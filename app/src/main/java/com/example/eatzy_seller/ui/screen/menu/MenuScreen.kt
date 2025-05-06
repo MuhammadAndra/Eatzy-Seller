@@ -1,20 +1,27 @@
 package com.example.eatzy_seller.ui.screen.menu
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
-import com.example.eatzy_seller.ui.components.BottomNavBar
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+
 
 @Composable
-fun MenuScreen(modifier: Modifier = Modifier, navController: NavController) {
-    Scaffold(bottomBar = { BottomNavBar(navController) }) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
-            Text("Menu")
-        }
+fun MenuScreen(
+    navController: NavHostController = rememberNavController(),
+    viewModel: MenuViewModel = viewModel()
+) {
+    val menuCategories by viewModel.menuCategories.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.fetchMenus()
     }
+
+    MenuListScreen(
+        navController = navController,
+        menuCategories = menuCategories
+    )
 }

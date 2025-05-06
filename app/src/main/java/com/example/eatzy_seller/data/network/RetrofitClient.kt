@@ -1,5 +1,6 @@
 package com.example.eatzy_seller.data.network
 
+import com.example.eatzy_seller.data.network.api.MenuApiService
 import com.example.eatzy_seller.data.network.api.TestApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -24,5 +25,9 @@ object RetrofitClient {
     }
 
     val testApi: TestApiService by lazy { retrofit.create(TestApiService::class.java) }
+
+    //API Menu
+    val menuApi: MenuApiService by lazy { retrofit.create(MenuApiService::class.java) }
+
 
 }

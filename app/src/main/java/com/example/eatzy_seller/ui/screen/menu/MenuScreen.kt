@@ -14,7 +14,10 @@ fun MenuScreen(
     navController: NavHostController = rememberNavController(),
     viewModel: MenuViewModel = viewModel()
 ) {
-    val menuCategories by viewModel.menuCategories.collectAsState()
+    //val menuCategories by viewModel.menuCategories.collectAsState(initial = emptyList())
+
+    val menuCategoriesState = viewModel.menuCategories.collectAsState(initial = emptyList())
+    val menuCategories = menuCategoriesState.value
 
     LaunchedEffect(Unit) {
         viewModel.fetchMenus()

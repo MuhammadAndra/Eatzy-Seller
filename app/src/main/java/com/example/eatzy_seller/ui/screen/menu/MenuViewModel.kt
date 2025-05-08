@@ -16,38 +16,38 @@ class MenuViewModel : ViewModel() {
     val menuCategories: StateFlow<List<MenuCategory>> = _menuCategories
 
     fun fetchMenus() {
-        RetrofitClient.menuApi.getMenusWithCategories().enqueue(object : Callback<List<MenuCategory>> {
-            override fun onResponse(
-                call: Call<List<MenuCategory>?>?,
-                response: Response<List<MenuCategory>>
-            ) {
-                if (response.isSuccessful) {
-                    val result = response.body() ?: emptyList()
-                    _menuCategories.value = result.map { category ->
-                        MenuCategory(
-                            name = category.name,
-                            menus = category.menus.map { menu ->
-                                Menu(
-                                    title = menu.title,
-                                    price = "Rp ${menu.price}",
-                                    imageRes = menu.imageRes,
-                                    visibleMenu = menu.visibleMenu
-                                )
-                            }
-                        )
+        RetrofitClient.menuApi.getMenusWithCategories()
+            .enqueue(object : Callback<List<MenuCategory>> {
+                override fun onResponse(
+                    call: Call<List<MenuCategory>?>?,
+                    response: Response<List<MenuCategory>>
+                ) {
+                    if (response.isSuccessful) {
+                        val result = response.body() ?: emptyList()
+                        _menuCategories.value = result.map { category ->
+                            MenuCategory(
+                                name = category.name,
+                                menus = category.menus.map { menu ->
+                                    Menu(
+                                        title = menu.title,
+                                        price = "Rp ${menu.price}",
+                                        imageRes = menu.imageRes,
+                                        visibleMenu = menu.visibleMenu
+                                    )
+                                }
+                            )
+                        }
                     }
-            }
+                }
 
-            override fun onFailure(
-                call: Call<List<MenuCategory>>,
-                t: Throwable?
-            ) {
-                // Log error or show a message
-            }
+                override fun onFailure(
+                    call: Call<List<MenuCategory>?>?,
+                    t: Throwable?
+                ) {
+                    TODO("Not yet implemented")
+                }
 
-
-        })
-    })
+            })
 
     }
 }

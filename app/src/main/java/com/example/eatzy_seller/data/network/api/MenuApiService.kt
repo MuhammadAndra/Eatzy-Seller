@@ -8,7 +8,7 @@ import retrofit2.http.PATCH
 import retrofit2.http.Path
 
 interface MenuApiService {
-    @GET("menus/with-categories")
+    @GET("menus")
     fun getMenusWithCategories(): Call<List<MenuCategory>>
 
     @PATCH("menu/{id}/visibility")

@@ -30,7 +30,7 @@ class MenuViewModel : ViewModel() {
                                 menus = category.menus.map { menu ->
                                     Menu(
                                         title = menu.title,
-                                        price = "Rp ${menu.price}",
+                                        price = menu.price,
                                         imageRes = menu.imageRes,
                                         visibleMenu = menu.visibleMenu
                                     )
@@ -44,7 +44,6 @@ class MenuViewModel : ViewModel() {
                     call: Call<List<MenuCategory>?>?,
                     t: Throwable?
                 ) {
-                    TODO("Not yet implemented")
                 }
 
             })

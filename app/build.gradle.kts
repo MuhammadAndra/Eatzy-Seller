@@ -76,6 +76,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation ("androidx.compose.material:material:1.5.0")
+
     implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
 
 }

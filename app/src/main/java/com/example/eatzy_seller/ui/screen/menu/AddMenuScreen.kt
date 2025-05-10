@@ -18,7 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -48,11 +47,17 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Switch
+import com.example.eatzy_seller.navigation.navGraph.AddMenu
+import com.example.eatzy_seller.navigation.navGraph.EditKategori
+import com.example.eatzy_seller.ui.components.BottomNavBar
+import com.example.eatzy_seller.ui.components.TopBarMenu
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TambahMenuScreen(
+fun AddMenuScreen(
     navController: NavController = rememberNavController()
 ) {
     // Menyimpan input user
@@ -64,13 +69,12 @@ fun TambahMenuScreen(
     // List kategori yang sudah ada
     val kategoriList = remember { mutableStateListOf("Makanan", "Minuman", "Dessert") }
     var selectedKategori by remember { mutableStateOf(kategoriList.firstOrNull() ?: "") }
-    var newKategori by remember { mutableStateOf("") }
+    //var newKategori by remember { mutableStateOf("") }
 
     // List kategori add-on yang ditambahkan oleh pengguna
     val kategoriAddOnList = remember { mutableStateListOf<Pair<String, Boolean>>() }
 
-    // State untuk dialog
-    var isDialogVisible by remember { mutableStateOf(false) }
+    // State untuk dialogkategori
     var isDropdownExpanded by remember { mutableStateOf(false) }
 
     //add on
@@ -81,11 +85,32 @@ fun TambahMenuScreen(
     var isSingleChoice by remember { mutableStateOf(false) }
 
 
+    Scaffold(
+        topBar = { TopBarMenu(title = "Daftar Menu", navController = navController) },
+        bottomBar = {
+            Column {
+                // Simpan Button
+                Button(
+                    onClick = { /* Simpan data */ },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    Text("Simpan")
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                BottomNavBar(navController = navController)
+            }
+        }
+    ) { innerPadding ->
     // Form Input
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .padding(innerPadding)
             .padding(16.dp)
+            .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
         OutlinedTextField(
@@ -117,7 +142,7 @@ fun TambahMenuScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         // Kategori Dropdown
-        Text("Kategori", fontWeight = FontWeight.SemiBold)
+        Text("Kategori", fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(6.dp))
         // Button untuk menambah kategori baru yang akan memunculkan dialog
         Row(verticalAlignment = Alignment.CenterVertically) {
             ExposedDropdownMenuBox(
@@ -128,7 +153,7 @@ fun TambahMenuScreen(
                 TextField(
                     value = selectedKategori,
                     onValueChange = {},
-                    label = { Text("Pilih Kategori") },
+                    //label = { Text("Pilih Kategori") },
                     readOnly = true,
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDropdownExpanded)
@@ -153,21 +178,22 @@ fun TambahMenuScreen(
                     }
                 }
             }
-            IconButton(onClick = { isDialogVisible = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Tambah kategori")
+            IconButton(onClick = {
+                navController.navigate(EditKategori)
+            }) {
+                Icon(Icons.Default.Edit, contentDescription = "Edit kategori")
             }
         }
 
-        // Kategori Add-On
-        Text("Kategori Add-On", fontWeight = FontWeight.SemiBold)
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            OutlinedTextField(
-                value = tambahKategoriAddOn,
-                onValueChange = { tambahKategoriAddOn = it },
-                label = { Text("Tambah Kategori Add-On") },
+            Text(
+                "Kategori Add-On",
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f)
+                    .padding(6.dp)
             )
             IconButton(onClick = {
                 isAddOnDialogVisible = true
@@ -203,8 +229,6 @@ fun TambahMenuScreen(
                     }) {
                         Icon(Icons.Default.Edit, contentDescription = "Edit")
                     }
-
-
                 }
             }
         }
@@ -229,53 +253,8 @@ fun TambahMenuScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Simpan Button
-        Button(
-            onClick = { /* Simpan data */ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            Text("Simpan")
-        }
-    }
 
-    // Dialog untuk menambah kategori
-    if (isDialogVisible) {
-        AlertDialog(
-            onDismissRequest = { isDialogVisible = false },
-            title = { Text("Tambah Kategori Baru") },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        value = newKategori,
-                        onValueChange = { newKategori = it },
-                        label = { Text("Kategori Baru") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (newKategori.isNotBlank() && !kategoriList.contains(newKategori)) {
-                            kategoriList.add(newKategori)
-                            selectedKategori = newKategori
-                            newKategori = ""
-                        }
-                        isDialogVisible = false
-                    }
-                ) {
-                    Text("Tambah")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { isDialogVisible = false }) {
-                    Text("Batal")
-                }
-            }
-        )
+    }
     }
     if (isAddOnDialogVisible) {
         AlertDialog(
@@ -332,6 +311,6 @@ fun TambahMenuScreen(
 @Composable
 fun PreviewMenuFormScreen() {
     MaterialTheme {
-        TambahMenuScreen()
+        AddMenuScreen()
     }
 }

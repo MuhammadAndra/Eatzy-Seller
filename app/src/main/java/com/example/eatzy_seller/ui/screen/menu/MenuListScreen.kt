@@ -48,7 +48,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import com.bumptech.glide.integration.compose.CrossFade
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.example.eatzy_seller.navigation.navGraph.TambahMenu
+import com.example.eatzy_seller.navigation.navGraph.AddMenu
 import com.example.eatzy_seller.ui.components.DeleteMenuDialog
 import com.example.eatzy_seller.ui.components.TopBarMenu
 import kotlinx.coroutines.launch
@@ -79,7 +79,7 @@ fun MenuListScreen(
         bottomBar = {
             Column {
                 TambahMenuButton {
-                    navController.navigate(TambahMenu)
+                    navController.navigate(AddMenu)
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 BottomNavBar(navController = navController)

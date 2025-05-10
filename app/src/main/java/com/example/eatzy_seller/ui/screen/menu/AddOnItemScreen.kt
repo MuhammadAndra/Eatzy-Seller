@@ -1,6 +1,5 @@
 package com.example.eatzy_seller.ui.screen.menu
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +18,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +32,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.eatzy_seller.ui.components.BottomNavBar
+import com.example.eatzy_seller.ui.components.TopBarMenu
 
 @Composable
 fun AddOnItemScreen(
@@ -47,92 +49,13 @@ fun AddOnItemScreen(
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Judul
-        Text(
-            text = "Kategori Add-On $namaKategori",
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Switch pilihan tunggal
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                Text(
-                    text = "Add-On Pilih salah satu?",
-                    modifier = Modifier.weight(1f)
-                )
-                Switch(
-                    checked = isSingleChoice,
-                    onCheckedChange = {} // opsional jika tidak diubah di halaman ini
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Daftar Add-On
-        addOnList.forEachIndexed { index, (nama, harga) ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                shape = RoundedCornerShape(8.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("Nama Add-On : $nama")
-                        Text("Harga : $harga")
-                    }
-                    Column {
-                        IconButton(onClick = {
-                            // Edit logika di sini
-                        }) {
-                            Icon(Icons.Default.Edit, contentDescription = "Edit")
-                        }
-                    
-                        IconButton(onClick = {
-                            addOnList.removeAt(index)
-                        }) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = "Hapus",
-                                tint = Color.Red
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Tombol tambah add-on
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomEnd
-        ) {
+    Scaffold(
+        topBar = { TopBarMenu(title = "Kategori Add-On $namaKategori", navController = navController) },
+        bottomBar = {
+            Spacer(modifier = Modifier.height(10.dp))
+            BottomNavBar(navController = navController)
+        },
+        floatingActionButton = {
             FloatingActionButton(
                 onClick = {
                     // Tambah Add-On
@@ -142,9 +65,80 @@ fun AddOnItemScreen(
                 Icon(Icons.Default.Add, contentDescription = "Tambah")
             }
         }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(20.dp)
+        ) {
+            // Switch pilihan tunggal
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    Text(
+                        text = "Add-On Pilih salah satu?",
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = isSingleChoice,
+                        onCheckedChange = {} // opsional jika tidak diubah di halaman ini
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Daftar Add-On
+            addOnList.forEachIndexed { index, (nama, harga) ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(12.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Nama Add-On : $nama")
+                            Text("Harga : $harga")
+                        }
+                        Column {
+                            IconButton(onClick = {
+                                // Edit logika di sini
+                            }) {
+                                Icon(Icons.Default.Edit, contentDescription = "Edit")
+                            }
+
+                            IconButton(onClick = {
+                                addOnList.removeAt(index)
+                            }) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Hapus",
+                                    tint = Color.Red
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

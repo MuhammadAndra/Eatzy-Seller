@@ -26,10 +26,13 @@ class MenuViewModel : ViewModel() {
                         val result = response.body() ?: emptyList()
                         _menuCategories.value = result.map { category ->
                             MenuCategory(
-                                name = category.name,
+                                idCategory = category.idCategory,
+                                idCanteen = category.idCanteen,
+                                categoryName = category.categoryName,
                                 menus = category.menus.map { menu ->
                                     Menu(
-                                        title = menu.title,
+                                        idMenu = menu.idMenu,
+                                        namaMenu = menu.namaMenu,
                                         price = menu.price,
                                         imageRes = menu.imageRes,
                                         visibleMenu = menu.visibleMenu
@@ -49,4 +52,24 @@ class MenuViewModel : ViewModel() {
             })
 
     }
+
+    fun deleteMenu(menuId: Int) {
+        RetrofitClient.menuApi.deleteMenu(menuId).enqueue(object : Callback<Unit> {
+            override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
+                if (response.isSuccessful) {
+                    // Update local state
+                    _menuCategories.value = _menuCategories.value.map { category ->
+                        category.copy(
+                            menus = category.menus.filterNot { it.idMenu == menuId }
+                        )
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<Unit>, t: Throwable) {
+                // Bisa tampilkan error kalau mau
+            }
+        })
+    }
+
 }

@@ -11,9 +11,9 @@ interface MenuApiService {
     @GET("menus")
     fun getMenusWithCategories(): Call<List<MenuCategory>>
 
-    @PATCH("menu/{id}/visibility")
-    fun toggleMenuVisibility(@Path("id") menuId: Int): Call<Unit>
-
+//    @PATCH("menu/{id}/visibility")
+//    fun toggleMenuVisibility(@Path("id") menuId: Int): Call<Unit>
+//
     @DELETE("menu/{id}")
     fun deleteMenu(@Path("id") menuId: Int): Call<Unit>
 }

@@ -1,5 +1,6 @@
 package com.example.eatzy_seller.ui.screen.menu
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,7 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Visibility
@@ -30,43 +30,56 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import com.example.eatzy_seller.ui.components.BottomNavBar
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.eatzy_seller.navigation.navGraph.Home
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import com.bumptech.glide.integration.compose.CrossFade
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.example.eatzy_seller.navigation.navGraph.TambahMenu
+import com.example.eatzy_seller.ui.components.DeleteMenuDialog
+import com.example.eatzy_seller.ui.components.TopBarMenu
+import kotlinx.coroutines.launch
 
 
+@SuppressLint("RememberReturnType")
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MenuListScreen(
-    navController: NavController = rememberNavController(),
+    navController: NavController = rememberNavController()
 ) {
-    val vm: MenuViewModel = viewModel()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
+    //view model
+    val vm: MenuViewModel = viewModel()
     LaunchedEffect(Unit) {
         vm.fetchMenus()
     }
 
+    //ambil data kategori
     val menuCategories = vm.menuCategories.collectAsState().value
 
     Scaffold(
-        topBar = { TopBar(title = "Daftar Menu", navController = navController) },
+        topBar = { TopBarMenu(title = "Daftar Menu", navController = navController) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             Column {
                 TambahMenuButton {
-                    // aksi tambah menu
+                    navController.navigate(TambahMenu)
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 BottomNavBar(navController = navController)
@@ -80,10 +93,11 @@ fun MenuListScreen(
             ),
             modifier = Modifier.padding(horizontal = 8.dp)
         ) {
+            //load setiap card menu per kategori
             menuCategories.forEach { category ->
                 item {
                     Text(
-                        text = category.name,
+                        text = category.categoryName,
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = Color.Gray,
                             fontWeight = FontWeight.SemiBold
@@ -94,47 +108,24 @@ fun MenuListScreen(
 
                 items(category.menus) { menu ->
                     MenuItem(
-                        title = menu.title,
+                        title = menu.namaMenu,
                         price = menu.price,
                         imageRes = menu.imageRes,
-                        visibleMenu = menu.visibleMenu
+                        visibleMenu = menu.visibleMenu,
+                        onDelete = {
+                            vm.deleteMenu(menu.idMenu)
+                        },
+                        onShowSnackbar = { message ->
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(message)
+                            }
+                        }
                     )
 
                 }
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopBar(
-    title: String,
-    navController: NavController,
-    showBackButton: Boolean = true
-) {
-    CenterAlignedTopAppBar(
-        title = { Text(text = title) },
-        navigationIcon = {
-            if (showBackButton) {
-                IconButton(onClick = {
-                    val navigatedBack = navController.popBackStack()
-                    if (!navigatedBack) {
-                        navController.navigate(Home::class.qualifiedName!!) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                            launchSingleTop = true
-                        }
-                    }
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Back"
-                    )
-                }
-            }
-        },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors()
-    )
 }
 
 @Composable
@@ -165,8 +156,25 @@ fun MenuItem(
     title: String,
     price: Double,
     imageRes: String,
-    visibleMenu: Boolean
+    visibleMenu: Boolean,
+    onDelete: () -> Unit,
+    onShowSnackbar: (String) -> Unit
 ) {
+
+    //show delete dialog
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    if (showDeleteDialog) {
+        DeleteMenuDialog(
+            objek = "Menu",
+            title = title,
+            onConfirmDelete = {
+                onDelete()
+                onShowSnackbar("Menu \"$title\" berhasil dihapus")
+            },
+            onDismiss = { showDeleteDialog = false }
+        )
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -238,7 +246,9 @@ fun MenuItem(
                     tint = Color.Red,
                     modifier = Modifier
                         .size(20.dp)
-                        .clickable { /* handle delete */ }
+                        .clickable {
+                            showDeleteDialog = true
+                        }
                 )
             }
         }

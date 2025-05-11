@@ -1,6 +1,5 @@
 package com.example.eatzy_seller.ui.screen.menu
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,9 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -38,12 +41,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import com.example.eatzy_seller.ui.components.TopBarMenu
+import com.example.eatzy_seller.ui.theme.SecondColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +60,7 @@ fun CategoryScreen(
     var newKategori by remember { mutableStateOf("") }
 
     Scaffold(
+        containerColor = Color.White,
         topBar = { TopBarMenu(title = "List Kategori", navController = navController) },
         bottomBar = {
             BottomNavBar(navController = navController)
@@ -62,23 +68,26 @@ fun CategoryScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { isDialogVisible = true },
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = SecondColor,
+                shape = CircleShape
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Tambah Kategori")
+                Icon(Icons.Default.Add, modifier = Modifier.size(35.dp) , contentDescription = "Tambah Kategori", tint = Color.White)
             }
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
+                .padding(10.dp)
                 .fillMaxSize()
         ) {
-            Spacer(modifier = Modifier.height(15.dp))
 
             // Content
             if (kategoriList.isEmpty()) {
                 Column(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 5.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -96,8 +105,8 @@ fun CategoryScreen(
                     itemsIndexed(kategoriList) { index, kategori ->
                         CategoryItem(
                             kategori = kategori,
-                            onEditClick = { /* TODO: Implement edit */ },
-                            onDeleteClick = { kategoriList.removeAt(index) },
+                            onEditClick = { /* editKategori*/ },
+                            onDeleteClick = { /* HapusKategori*/ },
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
@@ -130,14 +139,19 @@ private fun CategoryItem(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp, horizontal = 10.dp),
         shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White// Ganti sesuai keinginanmu
+        )
     ) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -145,27 +159,28 @@ private fun CategoryItem(
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f)
             )
-            Row {
-                IconButton(
-                    onClick = onEditClick,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-                IconButton(
-                    onClick = onDeleteClick,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Hapus",
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
+
+            IconButton(
+                onClick = onEditClick,
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            IconButton(
+                onClick = onDeleteClick,
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Hapus",
+                    tint = MaterialTheme.colorScheme.error
+                )
+
             }
         }
     }

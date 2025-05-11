@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -52,6 +53,8 @@ import com.example.eatzy_seller.navigation.navGraph.AddMenu
 import com.example.eatzy_seller.ui.components.DeleteMenuDialog
 import com.example.eatzy_seller.ui.components.TopBarMenu
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 
 
 @SuppressLint("RememberReturnType")
@@ -74,6 +77,7 @@ fun MenuListScreen(
     val menuCategories = vm.menuCategories.collectAsState().value
 
     Scaffold(
+        containerColor = Color.White,
         topBar = { TopBarMenu(title = "Daftar Menu", navController = navController) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
@@ -81,7 +85,7 @@ fun MenuListScreen(
                 TambahMenuButton {
                     navController.navigate(AddMenu)
                 }
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(3.dp))
                 BottomNavBar(navController = navController)
             }
         }
@@ -99,10 +103,9 @@ fun MenuListScreen(
                     Text(
                         text = category.categoryName,
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            color = Color.Gray,
                             fontWeight = FontWeight.SemiBold
                         ),
-                        modifier = Modifier.padding(start = 8.dp, top = 16.dp, bottom = 4.dp)
+                        modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp)
                     )
                 }
 
@@ -142,7 +145,7 @@ fun TambahMenuButton(onClick: () -> Unit) {
             Text(
                 text = "Tambah Menu",
                 color = Color.White,
-                fontSize = 18.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -174,13 +177,18 @@ fun MenuItem(
             onDismiss = { showDeleteDialog = false }
         )
     }
+    val formattedPrice = NumberFormat.getNumberInstance(Locale("id", "ID")).format(price)
+
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp, horizontal = 10.dp),
-        shape = MaterialTheme.shapes.medium.copy(CornerSize(8.dp)),
-        elevation = CardDefaults.cardElevation(8.dp)
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White// Ganti sesuai keinginanmu
+        )
     ) {
         Row(verticalAlignment = Alignment.Top) {
             GlideImage(
@@ -188,7 +196,7 @@ fun MenuItem(
                 contentDescription = "Menu Image",
                 transition = CrossFade,
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(90.dp)
                     .padding(8.dp)
                     .clip(MaterialTheme.shapes.medium)
                     .background(Color(0xFFF1F1FA)),
@@ -211,7 +219,8 @@ fun MenuItem(
                     modifier = Modifier.padding(bottom = 2.dp)
                 )
                 Text(
-                    text = "Rp${price.toInt()}",
+
+                    text = "Rp$formattedPrice",
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
                     //modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -219,7 +228,7 @@ fun MenuItem(
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier.padding(10.dp)
             ) {
                 Icon(

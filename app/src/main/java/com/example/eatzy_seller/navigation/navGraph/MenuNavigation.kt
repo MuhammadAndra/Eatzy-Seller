@@ -32,15 +32,15 @@ fun NavGraphBuilder.menuGraph(navController: NavController) {
     }
 
     composable(
-        route = "edit_kategori_addon/{namaKategori}/{isSingle}",
+        route = "edit_kategori_addon/{namaKategoriAddOn}/{isSingle}",
         arguments = listOf(
-            navArgument("namaKategori") { type = NavType.StringType },
+            navArgument("namaKategoriAddOn") { type = NavType.StringType },
             navArgument("isSingle") { type = NavType.BoolType }
         )
     ) { backStackEntry ->
-        val namaKategori = backStackEntry.arguments?.getString("namaKategori") ?: ""
+        val namaAddOn = backStackEntry.arguments?.getString("namaKategoriAddOn") ?: ""
         val isSingle = backStackEntry.arguments?.getBoolean("isSingle") ?: false
-        AddOnItemScreen(namaKategori = namaKategori, isSingleChoice = isSingle, navController = navController)
+        AddOnItemScreen(namaAddOn = namaAddOn, isSingleChoice = isSingle, navController = navController)
     }
 
 }

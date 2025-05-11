@@ -1,5 +1,6 @@
 package com.example.eatzy_seller.ui.components
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -11,9 +12,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.eatzy_seller.navigation.navGraph.Home
+import com.example.eatzy_seller.ui.theme.PrimaryColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,7 +28,7 @@ fun TopBarMenu(
     showBackButton: Boolean = true
 ) {
     CenterAlignedTopAppBar(
-        title = { Text(text = title) },
+        title = { Text(text = title, color = PrimaryColor, fontWeight = FontWeight.SemiBold) },
         navigationIcon = {
             if (showBackButton) {
                 IconButton(onClick = {
@@ -37,12 +42,17 @@ fun TopBarMenu(
                 }) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Back"
+                        contentDescription = "Back",
+                        modifier = Modifier.padding(start = 6.dp)
                     )
                 }
             }
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors()
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = Color.White,
+            titleContentColor = Color.Black,
+            navigationIconContentColor = Color.Black
+        )
     )
 }
 

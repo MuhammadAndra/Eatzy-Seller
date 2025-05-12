@@ -137,7 +137,7 @@ fun TambahMenuButton(onClick: () -> Unit) {
         Button(
             onClick = onClick,
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE89D3C)), // Warna oranye
-            shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)), // Membulat penuh
+            shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .height(56.dp)

@@ -7,5 +7,6 @@ data class Menu(
     val price: Double,
     //val preparationTime: String,
     val imageRes: String,
-    val visibleMenu: Boolean
+    val visibleMenu: Boolean,
+    //val listCategoryAddOn: List<AddOnCategory>
 )

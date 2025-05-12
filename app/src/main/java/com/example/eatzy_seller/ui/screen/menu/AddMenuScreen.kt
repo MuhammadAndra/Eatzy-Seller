@@ -77,6 +77,8 @@ fun AddMenuScreen(
     var namaMenu by remember { mutableStateOf("") }
     var deskripsi by remember { mutableStateOf("") }
     var harga by remember { mutableStateOf("") }
+    var estimasi by remember { mutableStateOf("") }
+
 
     // List kategori yang sudah ada
     val kategoriList = remember { mutableStateListOf("Makanan", "Minuman", "Dessert") }
@@ -99,26 +101,24 @@ fun AddMenuScreen(
 
     Scaffold(
         containerColor = Color.White,
-        topBar = { TopBarMenu(title = "Daftar Menu", navController = navController) },
+        topBar = { TopBarMenu(title = "Tambah Menu", navController = navController) },
         bottomBar = {
-            Column {
-                // Simpan Button
-                SimpanTambahMenuButton {
-                    navController.navigate(AddMenu)
-                }
-                Spacer(modifier = Modifier.height(3.dp))
-                BottomNavBar(navController = navController)
-            }
+            BottomNavBar(navController = navController)
         }
+
     ) { innerPadding ->
         // Form Input
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(16.dp)
+                .padding(start = 16.dp, end = 16.dp)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
+            Text(
+                "Detail Menu", fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(6.dp)
+            )
             OutlinedTextField(
                 value = namaMenu,
                 onValueChange = { namaMenu = it },
@@ -150,9 +150,19 @@ fun AddMenuScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            OutlinedTextField(
+                value = estimasi,
+                onValueChange = { estimasi = it },
+                label = { Text("Estimasi Pembuatan (Menit)") },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             // Kategori Dropdown
-            Text("Kategori", fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(6.dp))
+//
             // Button untuk menambah kategori baru yang akan memunculkan dialog
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ExposedDropdownMenuBox(
@@ -163,7 +173,7 @@ fun AddMenuScreen(
                     OutlinedTextField(
                         value = selectedKategori,
                         onValueChange = {},
-                        //label = { Text("Pilih Kategori") },
+                        label = { Text("Pilih Kategori") },
                         readOnly = true,
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
@@ -206,9 +216,14 @@ fun AddMenuScreen(
                 IconButton(onClick = {
                     navController.navigate(EditKategori)
                 }) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit kategori", tint = SecondColor)
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Edit kategori",
+                        tint = SecondColor
+                    )
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
 
             //AddOn
             Row(
@@ -272,7 +287,7 @@ fun AddMenuScreen(
                         onClick = {
                             navController.navigate("edit_kategori_addon/${nama}/${isSingle}")
                         }
-                    ){
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Edit",
@@ -286,11 +301,19 @@ fun AddMenuScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Upload Gambar
-            Text("Tambah Gambar", fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(6.dp))
+            Text(
+                "Tambah Gambar", fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(6.dp)
+            )
             UploadImageComponent()
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Simpan Button
+            SimpanTambahMenuButton {
+                navController.navigate(AddMenu)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
 
 
         }
@@ -338,10 +361,11 @@ fun AddMenuScreen(
                 }
             },
             dismissButton = {
-                Button(onClick = { isAddOnDialogVisible = false },
+                Button(
+                    onClick = { isAddOnDialogVisible = false },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9D9D9))
                 ) {
-                    Text("Batal", color = Color.Black )
+                    Text("Batal", color = Color.Black)
                 }
             }
         )
@@ -356,7 +380,7 @@ fun SimpanTambahMenuButton(onClick: () -> Unit) {
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE89D3C)), // Warna oranye
             shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)), // Membulat penuh
             modifier = Modifier
-                .fillMaxWidth(0.9f)
+                .fillMaxWidth(1f)
                 .height(56.dp)
         ) {
             Text(
@@ -376,10 +400,11 @@ fun UploadImageComponent() {
 
     // Setup ActivityResultLauncher untuk memilih gambar dari galeri
     val context = LocalContext.current
-    val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        // Setelah gambar dipilih, simpan URI-nya
-        selectedImageUri = uri
-    }
+    val getContent =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            // Setelah gambar dipilih, simpan URI-nya
+            selectedImageUri = uri
+        }
 
     // Tombol untuk memilih gambar
     Box(

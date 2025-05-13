@@ -7,8 +7,12 @@ import androidx.lifecycle.ViewModel
 import com.example.eatzy_seller.data.dummyOrders
 import com.example.eatzy_seller.data.model.OrderState
 
-class OrderViewModel : ViewModel() {
+class OrderStateViewModel : ViewModel() {
+
     var orders by mutableStateOf(dummyOrders)
+        private set
+
+    var selectedStatus by mutableStateOf("Semua")
         private set
 
     fun updateOrderStatus(orderId: Int, newStatus: String) {
@@ -19,5 +23,9 @@ class OrderViewModel : ViewModel() {
 
     fun getOrderById(orderId: Int): OrderState? {
         return orders.find { it.id == orderId }
+    }
+
+    fun updateSelectedStatus(newStatus: String) {
+        selectedStatus = newStatus
     }
 }

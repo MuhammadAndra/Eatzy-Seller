@@ -1,6 +1,5 @@
 package com.example.eatzy_seller.ui.screen.orderState
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,25 +7,71 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+//import com.bumptech.glide.integration.compose.GlideImage
+import coil.compose.AsyncImage
 import com.example.eatzy_seller.R
 import com.example.eatzy_seller.data.model.OrderState
 import com.example.eatzy_seller.data.dummyOrders
+import com.example.eatzy_seller.ui.components.BottomNavBar
 import java.text.NumberFormat
 import java.util.Locale
 
+//topbar
+@Composable
+fun TopNavBar(
+    title: String,
+    navController: NavController
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        IconButton(onClick = { navController.popBackStack() }) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Kembali",
+                tint = Color(0xFF455E84)
+            )
+        }
+
+        Text(
+            text = title,
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF455E84),
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.size(48.dp)) 
+    }
+}
+
+//state
 @Composable
 fun OrderListScreen(
+    navController: NavHostController,
     orders: List<OrderState>,
     selectedStatus: String,
     onStatusSelected: (String) -> Unit,
@@ -36,55 +81,55 @@ fun OrderListScreen(
 ) {
     val statuses = listOf("Semua", "Konfirmasi", "Proses", "Selesai", "Batal")
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+    Scaffold (
+        containerColor = Color.White,
+        bottomBar = {
+            BottomNavBar(navController = navController)
+        },
     ) {
-        Text(
-            text = "Pesanan",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF455E84),
+            innerPadding ->
+        Column(
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(bottom = 8.dp)
-        )
-        // Tab bar status filter
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .fillMaxSize()
+                .padding(16.dp)
+                .padding(bottom = innerPadding.calculateBottomPadding())
         ) {
-            statuses.forEach { status ->
-                TextButton(onClick = { onStatusSelected(status) }) {
-                    Text(
-                        text = status,
-                        color = if (status == selectedStatus) Color(0xFFFC9824) else Color.Gray,
-                        fontWeight = if (status == selectedStatus) FontWeight.Bold else FontWeight.Normal,
-                        fontSize = 14.sp
-                    )
+            TopNavBar(title = "Pesanan", navController = navController)
+
+            // Tab bar status filter
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                statuses.forEach { status ->
+                    TextButton(onClick = { onStatusSelected(status) }) {
+                        Text(
+                            text = status,
+                            color = if (status == selectedStatus) Color(0xFFFC9824) else Color.Gray,
+                            fontWeight = if (status == selectedStatus) FontWeight.Bold else FontWeight.Normal,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
+//            Spacer(modifier = Modifier.height(8.dp))
 
-        val filteredOrders = if (selectedStatus == "Semua") {
-            orders
-        } else {
-            orders.filter { it.status == selectedStatus }
-        }
+            val filteredOrders = orders.filter {  order ->
+                selectedStatus == "Semua" || order.status == selectedStatus
+            }
 
-        LazyColumn {
-            items(filteredOrders) { order ->
-                OrderCard(
-                    order = order,
-                    onOrderAccepted = { onOrderAccepted(order) },
-                    onOrderRejected = { onOrderRejected(order) },
-                    onOrderDetailed = { onOrderDetailed(order) }
-                )
+            LazyColumn {
+                items(filteredOrders) { order ->
+                    OrderCard(
+                        order = order,
+                        onOrderAccepted = { onOrderAccepted(order) },
+                        onOrderRejected = { onOrderRejected(order) },
+                        onOrderDetailed = { onOrderDetailed(order) }
+                    )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
             }
         }
     }
@@ -92,11 +137,35 @@ fun OrderListScreen(
 
 fun formatPrice(price: Double): String {
     val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
-    return "Rp ${formatter.format(price)}"
+    return " Rp ${formatter.format(price)}"
 }
 
 @Composable
 fun OrderCard(order: OrderState, onOrderAccepted: (OrderState) -> Unit, onOrderRejected: (OrderState) -> Unit, onOrderDetailed: (OrderState) -> Unit) {
+    // dialog konfirmasi tolak pesanan
+    var showRejectDialog by remember { mutableStateOf(false) }
+
+    if (showRejectDialog) {
+        AlertDialog(
+            onDismissRequest = { showRejectDialog = false },
+            title = { Text("Konfirmasi Penolakan") },
+            text = { Text("Yakin ingin tolak pesanan?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRejectDialog = false
+                    onOrderRejected(order)
+                }) {
+                    Text("Ya", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRejectDialog = false }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -104,6 +173,7 @@ fun OrderCard(order: OrderState, onOrderAccepted: (OrderState) -> Unit, onOrderR
             .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(12.dp))
             .clickable { if (order.status == "Proses") onOrderDetailed(order) }
             .padding(12.dp)
+            .background(Color.White)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -115,15 +185,17 @@ fun OrderCard(order: OrderState, onOrderAccepted: (OrderState) -> Unit, onOrderR
 
         Text("Dipesan pada ${order.date}", fontSize = 14.sp, color = Color.Gray)
 
-        Divider(modifier = Modifier.padding(vertical = 8.dp))
+        Divider(modifier = Modifier.padding(vertical = 2.dp))
 
         order.items.forEachIndexed { index, item ->
+            Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(R.drawable.sample_food),
+                AsyncImage(
+                    model = item.imageUrl,
                     contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(80.dp)
                         .clip(RoundedCornerShape(8.dp))
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -141,8 +213,11 @@ fun OrderCard(order: OrderState, onOrderAccepted: (OrderState) -> Unit, onOrderR
                 }
             }
 
+//            Spacer(modifier = Modifier.height(8.dp))
+
             if (index == order.items.lastIndex) {
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
+//                Spacer(modifier = Modifier.height(8.dp))
                 val total = order.items.sumOf { it.quantity * it.price }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -154,7 +229,7 @@ fun OrderCard(order: OrderState, onOrderAccepted: (OrderState) -> Unit, onOrderR
         }
 
         if (order.status == "Konfirmasi") {
-            Spacer(modifier = Modifier.height(6.dp))
+//            Spacer(modifier = Modifier.height(6.dp))
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -167,7 +242,7 @@ fun OrderCard(order: OrderState, onOrderAccepted: (OrderState) -> Unit, onOrderR
                     Text("Terima", color = Color.White)
                 }
                 Button(
-                    onClick = { onOrderRejected(order) },
+                    onClick = { showRejectDialog = true },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF455E84))
                 ) {
@@ -210,12 +285,14 @@ fun StatusPesanan(status: String) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewOrderListScreen() {
+    val navController = rememberNavController()
     var selectedStatus by remember { mutableStateOf("Semua") }
     val dummyOrders = dummyOrders // dari file OrderDummyData.kt
 
     MaterialTheme {
         Surface {
             OrderListScreen(
+                navController = navController,
                 orders = dummyOrders,
                 selectedStatus = selectedStatus,
                 onStatusSelected = { selectedStatus = it },

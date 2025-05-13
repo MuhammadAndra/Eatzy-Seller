@@ -5,22 +5,20 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.example.eatzy_seller.navigation.navGraph.Login
-//import com.example.eatzy_seller.navigation.navGraph.Order
-import com.example.eatzy_seller.navigation.navGraph.Test
+import com.example.eatzy_seller.navigation.navGraph.Order
 import com.example.eatzy_seller.navigation.navGraph.authGraph
 import com.example.eatzy_seller.navigation.navGraph.homeGraph
 import com.example.eatzy_seller.navigation.navGraph.orderGraph
 import com.example.eatzy_seller.navigation.navGraph.testGraph
 import com.example.eatzy_seller.navigation.navGraph.orderDetailGraph
-import com.example.eatzy_seller.ui.screen.orderState.OrderViewModel
+import com.example.eatzy_seller.ui.screen.orderState.OrderStateViewModel
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
-    val orderViewModel: OrderViewModel = viewModel()
+    val orderViewModel: OrderStateViewModel = viewModel()
 
-    NavHost(navController = navController, startDestination = "orderList") {
+    NavHost(navController = navController, startDestination = Order.route) {
         authGraph(navController)
         homeGraph(navController)
         testGraph(navController)

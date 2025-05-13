@@ -67,6 +67,7 @@ import com.example.eatzy_seller.ui.components.BottomNavBar
 import com.example.eatzy_seller.ui.components.TopBarMenu
 import com.example.eatzy_seller.ui.theme.SecondColor
 import coil.compose.rememberImagePainter
+import com.example.eatzy_seller.ui.theme.PrimaryColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +76,7 @@ fun AddMenuScreen(
 ) {
     // Menyimpan input user
     var namaMenu by remember { mutableStateOf("") }
-    var deskripsi by remember { mutableStateOf("") }
+    //var deskripsi by remember { mutableStateOf("") }
     var harga by remember { mutableStateOf("") }
     var estimasi by remember { mutableStateOf("") }
 
@@ -129,13 +130,13 @@ fun AddMenuScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
-                value = deskripsi,
-                onValueChange = { deskripsi = it },
-                label = { Text("Deskripsi") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
-            )
+//            OutlinedTextField(
+//                value = deskripsi,
+//                onValueChange = { deskripsi = it },
+//                label = { Text("Deskripsi") },
+//                modifier = Modifier.fillMaxWidth(),
+//                shape = RoundedCornerShape(16.dp)
+//            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -183,7 +184,7 @@ fun AddMenuScreen(
                             Icon(
                                 imageVector = Icons.Filled.ArrowDropDown,
                                 contentDescription = null,
-                                tint = Color(0xFFFFA726) // Warna oranye
+                                tint = PrimaryColor // Warna oranye
                             )
                         },
                         placeholder = { Text("Pilih kategori") }, // Agar teks awal terlihat
@@ -219,7 +220,7 @@ fun AddMenuScreen(
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = "Edit kategori",
-                        tint = SecondColor
+                        tint = PrimaryColor
                     )
                 }
             }
@@ -291,7 +292,7 @@ fun AddMenuScreen(
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Edit",
-                            tint = SecondColor
+                            tint = PrimaryColor
                         )
                     }
                 }

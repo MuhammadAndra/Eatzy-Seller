@@ -180,7 +180,7 @@ fun AddOnItemScreen(
                                 Icon(
                                     Icons.Default.Delete,
                                     contentDescription = "Hapus",
-                                    tint = MaterialTheme.colorScheme.error
+                                    tint = Color(0xFFFC2433)
                                 )
                             }
                         }

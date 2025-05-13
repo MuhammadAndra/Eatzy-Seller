@@ -48,6 +48,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import com.example.eatzy_seller.ui.components.TopBarMenu
+import com.example.eatzy_seller.ui.theme.PrimaryColor
 import com.example.eatzy_seller.ui.theme.SecondColor
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -167,7 +168,7 @@ private fun CategoryItem(
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = "Edit",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = PrimaryColor
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))
@@ -178,7 +179,7 @@ private fun CategoryItem(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Hapus",
-                    tint = MaterialTheme.colorScheme.error
+                    tint = Color(0xFFFC2433)
                 )
 
             }

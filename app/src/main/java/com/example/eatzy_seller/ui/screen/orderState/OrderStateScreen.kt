@@ -147,9 +147,10 @@ fun OrderCard(order: OrderState, onOrderAccepted: (OrderState) -> Unit, onOrderR
 
     if (showRejectDialog) {
         AlertDialog(
+            containerColor = Color.White,
             onDismissRequest = { showRejectDialog = false },
-            title = { Text("Konfirmasi Penolakan") },
-            text = { Text("Yakin ingin tolak pesanan?") },
+            title = { Text(text ="Konfirmasi Penolakan", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 24.sp) },
+            text = { Text(text ="Yakin ingin tolak pesanan?", color = Color.Black, fontSize = 16.sp) },
             confirmButton = {
                 TextButton(onClick = {
                     showRejectDialog = false
@@ -160,7 +161,7 @@ fun OrderCard(order: OrderState, onOrderAccepted: (OrderState) -> Unit, onOrderR
             },
             dismissButton = {
                 TextButton(onClick = { showRejectDialog = false }) {
-                    Text("Batal")
+                    Text("Batal", color = Color(0xFFFC9824))
                 }
             }
         )

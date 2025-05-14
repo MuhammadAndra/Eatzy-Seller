@@ -19,6 +19,9 @@ class OrderStateViewModel : ViewModel() {
     var isLoading by mutableStateOf(false)
         private set
 
+    init {
+        orders = dummyOrders
+    }
 //    var errorMessage by mutableStateOf<String?>(null)
 //    pri
 

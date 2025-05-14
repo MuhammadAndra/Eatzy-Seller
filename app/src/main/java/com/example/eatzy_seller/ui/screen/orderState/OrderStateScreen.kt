@@ -184,6 +184,7 @@ fun OrderCard(order: OrderState, onOrderAccepted: (OrderState) -> Unit, onOrderR
         }
 
         Text("Dipesan pada ${order.date}", fontSize = 14.sp, color = Color.Gray)
+        Text("Estimasi selesai: ${order.estimation}", fontSize = 14.sp, color = Color.Gray)
 
         Divider(modifier = Modifier.padding(vertical = 2.dp))
 

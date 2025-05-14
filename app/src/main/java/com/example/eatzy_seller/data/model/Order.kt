@@ -13,6 +13,7 @@ data class OrderList(
 data class OrderState(
     val id: Int,
     val date: String,
+    val estimation: String,
     val status: String,
     val items: List<OrderItem>
 )

@@ -56,10 +56,17 @@ dependencies {
     // JSON serialization library, works with the Kotlin serialization plugin
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
-    implementation("com.squareup.okhttp3:okhttp:3.4.1")
-    implementation("com.squareup.okhttp3:logging-interceptor:3.4.1")
-    implementation("com.squareup.retrofit2:converter-gson:2.1.0")
-    implementation("com.squareup.retrofit2:retrofit:2.1.0")
+//    implementation("com.squareup.okhttp3:okhttp:3.4.1")
+//    implementation("com.squareup.okhttp3:logging-interceptor:3.4.1")
+//    implementation("com.squareup.retrofit2:converter-gson:2.1.0")
+//    implementation("com.squareup.retrofit2:retrofit:2.1.0")
+
+    // Retrofit (versi modern dengan dukungan coroutine)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    // OkHttp (versi modern)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android")
     implementation("androidx.lifecycle:lifecycle-runtime-compose-android:2.8.7")

@@ -241,7 +241,10 @@ fun MenuItem(
                 text = "Rp$formattedPrice",
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp)
             )
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+
+            ) {
                 Checkbox(
                     checked = menu.visibleMenu,
                     onCheckedChange = { /* handle toggle */ }
@@ -252,7 +255,7 @@ fun MenuItem(
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.padding(10.dp)
         ) {
             Icon(

@@ -31,11 +31,11 @@ class MenuViewModel : ViewModel() {
                                 categoryName = category.categoryName,
                                 menus = category.menus.map { menu ->
                                     Menu(
-                                        idMenu = menu.idMenu,
-                                        namaMenu = menu.namaMenu,
-                                        price = menu.price,
-                                        imageRes = menu.imageRes,
-                                        visibleMenu = menu.visibleMenu
+                                        menuId = menu.menuId,
+                                        menuName = menu.menuName,
+                                        menuPrice = menu.menuPrice,
+                                        menuImageRes = menu.menuImageRes,
+                                        menuAvailable = menu.menuAvailable
                                     )
                                 }
                             )
@@ -60,7 +60,7 @@ class MenuViewModel : ViewModel() {
                     // Update local state
                     _menuCategories.value = _menuCategories.value.map { category ->
                         category.copy(
-                            menus = category.menus.filterNot { it.idMenu == menuId }
+                            menus = category.menus.filterNot { it.menuId == menuId }
                         )
                     }
                 }

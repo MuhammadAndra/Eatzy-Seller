@@ -1,11 +1,11 @@
 package com.example.eatzy_seller.data.model
 
 data class Menu(
-    val idMenu : Int,
-    val namaMenu: String,
-    val price: Double,
-    //val preparationTime: String,
-    val imageRes: String,
-    val visibleMenu: Boolean,
+    val menuId : Int,
+    val menuName: String,
+    val menuPrice: Double,
+    //val menuPreparationTime: String,
+    val menuImageRes: String,
+    val menuAvailable: Boolean,
     //val listCategoryAddOn: List<AddOnCategory>
 )

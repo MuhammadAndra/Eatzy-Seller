@@ -62,11 +62,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
 import com.example.eatzy_seller.navigation.navGraph.AddMenu
-import com.example.eatzy_seller.navigation.navGraph.EditKategori
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import com.example.eatzy_seller.ui.components.TopBarMenu
 import com.example.eatzy_seller.ui.theme.SecondColor
 import coil.compose.rememberImagePainter
+import com.example.eatzy_seller.navigation.navGraph.EditCategory
 import com.example.eatzy_seller.ui.theme.PrimaryColor
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -127,16 +127,6 @@ fun AddMenuScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-//            OutlinedTextField(
-//                value = deskripsi,
-//                onValueChange = { deskripsi = it },
-//                label = { Text("Deskripsi") },
-//                modifier = Modifier.fillMaxWidth(),
-//                shape = RoundedCornerShape(16.dp)
-//            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -215,7 +205,7 @@ fun AddMenuScreen(
                     }
                 }
                 IconButton(onClick = {
-                    navController.navigate(EditKategori)
+                    navController.navigate(EditCategory)
                 }) {
                     Icon(
                         Icons.Default.Edit,

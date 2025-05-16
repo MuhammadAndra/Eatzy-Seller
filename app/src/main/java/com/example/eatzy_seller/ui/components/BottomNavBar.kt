@@ -26,7 +26,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.eatzy_seller.navigation.navGraph.Home
 import com.example.eatzy_seller.navigation.navGraph.Profile
-import com.example.eatzy_seller.navigation.navGraph.Menu
+import com.example.eatzy_seller.navigation.navGraph.MenuManagement
 import com.example.eatzy_seller.navigation.navGraph.Order
 import com.example.eatzy_seller.ui.theme.PrimaryColor
 import kotlin.reflect.KClass
@@ -39,7 +39,7 @@ data class BottomNavItem(
 
 val bottomNavItems = listOf(
     BottomNavItem("Home", Icons.Default.Home, Home::class),
-    BottomNavItem("Menu", Icons.Default.List, Menu::class),
+    BottomNavItem("Menu", Icons.Default.List, MenuManagement::class),
     BottomNavItem("Order", Icons.Default.ShoppingCart, Order::class),
     BottomNavItem("Profile", Icons.Default.Person, Profile::class),
 )

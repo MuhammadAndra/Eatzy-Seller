@@ -5,44 +5,45 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.eatzy_seller.ui.screen.menu.AddMenuScreen
-import com.example.eatzy_seller.ui.screen.menu.AddOnItemScreen
-import com.example.eatzy_seller.ui.screen.menu.CategoryScreen
-import com.example.eatzy_seller.ui.screen.menu.MenuListScreen
+import com.example.eatzy_seller.ui.screen.menu.*
 import kotlinx.serialization.Serializable
 
 @Serializable
-object Menu
+object MenuManagement
 
 @Serializable
 object AddMenu
 
 @Serializable
-object EditKategori
+object EditCategory
+
+@Serializable
+object AddAddOnCategory
 
 fun NavGraphBuilder.menuGraph(navController: NavController) {
-    composable<Menu> {
-        MenuListScreen(navController = navController)
+    //main menu screen
+    composable<MenuManagement> {
+        MenuManagementScreen(navController = navController)
     }
     composable<AddMenu> {
         AddMenuScreen(navController = navController)
     }
-    composable<EditKategori> {
+    composable<EditCategory> {
         CategoryScreen(navController = navController)
+    }
+    composable<AddAddOnCategory> {
+        AddOnCategoryScreen(navController = navController, mode = AddOnMode.ADD)
     }
 
     composable(
-        route = "edit_kategori_addon/{namaKategoriAddOn}/{isSingle}",
+        route = "add_on_category/{categoryId}",
         arguments = listOf(
-            navArgument("namaKategoriAddOn") { type = NavType.StringType },
-            navArgument("isSingle") { type = NavType.BoolType }
+            navArgument("categoryId") { type = NavType.IntType } // atau StringType jika ID berupa string
         )
     ) { backStackEntry ->
-        val namaAddOn = backStackEntry.arguments?.getString("namaKategoriAddOn") ?: ""
-        val isSingle = backStackEntry.arguments?.getBoolean("isSingle") ?: false
-        AddOnItemScreen(namaAddOn = namaAddOn, isSingleChoice = isSingle, navController = navController)
+        val categoryId = backStackEntry.arguments?.getInt("categoryId") ?: 0
+        AddOnCategoryScreen(categoryId = categoryId)
     }
 
+
 }
-
-

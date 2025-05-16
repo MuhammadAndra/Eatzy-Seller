@@ -21,9 +21,9 @@ val dummyAddOns3 = listOf(
 
 // Dummy AddOnCategory data
 val dummyAddOnCategories = listOf(
-    AddOnCategory(1, 1, "Toppings", true, dummyAddOns1),
-    AddOnCategory(2, 1, "Spiciness", false, dummyAddOns2),
-    AddOnCategory(3, 1, "Drink Options", true, dummyAddOns3)
+    AddOnCategory(1, "Toppings", true, dummyAddOns1),
+    AddOnCategory(2, "Spiciness", false, dummyAddOns2),
+    AddOnCategory(3, "Drink Options", true, dummyAddOns3)
 )
 
 // Dummy Menu data

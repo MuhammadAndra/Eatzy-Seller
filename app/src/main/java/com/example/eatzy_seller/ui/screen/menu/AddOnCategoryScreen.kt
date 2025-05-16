@@ -21,46 +21,29 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.eatzy_seller.data.model.dummyAddOnCategories
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import com.example.eatzy_seller.ui.components.TopBarMenu
 import com.example.eatzy_seller.ui.theme.PrimaryColor
 import com.example.eatzy_seller.ui.theme.SecondColor
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun AddOnCategoryScreen(
     navController: NavController = rememberNavController(),
-    viewModel: ViewModel = MenuViewModel(), // atau sesuai ViewModel kamu
-    categoryId: String,
-    mode: AddOnMode = AddOnMode.ADD
+    mode: AddOnMode = AddOnMode.ADD,
+    initialCategoryName: String = "",
+    initialIsSingleChoice: Boolean = false,
+    initialAddOns: List<Pair<String, String>> = emptyList()
 ) {
-    // Dapatkan data dari ViewModel
-    //val categoryState by viewModel.getAddOnCategoryById(categoryId).collectAsState(initial = null)
-
-    // Local UI State
     var isDialogVisible by remember { mutableStateOf(false) }
     var newNamaAddOn by remember { mutableStateOf("") }
     var newHargaAddOn by remember { mutableStateOf("") }
+    var isSingleChoice by remember { mutableStateOf(initialIsSingleChoice) }
+    var categoryName by remember { mutableStateOf(initialCategoryName) }
 
-    // Jika data belum siap, tampilkan loading
-    if (categoryAddOn == null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val addOnList = remember { mutableStateListOf<Pair<String, String>>().apply { addAll(initialAddOns) } }
 
-//    val category = categoryState!!
-//    var categoryName by remember { mutableStateOf(category.name) }
-//    var isSingleChoice by remember { mutableStateOf(category.isSingleChoice) }
-//    val addOnList = remember { mutableStateListOf<Pair<String, String>>().apply { addAll(category.addOns) } }
-
-    
-    // Lanjut seperti sebelumnya
     Scaffold(
         containerColor = Color.White,
         topBar = {

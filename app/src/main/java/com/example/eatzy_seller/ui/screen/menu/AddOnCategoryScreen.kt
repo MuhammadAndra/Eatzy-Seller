@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -27,6 +28,8 @@ import com.example.eatzy_seller.ui.components.BottomNavBar
 import com.example.eatzy_seller.ui.components.TopBarMenu
 import com.example.eatzy_seller.ui.theme.PrimaryColor
 import com.example.eatzy_seller.ui.theme.SecondColor
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun AddOnCategoryScreen(
@@ -49,7 +52,7 @@ fun AddOnCategoryScreen(
         topBar = {
             TopBarMenu(
                 title = when (mode) {
-                    AddOnMode.ADD -> if (categoryName.isBlank()) "Tambah Kategori" else "Kategori $categoryName"
+                    AddOnMode.ADD -> if (categoryName.isBlank()) "Tambah Kategori Add-On" else "Kategori $categoryName"
                     AddOnMode.EDIT -> "Edit Kategori $categoryName"
                 },
                 navController = navController
@@ -75,6 +78,7 @@ fun AddOnCategoryScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp, vertical = 8.dp),
                 singleLine = true,
+                shape = RoundedCornerShape(16.dp),
                 readOnly = mode == AddOnMode.EDIT
             )
 
@@ -83,7 +87,7 @@ fun AddOnCategoryScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp, horizontal = 10.dp),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.cardElevation(4.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White
@@ -105,6 +109,7 @@ fun AddOnCategoryScreen(
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -113,10 +118,11 @@ fun AddOnCategoryScreen(
                     .padding(6.dp)
             ) {
                 Text(
-                    text = "Kategori Add On",
+                    text = "Item Add On",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.Black
+                    color = Color.Black,
+                    modifier = Modifier.padding(start = 8.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Box(
@@ -135,7 +141,7 @@ fun AddOnCategoryScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            //Spacer(modifier = Modifier.height(4.dp))
 
             // Daftar Add-On in TextField-like format
             if (addOnList.isEmpty()) {
@@ -149,11 +155,13 @@ fun AddOnCategoryScreen(
                 )
             } else {
                 addOnList.forEachIndexed { index, (nama, harga) ->
+                    val formatted = NumberFormat.getCurrencyInstance(Locale("in", "ID")).format(harga.toInt())
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp)
+                            .padding(start = 10.dp, top = 8.dp)
                     ) {
                         Box(
                             modifier = Modifier
@@ -210,15 +218,17 @@ fun AddOnCategoryScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .height(56.dp),
                 enabled = categoryName.isNotBlank(),
-                colors = ButtonDefaults.buttonColors(containerColor = SecondColor)
+                colors = ButtonDefaults.buttonColors(containerColor = SecondColor),
+                shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)), // Membulat penuh
             ) {
                 Text(
                     text = when (mode) {
                         AddOnMode.ADD -> "Simpan Kategori"
                         AddOnMode.EDIT -> "Simpan Perubahan"
                     },
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -324,9 +334,9 @@ fun PreviewAddOnCategoryScreen_EditMode() {
         initialCategoryName = "Sambal",
         initialIsSingleChoice = true,
         initialAddOns = listOf(
-            "Pedas" to "Rp 5.000",
-            "Manis" to "Rp 3.000",
-            "Asin" to "Rp 4.000"
+            "Pedas" to "5.000",
+            "Manis" to "3.000",
+            "Asin" to "4.000"
         )
     )
 }

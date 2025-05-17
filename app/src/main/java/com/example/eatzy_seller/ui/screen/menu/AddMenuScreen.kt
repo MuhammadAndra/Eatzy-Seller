@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -59,6 +61,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -69,6 +72,7 @@ import com.example.eatzy_seller.ui.components.TopBarMenu
 import com.example.eatzy_seller.ui.theme.SecondColor
 import coil.compose.rememberImagePainter
 import com.example.eatzy_seller.navigation.navGraph.EditCategory
+import com.example.eatzy_seller.ui.theme.DeleteColor
 import com.example.eatzy_seller.ui.theme.PrimaryColor
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,12 +99,12 @@ fun AddMenuScreen(
     val isAddOnDialogVisible = remember { mutableStateOf(false) }
     val showFormDialog = remember { mutableStateOf(false) }
 
-    val kategoriAddOnList = remember { mutableStateListOf<Pair<String, Boolean>>() } // Pair(nama, isSingleChoice)
+    val kategoriAddOnList =
+        remember { mutableStateListOf<Pair<String, Boolean>>() } // Pair(nama, isSingleChoice)
     val selectedAddOns = remember { mutableStateListOf<String>() }
 
     var newKategoriAddOn by remember { mutableStateOf("") }
     var isSingleChoice by remember { mutableStateOf(false) }
-
 
 
     Scaffold(
@@ -248,46 +252,55 @@ fun AddMenuScreen(
                     )
                 }
 
-
-
             }
 
 
-            // Tampilkan daftar kategori add-on yang sudah ditambahkan dalam bentuk Row mirip TextField
-            kategoriAddOnList.forEachIndexed { index, (nama, isSingle) ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+            if (kategoriAddOnList.isEmpty()) {
+                Text(
+                    text = "Belum ada Add-On",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                ) {
-                    // Mirip TextField tapi tidak bisa diedit
-                    Box(
+                        .padding(16.dp),
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                // Tampilkan daftar kategori add-on yang sudah ditambahkan dalam bentuk Row mirip TextField
+                kategoriAddOnList.forEachIndexed { index, (nama, isSingle) ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .weight(1f)
-                            .border(1.dp, Color.Gray, RoundedCornerShape(16.dp))
-                            .padding(horizontal = 16.dp, vertical = 14.dp)
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
                     ) {
-                        Text(
-                            text = "$nama (${if (isSingle) "Pilih satu" else "Bebas pilih"})",
-                            fontSize = 16.sp,
-                            color = Color.Black
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    // Tombol edit dengan ikon dalam kotak oranye
-                    IconButton(
-                        onClick = {
-                            navController.navigate("edit_kategori_addon/${nama}/${isSingle}")
+                        // Mirip TextField tapi tidak bisa diedit
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .border(1.dp, Color.Gray, RoundedCornerShape(16.dp))
+                                .padding(horizontal = 16.dp, vertical = 14.dp)
+                        ) {
+                            Text(
+                                text = "$nama (${if (isSingle) "Pilih satu" else "Bebas pilih"})",
+                                fontSize = 16.sp,
+                                color = Color.Black
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit",
-                            tint = PrimaryColor
-                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        // Tombol edit dengan ikon dalam kotak oranye
+                        IconButton(
+                            onClick = {
+                                selectedAddOns.remove(nama)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Edit",
+                                tint = DeleteColor
+                            )
+                        }
                     }
                 }
             }
@@ -314,89 +327,39 @@ fun AddMenuScreen(
         }
     }
     if (isAddOnDialogVisible.value) {
-        if (kategoriAddOnList.isEmpty()) {
-            // Dialog form untuk menambahkan kategori add-on baru
-            AlertDialog(
-                onDismissRequest = { isAddOnDialogVisible.value = false },
-                title = { Text("Tambah Kategori Add-On") },
-                text = {
-                    Column {
-                        OutlinedTextField(
-                            value = newKategoriAddOn,
-                            onValueChange = { newKategoriAddOn = it },
-                            label = { Text("Nama Kategori Add-On") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Add-On Pilih salah satu?", modifier = Modifier.weight(1f))
-                            Switch(
-                                checked = isSingleChoice,
-                                onCheckedChange = { isSingleChoice = it }
-                            )
-                        }
-                    }
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            if (newKategoriAddOn.isNotBlank() &&
-                                !kategoriAddOnList.any { it.first == newKategoriAddOn }
-                            ) {
-                                kategoriAddOnList.add(Pair(newKategoriAddOn, isSingleChoice))
-                                newKategoriAddOn = ""
-                                isSingleChoice = false
-                            }
-                            isAddOnDialogVisible.value = false
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = SecondColor)
-                    ) {
-                        Text("Simpan")
-                    }
-                },
-                dismissButton = {
-                    Button(
-                        onClick = { isAddOnDialogVisible.value = false },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9D9D9))
-                    ) {
-                        Text("Batal", color = Color.Black)
-                    }
-                }
-            )
-        } else {
-            // Dialog pilih kategori yang sudah ada
-            AlertDialog(
-                onDismissRequest = { isAddOnDialogVisible.value = false },
-                title = { Text("Pilih Kategori Add-On") },
-                text = {
-                    Column {
-                        kategoriAddOnList.forEach { (nama, _) ->
-                            OutlinedButton(
-                                onClick = {
-                                    if (nama !in selectedAddOns) {
-                                        selectedAddOns.add(nama)
-                                    }
-                                    isAddOnDialogVisible.value = false
-                                },
-                                shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(1.dp, Color.Gray),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
-                            ) {
-                                Text(nama)
-                            }
-                        }
-                    }
-                },
-                confirmButton = {}
-            )
-        }
+        PilihKategoriAddOnDialog(
+            kategoriAddOnList = kategoriAddOnList,
+            selectedAddOns = selectedAddOns,
+            onDismiss = { isAddOnDialogVisible.value = false },
+            onTambahKategoriClick = {
+                showFormDialog.value = true
+            }
+        )
     }
 
+    if (showFormDialog.value) {
+        AddKategoriAddOnDialog(
+            newKategoriAddOn = newKategoriAddOn,
+            onKategoriChange = { newKategoriAddOn = it },
+            isSingleChoice = isSingleChoice,
+            onSingleChoiceChange = { isSingleChoice = it },
+            onSave = {
+                if (newKategoriAddOn.isNotBlank() &&
+                    !kategoriAddOnList.any { it.first == newKategoriAddOn }
+                ) {
+                    kategoriAddOnList.add(Pair(newKategoriAddOn, isSingleChoice))
+                    newKategoriAddOn = ""
+                    isSingleChoice = false
+                }
+                showFormDialog.value = false
+                isAddOnDialogVisible.value = true // kembali ke dialog pilih kategori
+            },
+            onDismiss = {
+                showFormDialog.value = false
+                isAddOnDialogVisible.value = true // kembali ke dialog pilih kategori
+            }
+        )
+    }
 
 
 }
@@ -406,7 +369,7 @@ fun SimpanTambahMenuButton(onClick: () -> Unit) {
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Button(
             onClick = onClick,
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE89D3C)), // Warna oranye
+            colors = ButtonDefaults.buttonColors(containerColor = SecondColor), // Warna oranye
             shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)), // Membulat penuh
             modifier = Modifier
                 .fillMaxWidth(1f)
@@ -463,6 +426,106 @@ fun UploadImageComponent() {
     }
 }
 
+@Composable
+fun AddKategoriAddOnDialog(
+    newKategoriAddOn: String,
+    onKategoriChange: (String) -> Unit,
+    isSingleChoice: Boolean,
+    onSingleChoiceChange: (Boolean) -> Unit,
+    onSave: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Tambah Kategori Add-On") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = newKategoriAddOn,
+                    onValueChange = onKategoriChange,
+                    label = { Text("Nama Kategori Add-On") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Add-On Pilih salah satu?", modifier = Modifier.weight(1f))
+                    Switch(
+                        checked = isSingleChoice,
+                        onCheckedChange = onSingleChoiceChange
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onSave,
+                colors = ButtonDefaults.buttonColors(containerColor = SecondColor)
+            ) {
+                Text("Simpan")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9D9D9))
+            ) {
+                Text("Batal", color = Color.Black)
+            }
+        }
+    )
+}
+
+@Composable
+fun PilihKategoriAddOnDialog(
+    kategoriAddOnList: List<Pair<String, Boolean>>,
+    selectedAddOns: SnapshotStateList<String>,
+    onDismiss: () -> Unit,
+    onTambahKategoriClick: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Pilih Kategori Add-On") },
+        text = {
+            Column {
+                kategoriAddOnList.forEach { (nama, _) ->
+                    OutlinedButton(
+                        onClick = {
+                            if (nama !in selectedAddOns) {
+                                selectedAddOns.add(nama)
+                            }
+                            onDismiss()
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color.Gray),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    ) {
+                        Text(nama)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Tombol Tambah Kategori
+                Button(
+                    onClick = {
+                        onDismiss()
+                        onTambahKategoriClick()
+                    },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text("+ Tambah Kategori")
+                }
+            }
+        },
+        confirmButton = {}
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewUploadImage() {
@@ -475,4 +538,38 @@ fun PreviewMenuFormScreen() {
     MaterialTheme {
         AddMenuScreen()
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddKategoriAddOnDialogPreview() {
+    var newKategoriAddOn by remember { mutableStateOf("Makanan") }
+    var isSingleChoice by remember { mutableStateOf(false) }
+
+    AddKategoriAddOnDialog(
+        newKategoriAddOn = newKategoriAddOn,
+        onKategoriChange = { newKategoriAddOn = it },
+        isSingleChoice = isSingleChoice,
+        onSingleChoiceChange = { isSingleChoice = it },
+        onSave = {},
+        onDismiss = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PilihKategoriAddOnDialogPreview() {
+    val dummyKategori = listOf(
+        "Makanan" to true,
+        "Minuman" to false,
+        "Cemilan" to true
+    )
+    val selectedAddOns = remember { mutableStateListOf<String>() }
+
+    PilihKategoriAddOnDialog(
+        kategoriAddOnList = dummyKategori,
+        selectedAddOns = selectedAddOns,
+        onDismiss = {},
+        onTambahKategoriClick = {}
+    )
 }

@@ -4,14 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +42,7 @@ import com.example.eatzy_seller.data.model.dummyMenuCategories
 import com.example.eatzy_seller.navigation.navGraph.AddAddOnCategory
 import com.example.eatzy_seller.navigation.navGraph.AddMenu
 import com.example.eatzy_seller.ui.components.*
+import com.example.eatzy_seller.ui.theme.DeleteColor
 import com.example.eatzy_seller.ui.theme.SecondColor
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -58,6 +62,7 @@ fun MenuManagementScreen(navController: NavController = rememberNavController())
             navController = navController,
             onSwitchToAddOn = { currentMenuType = MenuType.ADD_ON }
         )
+
         MenuType.ADD_ON -> AddOnListScreen(
             navController = navController,
             onSwitchToMenu = { currentMenuType = MenuType.REGULAR_MENU }
@@ -86,7 +91,11 @@ fun MenuListScreen(
         containerColor = Color.White,
         topBar = {
             Column {
-                TopBarMenu(title = "Daftar Menu", navController = navController, showBackButton = false)
+                TopBarMenu(
+                    title = "Daftar Menu",
+                    navController = navController,
+                    showBackButton = false
+                )
                 ButtonStatus(
                     currentScreen = "Menu",
                     onMenuClick = { /* already on menu */ },
@@ -122,7 +131,9 @@ fun MenuListScreen(
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar(message)
                 }
-            }
+            },
+            onEditCategory = {},
+            onDeleteCategory = {}
         )
     }
 }
@@ -134,7 +145,9 @@ fun MenuListContent(
     menuCategories: List<MenuCategory>,
     isAddOn: Boolean,
     onDelete: (Int) -> Unit,
-    onShowSnackbar: (String) -> Unit
+    onShowSnackbar: (String) -> Unit,
+    onEditCategory: (MenuCategory) -> Unit,
+    onDeleteCategory: (MenuCategory) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(
@@ -180,6 +193,44 @@ fun MenuListContent(
                                 thickness = 0.5.dp,
                                 color = Color(0xFFBDBDBD),
                                 modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                        }
+                    }
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        color = Color(0xFFBDBDBD),
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(
+                            onClick = { onEditCategory(category) },
+                            colors = ButtonDefaults.buttonColors(containerColor = SecondColor), // Warna oranye
+                            shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
+                        ) {
+                            Text(
+                                text = "Edit Kategori",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = { onDeleteCategory(category) },
+                            colors = ButtonDefaults.buttonColors(containerColor = DeleteColor), // Warna oranye
+                            shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
+                        ) {
+                            Text(
+                                text = "Simpan",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
@@ -271,7 +322,7 @@ fun MenuItem(
             Icon(
                 imageVector = Icons.Filled.Delete,
                 contentDescription = "Delete",
-                tint = Color(0xFFFC2433),
+                tint = DeleteColor,
                 modifier = Modifier
                     .size(20.dp)
                     .clickable { showDeleteDialog = true }
@@ -301,7 +352,11 @@ fun AddOnListScreen(
         containerColor = Color.White,
         topBar = {
             Column {
-                TopBarMenu(title = "Daftar Add-On", navController = navController, showBackButton = false)
+                TopBarMenu(
+                    title = "Daftar Add-On",
+                    navController = navController,
+                    showBackButton = false
+                )
                 //pindah button menu and add-on
                 ButtonStatus(
                     currentScreen = "Add-On",
@@ -338,10 +393,13 @@ fun AddOnListScreen(
                     snackbarHostState.showSnackbar(message)
                 }
             },
-            navController = navController
+            navController = navController,
+            onEditAddCategory = {},
+            onDeleteAddCategory = {}
         )
     }
 }
+
 @Composable
 fun AddOnListContent(
     modifier: Modifier = Modifier,
@@ -349,7 +407,9 @@ fun AddOnListContent(
     addOnCategories: List<AddOnCategory>,
     onDelete: (Int) -> Unit,
     onShowSnackbar: (String) -> Unit,
-    navController: NavController
+    navController: NavController,
+    onEditAddCategory: (AddOnCategory) -> Unit,
+    onDeleteAddCategory: (AddOnCategory) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(
@@ -374,7 +434,9 @@ fun AddOnListContent(
                         Text(
                             text = category.addOnCategoryName,
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                            modifier = Modifier.weight(1f).padding(start = 8.dp)
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 8.dp)
                         )
                         Text(
                             text = if (category.addOnCategoryMultiple) "Multiple" else "Single",
@@ -401,6 +463,44 @@ fun AddOnListContent(
                                 thickness = 0.5.dp,
                                 color = Color(0xFFBDBDBD),
                                 modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                        }
+                    }
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        color = Color(0xFFBDBDBD),
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(
+                            onClick = { onEditAddCategory(category) },
+                            colors = ButtonDefaults.buttonColors(containerColor = SecondColor), // Warna oranye
+                            shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
+                        ) {
+                            Text(
+                                text = "Edit Kategori",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = { onDeleteAddCategory(category) },
+                            colors = ButtonDefaults.buttonColors(containerColor = DeleteColor), // Warna oranye
+                            shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
+                        ) {
+                            Text(
+                                text = "Simpan",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
@@ -479,7 +579,7 @@ fun AddOnItem(
             Icon(
                 imageVector = Icons.Filled.Delete,
                 contentDescription = "Delete",
-                tint = Color(0xFFFC2433),
+                tint = DeleteColor,
                 modifier = Modifier
                     .size(20.dp)
                     .clickable { showDeleteDialog = true }
@@ -496,7 +596,8 @@ fun ButtonStatus(
     onAddOnClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .background(Color.White) // Ganti dengan warna latar yang diinginkan
             .padding(vertical = 8.dp), // Opsional: Tambahkan padding agar tombol tidak terlalu mepet
         horizontalArrangement = Arrangement.SpaceAround
@@ -542,7 +643,9 @@ fun PreviewAddOnListContent() {
             addOnCategories = dummyAddOnCategories,
             onDelete = {},
             onShowSnackbar = {},
-            navController = rememberNavController()
+            navController = rememberNavController(),
+            onEditAddCategory = {},
+            onDeleteAddCategory = {}
         )
     }
 }
@@ -619,7 +722,9 @@ fun PreviewMenuListContent() {
             menuCategories = dummyMenuCategories,
             isAddOn = false,
             onDelete = {},
-            onShowSnackbar = {}
+            onShowSnackbar = {},
+            onEditCategory = {},
+            onDeleteCategory = {}
         )
     }
 }

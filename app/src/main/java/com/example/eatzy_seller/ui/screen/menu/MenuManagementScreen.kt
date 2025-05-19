@@ -78,14 +78,19 @@ fun MenuListScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
-    val vm: MenuViewModel = viewModel()
 
-    LaunchedEffect(Unit) {
-        vm.fetchMenus()
-    }
+
+    var isEditDialogVisible by remember { mutableStateOf(false) }
+    var categoryToEdit by remember { mutableStateOf<MenuCategory?>(null) }
+
+//    val vm: MenuViewModel = viewModel()
+//
+//    LaunchedEffect(Unit) {
+//        vm.fetchMenus()
+//    }
 
     //pakai data dummy dulu
-    val menuCategories = dummyMenuCategories
+    val menuCategories = remember { mutableStateListOf<MenuCategory>().apply { addAll(dummyMenuCategories) } }
 
     Scaffold(
         containerColor = Color.White,
@@ -126,18 +131,39 @@ fun MenuListScreen(
             innerPadding = innerPadding,
             menuCategories = menuCategories,
             isAddOn = false,
-            onDelete = { vm.deleteMenu(it) },
+            onDelete = {/* vm.deleteMenu(it)*/ },
             onShowSnackbar = { message ->
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar(message)
                 }
             },
-            onEditCategory = {},
+            onEditCategory = { category ->
+                categoryToEdit = category
+                isEditDialogVisible = true
+            },
             onDeleteCategory = {}
         )
+
+        if (isEditDialogVisible && categoryToEdit != null) {
+            EditCategoryDialog(
+                initialName = categoryToEdit!!.categoryName,
+                onDismiss = {
+                    isEditDialogVisible = false
+                    categoryToEdit = null
+                },
+                onSave = { newName ->
+                    // Update category name di list
+                    val index = menuCategories.indexOfFirst { it.idCategory == categoryToEdit!!.idCategory }
+                    if (index >= 0) {
+                        menuCategories[index] = menuCategories[index].copy(categoryName = newName)
+                    }
+                    isEditDialogVisible = false
+                    categoryToEdit = null
+                }
+            )
+        }
     }
 }
-
 @Composable
 fun MenuListContent(
     modifier: Modifier = Modifier,
@@ -152,7 +178,7 @@ fun MenuListContent(
     LazyColumn(
         contentPadding = PaddingValues(
             top = innerPadding.calculateTopPadding() + 8.dp,
-            bottom = innerPadding.calculateBottomPadding() + 8.dp
+            bottom = innerPadding.calculateBottomPadding() + 80.dp // Tambahkan ekstra padding untuk FAB
         ),
         modifier = modifier.padding(horizontal = 8.dp)
     ) {
@@ -209,7 +235,7 @@ fun MenuListContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Button(
-                            onClick = { onEditCategory(category) },
+                            onClick = { onEditCategory(category)},
                             colors = ButtonDefaults.buttonColors(containerColor = SecondColor), // Warna oranye
                             shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
                         ) {
@@ -227,7 +253,7 @@ fun MenuListContent(
                             shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
                         ) {
                             Text(
-                                text = "Simpan",
+                                text = "Hapus",
                                 color = Color.White,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
@@ -340,11 +366,11 @@ fun AddOnListScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
-    val vm: MenuViewModel = viewModel()
+    //val vm: MenuViewModel = viewModel()
 
-    LaunchedEffect(Unit) {
-        vm.fetchMenus()
-    }
+//    LaunchedEffect(Unit) {
+//        vm.fetchMenus()
+//    }
 
     val addOnCategories = dummyAddOnCategories
 
@@ -414,7 +440,7 @@ fun AddOnListContent(
     LazyColumn(
         contentPadding = PaddingValues(
             top = innerPadding.calculateTopPadding() + 8.dp,
-            bottom = innerPadding.calculateBottomPadding() + 8.dp
+            bottom = innerPadding.calculateBottomPadding() + 80.dp // Tambahkan ekstra padding untuk FAB
         ),
         modifier = modifier.padding(horizontal = 8.dp)
     ) {
@@ -497,7 +523,7 @@ fun AddOnListContent(
                             shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
                         ) {
                             Text(
-                                text = "Simpan",
+                                text = "Hapus",
                                 color = Color.White,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
@@ -587,7 +613,6 @@ fun AddOnItem(
         }
     }
 }
-
 
 @Composable
 fun ButtonStatus(

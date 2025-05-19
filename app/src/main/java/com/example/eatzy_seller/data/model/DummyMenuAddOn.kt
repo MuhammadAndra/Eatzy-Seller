@@ -1,5 +1,15 @@
 package com.example.eatzy_seller.data.model
 
+
+fun fetchCategoryById(id: Int): AddOnCategory {
+    return AddOnCategory(
+        addOnCategoryId = 1,  // Assuming you can convert String to Int
+        addOnCategoryName = "Sambal",
+        addOnCategoryMultiple = false,  // Since isSingleChoice was true
+        addOns = dummyAddOns1
+    )
+}
+
 // Dummy AddOn data
 val dummyAddOns1 = listOf(
     AddOn(1, "Extra Cheese", 5000.0, true),

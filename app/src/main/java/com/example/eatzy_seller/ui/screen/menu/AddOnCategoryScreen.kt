@@ -24,6 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.eatzy_seller.data.model.AddOn
+import com.example.eatzy_seller.data.model.dummyAddOnCategories
+import com.example.eatzy_seller.data.model.dummyAddOns1
+import com.example.eatzy_seller.data.model.fetchCategoryById
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import com.example.eatzy_seller.ui.components.TopBarMenu
 import com.example.eatzy_seller.ui.theme.PrimaryColor
@@ -35,25 +39,34 @@ import java.util.Locale
 fun AddOnCategoryScreen(
     navController: NavController = rememberNavController(),
     mode: AddOnMode = AddOnMode.ADD,
-    initialCategoryName: String = "",
-    initialIsSingleChoice: Boolean = false,
-    initialAddOns: List<Pair<String, String>> = emptyList()
+    categoryId: Int? = null
 ) {
     var isDialogVisible by remember { mutableStateOf(false) }
     var newNamaAddOn by remember { mutableStateOf("") }
-    var newHargaAddOn by remember { mutableStateOf("") }
-    var isSingleChoice by remember { mutableStateOf(initialIsSingleChoice) }
-    var categoryName by remember { mutableStateOf(initialCategoryName) }
+    var newHargaAddOn by remember { mutableStateOf(0.0) }
 
-    val addOnList = remember { mutableStateListOf<Pair<String, String>>().apply { addAll(initialAddOns) } }
+    var categoryName by remember { mutableStateOf("") }
+    var isSingleChoice by remember { mutableStateOf(false) }
+    var addOnList = remember { mutableStateListOf<AddOn>() }
+
+    // Simulasi ambil data jika mode edit
+    LaunchedEffect(categoryId) {
+        if (mode == AddOnMode.EDIT && categoryId != null) {
+            val fetched = fetchCategoryById(categoryId)
+            categoryName = fetched.addOnCategoryName
+            isSingleChoice = fetched.addOnCategoryMultiple
+            addOnList.clear()
+            addOnList.addAll(fetched.addOns)
+        }
+    }
 
     Scaffold(
         containerColor = Color.White,
         topBar = {
             TopBarMenu(
                 title = when (mode) {
-                    AddOnMode.ADD -> if (categoryName.isBlank()) "Tambah Kategori Add-On" else "Kategori $categoryName"
-                    AddOnMode.EDIT -> "Edit Kategori $categoryName"
+                    AddOnMode.ADD -> if (categoryName.isBlank()) "Tambah Kategori Add-On" else "Kategori ${categoryName}"
+                    AddOnMode.EDIT -> "Edit Kategori ${categoryName}"
                 },
                 navController = navController
             )
@@ -63,13 +76,14 @@ fun AddOnCategoryScreen(
             BottomNavBar(navController = navController)
         }
     ) { innerPadding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(10.dp)
         ) {
-            // Category Name Input
+            // Input nama kategori
             OutlinedTextField(
                 value = categoryName,
                 onValueChange = { categoryName = it },
@@ -78,8 +92,7 @@ fun AddOnCategoryScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp, vertical = 8.dp),
                 singleLine = true,
-                shape = RoundedCornerShape(16.dp),
-                readOnly = mode == AddOnMode.EDIT
+                shape = RoundedCornerShape(16.dp)
             )
 
             // Switch pilihan tunggal
@@ -89,9 +102,7 @@ fun AddOnCategoryScreen(
                     .padding(vertical = 4.dp, horizontal = 10.dp),
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.cardElevation(4.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
-                )
+                colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -109,6 +120,7 @@ fun AddOnCategoryScreen(
                     )
                 }
             }
+
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
@@ -141,9 +153,6 @@ fun AddOnCategoryScreen(
                 }
             }
 
-            //Spacer(modifier = Modifier.height(4.dp))
-
-            // Daftar Add-On in TextField-like format
             if (addOnList.isEmpty()) {
                 Text(
                     text = "Belum ada Add-On",
@@ -154,9 +163,10 @@ fun AddOnCategoryScreen(
                     style = MaterialTheme.typography.bodyMedium
                 )
             } else {
-                addOnList.forEachIndexed { index, (nama, harga) ->
-                    val formatted = NumberFormat.getCurrencyInstance(Locale("in", "ID")).format(harga.toInt())
-
+                addOnList.forEachIndexed { index, addOn ->
+                    val formatted = NumberFormat.getCurrencyInstance(Locale("in", "ID")).apply {
+                        maximumFractionDigits = 0
+                    }.format(addOn.AddOnPrice)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -170,20 +180,18 @@ fun AddOnCategoryScreen(
                                 .padding(horizontal = 16.dp, vertical = 14.dp)
                         ) {
                             Text(
-                                text = "$nama - $harga",
+                                text = addOn.AddOnName +" - "+ formatted,
                                 fontSize = 16.sp,
                                 color = Color.Black
                             )
                         }
-
                         Spacer(modifier = Modifier.width(8.dp))
 
                         IconButton(
                             onClick = {
-                                newNamaAddOn = nama
-                                newHargaAddOn = harga
+                                newNamaAddOn = addOn.AddOnName
+                                newHargaAddOn = addOn.AddOnPrice
                                 isDialogVisible = true
-                                addOnList.removeAt(index)
                             }
                         ) {
                             Icon(
@@ -206,13 +214,17 @@ fun AddOnCategoryScreen(
                 }
             }
 
-            // Save Button
             Spacer(modifier = Modifier.weight(1f))
+
             Button(
                 onClick = {
                     when (mode) {
-                        AddOnMode.ADD -> { /* Handle add */ }
-                        AddOnMode.EDIT -> { /* Handle edit */ }
+                        AddOnMode.ADD -> {
+                            // Simpan ke DB atau repo
+                        }
+                        AddOnMode.EDIT -> {
+                            // Update ke DB atau repo
+                        }
                     }
                     navController.popBackStack()
                 },
@@ -221,7 +233,7 @@ fun AddOnCategoryScreen(
                     .height(56.dp),
                 enabled = categoryName.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(containerColor = SecondColor),
-                shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)), // Membulat penuh
+                shape = MaterialTheme.shapes.large.copy(all = CornerSize(50))
             ) {
                 Text(
                     text = when (mode) {
@@ -238,32 +250,41 @@ fun AddOnCategoryScreen(
             Add_AddOnDialog(
                 newAddOn = newNamaAddOn,
                 harga = newHargaAddOn,
-                onAddOnChange = { newNamaAddOn = it },
-                onHargaChange = { newHargaAddOn = it },
+                AddOnNamaChange = { newNamaAddOn = it },
+                AddOnHargaChange = { newHargaAddOn = it.toDouble() },
                 onConfirm = {
-                    if (newNamaAddOn.isNotBlank() && newHargaAddOn.isNotBlank()) {
-                        addOnList.add(newNamaAddOn to newHargaAddOn)
+                    if (newNamaAddOn.isNotBlank() && newHargaAddOn != null) {
+                        addOnList.add(
+                            AddOn(
+                                AddOnId = addOnList.size + 1,
+                                AddOnName = newNamaAddOn,
+                                AddOnPrice = newHargaAddOn,
+                                AddOnAvailable = true
+                            )
+                        )
                         newNamaAddOn = ""
-                        newHargaAddOn = ""
+                        newHargaAddOn = 0.0
                         isDialogVisible = false
                     }
                 },
                 onDismiss = {
                     isDialogVisible = false
                     newNamaAddOn = ""
-                    newHargaAddOn = ""
+                    newHargaAddOn = 0.0
                 }
             )
+
         }
     }
 }
 
+
 @Composable
 private fun Add_AddOnDialog(
     newAddOn: String,
-    harga: String,
-    onAddOnChange: (String) -> Unit,
-    onHargaChange: (String) -> Unit,
+    harga: Double?,
+    AddOnNamaChange: (String) -> Unit,
+    AddOnHargaChange: (String) -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -274,15 +295,15 @@ private fun Add_AddOnDialog(
             Column {
                 OutlinedTextField(
                     value = newAddOn,
-                    onValueChange = onAddOnChange,
+                    onValueChange = AddOnNamaChange,
                     label = { Text("Nama Add-On") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = harga,
-                    onValueChange = onHargaChange,
+                    value = harga?.toInt().toString(),
+                    onValueChange = AddOnHargaChange,
                     label = { Text("Harga") },
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
@@ -293,7 +314,7 @@ private fun Add_AddOnDialog(
         confirmButton = {
             Button(
                 onClick = onConfirm,
-                enabled = newAddOn.isNotBlank() && harga.isNotBlank(),
+                enabled = newAddOn.isNotBlank() && harga.toString().isNotBlank(),
                 colors = ButtonDefaults.buttonColors(containerColor = SecondColor)
             ) {
                 Text("Simpan")
@@ -301,7 +322,7 @@ private fun Add_AddOnDialog(
         },
         dismissButton = {
             Button(
-                onClick = onConfirm,
+                onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9D9D9))
             ) {
                 Text("Batal", color = Color.Black)
@@ -331,12 +352,6 @@ fun PreviewAddOnCategoryScreen_EditMode() {
     AddOnCategoryScreen(
         navController = dummyNavController,
         mode = AddOnMode.EDIT,
-        initialCategoryName = "Sambal",
-        initialIsSingleChoice = true,
-        initialAddOns = listOf(
-            "Pedas" to "5.000",
-            "Manis" to "3.000",
-            "Asin" to "4.000"
-        )
+        categoryId = dummyAddOnCategories[0].addOnCategoryId
     )
 }

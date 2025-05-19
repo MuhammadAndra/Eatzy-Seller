@@ -188,7 +188,7 @@ private fun CategoryItem(
 }
 
 @Composable
-private fun AddCategoryDialog(
+fun AddCategoryDialog(
     newKategori: String,
     onKategoriChange: (String) -> Unit,
     onConfirm: () -> Unit,

@@ -46,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.eatzy_seller.ui.components.AddCategoryDialog
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import com.example.eatzy_seller.ui.components.TopBarMenu
 import com.example.eatzy_seller.ui.theme.PrimaryColor
@@ -187,46 +188,7 @@ private fun CategoryItem(
     }
 }
 
-@Composable
-fun AddCategoryDialog(
-    newKategori: String,
-    onKategoriChange: (String) -> Unit,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Tambah Kategori Baru") },
-        text = {
-            OutlinedTextField(
-                value = newKategori,
-                onValueChange = onKategoriChange,
-                label = { Text("Nama Kategori") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-        },
-        confirmButton = {
-            Button(
-                onClick = onConfirm,
-                enabled = newKategori.isNotBlank()
-            ) {
-                Text("Simpan")
-            }
-        },
-        dismissButton = {
-            Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                )
-            ) {
-                Text("Batal")
-            }
-        }
-    )
-}
+
 
 @Preview(showBackground = true)
 @Composable

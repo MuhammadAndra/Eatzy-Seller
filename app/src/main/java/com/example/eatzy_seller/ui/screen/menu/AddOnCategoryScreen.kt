@@ -28,6 +28,7 @@ import com.example.eatzy_seller.data.model.AddOn
 import com.example.eatzy_seller.data.model.dummyAddOnCategories
 import com.example.eatzy_seller.data.model.dummyAddOns1
 import com.example.eatzy_seller.data.model.fetchCategoryById
+import com.example.eatzy_seller.ui.components.Add_AddOnDialog
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import com.example.eatzy_seller.ui.components.TopBarMenu
 import com.example.eatzy_seller.ui.theme.PrimaryColor
@@ -37,7 +38,7 @@ import java.util.Locale
 
 @Composable
 fun AddOnCategoryScreen(
-    navController: NavController = rememberNavController(),
+    navController: NavController,
     mode: AddOnMode = AddOnMode.ADD,
     categoryId: Int? = null
 ) {
@@ -278,58 +279,6 @@ fun AddOnCategoryScreen(
     }
 }
 
-
-@Composable
-private fun Add_AddOnDialog(
-    newAddOn: String,
-    harga: Double?,
-    AddOnNamaChange: (String) -> Unit,
-    AddOnHargaChange: (String) -> Unit,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Tambah Add-On Baru") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = newAddOn,
-                    onValueChange = AddOnNamaChange,
-                    label = { Text("Nama Add-On") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = harga?.toInt().toString(),
-                    onValueChange = AddOnHargaChange,
-                    label = { Text("Harga") },
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = onConfirm,
-                enabled = newAddOn.isNotBlank() && harga.toString().isNotBlank(),
-                colors = ButtonDefaults.buttonColors(containerColor = SecondColor)
-            ) {
-                Text("Simpan")
-            }
-        },
-        dismissButton = {
-            Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9D9D9))
-            ) {
-                Text("Batal", color = Color.Black)
-            }
-        }
-    )
-}
 
 enum class AddOnMode {
     ADD, EDIT

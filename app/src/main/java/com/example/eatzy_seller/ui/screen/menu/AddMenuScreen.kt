@@ -72,6 +72,8 @@ import com.example.eatzy_seller.ui.components.TopBarMenu
 import com.example.eatzy_seller.ui.theme.SecondColor
 import coil.compose.rememberImagePainter
 import com.example.eatzy_seller.navigation.navGraph.EditCategory
+import com.example.eatzy_seller.ui.components.AddKategoriAddOnDialog
+import com.example.eatzy_seller.ui.components.PilihKategoriAddOnDialog
 import com.example.eatzy_seller.ui.theme.DeleteColor
 import com.example.eatzy_seller.ui.theme.PrimaryColor
 
@@ -426,105 +428,6 @@ fun UploadImageComponent() {
     }
 }
 
-@Composable
-fun AddKategoriAddOnDialog(
-    newKategoriAddOn: String,
-    onKategoriChange: (String) -> Unit,
-    isSingleChoice: Boolean,
-    onSingleChoiceChange: (Boolean) -> Unit,
-    onSave: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Tambah Kategori Add-On") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = newKategoriAddOn,
-                    onValueChange = onKategoriChange,
-                    label = { Text("Nama Kategori Add-On") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Add-On Pilih salah satu?", modifier = Modifier.weight(1f))
-                    Switch(
-                        checked = isSingleChoice,
-                        onCheckedChange = onSingleChoiceChange
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = onSave,
-                colors = ButtonDefaults.buttonColors(containerColor = SecondColor)
-            ) {
-                Text("Simpan")
-            }
-        },
-        dismissButton = {
-            Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9D9D9))
-            ) {
-                Text("Batal", color = Color.Black)
-            }
-        }
-    )
-}
-
-@Composable
-fun PilihKategoriAddOnDialog(
-    kategoriAddOnList: List<Pair<String, Boolean>>,
-    selectedAddOns: SnapshotStateList<String>,
-    onDismiss: () -> Unit,
-    onTambahKategoriClick: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Pilih Kategori Add-On") },
-        text = {
-            Column {
-                kategoriAddOnList.forEach { (nama, _) ->
-                    OutlinedButton(
-                        onClick = {
-                            if (nama !in selectedAddOns) {
-                                selectedAddOns.add(nama)
-                            }
-                            onDismiss()
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color.Gray),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                    ) {
-                        Text(nama)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Tombol Tambah Kategori
-                Button(
-                    onClick = {
-                        onDismiss()
-                        onTambahKategoriClick()
-                    },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Text("+ Tambah Kategori")
-                }
-            }
-        },
-        confirmButton = {}
-    )
-}
 
 @Preview(showBackground = true)
 @Composable
@@ -540,36 +443,3 @@ fun PreviewMenuFormScreen() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun AddKategoriAddOnDialogPreview() {
-    var newKategoriAddOn by remember { mutableStateOf("Makanan") }
-    var isSingleChoice by remember { mutableStateOf(false) }
-
-    AddKategoriAddOnDialog(
-        newKategoriAddOn = newKategoriAddOn,
-        onKategoriChange = { newKategoriAddOn = it },
-        isSingleChoice = isSingleChoice,
-        onSingleChoiceChange = { isSingleChoice = it },
-        onSave = {},
-        onDismiss = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PilihKategoriAddOnDialogPreview() {
-    val dummyKategori = listOf(
-        "Makanan" to true,
-        "Minuman" to false,
-        "Cemilan" to true
-    )
-    val selectedAddOns = remember { mutableStateListOf<String>() }
-
-    PilihKategoriAddOnDialog(
-        kategoriAddOnList = dummyKategori,
-        selectedAddOns = selectedAddOns,
-        onDismiss = {},
-        onTambahKategoriClick = {}
-    )
-}

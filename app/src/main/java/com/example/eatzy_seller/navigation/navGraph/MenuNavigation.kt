@@ -36,13 +36,13 @@ fun NavGraphBuilder.menuGraph(navController: NavController) {
     }
 
     composable(
-        route = "add_on_category/{categoryId}",
+        route = "edit_addOnCategory/{categoryId}",
         arguments = listOf(
             navArgument("categoryId") { type = NavType.IntType } // atau StringType jika ID berupa string
         )
     ) { backStackEntry ->
         val categoryId = backStackEntry.arguments?.getInt("categoryId") ?: 0
-        AddOnCategoryScreen(categoryId = categoryId)
+        AddOnCategoryScreen(navController = navController, categoryId = categoryId, mode = AddOnMode.EDIT)
     }
 
 

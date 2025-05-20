@@ -52,11 +52,13 @@ enum class MenuType {
     REGULAR_MENU, ADD_ON
 }
 
+//===========General===========//
 @Composable
-fun MenuManagementScreen(navController: NavController = rememberNavController()) {
-    //default menu screen
+fun MenuManagementScreen(navController: NavController) {
+    //default menu screen ke Menu
     var currentMenuType by remember { mutableStateOf(MenuType.REGULAR_MENU) }
 
+    //===========Pindah Menu dan Add On===========//
     when (currentMenuType) {
         MenuType.REGULAR_MENU -> MenuListScreen(
             navController = navController,
@@ -67,551 +69,6 @@ fun MenuManagementScreen(navController: NavController = rememberNavController())
             navController = navController,
             onSwitchToMenu = { currentMenuType = MenuType.REGULAR_MENU }
         )
-    }
-}
-
-@OptIn(ExperimentalGlideComposeApi::class)
-@Composable
-fun MenuListScreen(
-    navController: NavController = rememberNavController(),
-    onSwitchToAddOn: () -> Unit = {}
-) {
-    //untuk snackbar
-    val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
-
-    //untuk edit dialog kategori
-    var isEditDialogVisible by remember { mutableStateOf(false) }
-    var categoryToEdit by remember { mutableStateOf<MenuCategory?>(null) }
-
-//    val vm: MenuViewModel = viewModel()
-//
-//    LaunchedEffect(Unit) {
-//        vm.fetchMenus()
-//    }
-
-    //pakai data dummy dulu
-    val menuCategories = remember { mutableStateListOf<MenuCategory>().apply { addAll(dummyMenuCategories) } }
-
-    Scaffold(
-        containerColor = Color.White,
-        topBar = {
-            Column {
-                TopBarMenu(
-                    title = "Daftar Menu",
-                    navController = navController,
-                    showBackButton = false
-                )
-                ButtonStatus(
-                    currentScreen = "Menu",
-                    onMenuClick = { /* already on menu */ },
-                    onAddOnClick = onSwitchToAddOn
-                )
-            }
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate(AddMenu) },//ke addMenuScreen
-                containerColor = SecondColor,
-                shape = CircleShape
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    modifier = Modifier.size(35.dp),
-                    contentDescription = "Tambah Menu",
-                    tint = Color.White
-                )
-            }
-        },
-        bottomBar = {
-            BottomNavBar(navController = navController)
-        }
-    ) { innerPadding ->
-        MenuListContent(
-            innerPadding = innerPadding,
-            menuCategories = menuCategories,
-            isAddOn = false,
-            onDelete = {/* vm.deleteMenu(it)*/ },
-            onShowSnackbar = { message ->
-                coroutineScope.launch {
-                    snackbarHostState.showSnackbar(message)
-                }
-            },
-            onEditCategory = { category ->
-                categoryToEdit = category
-                isEditDialogVisible = true
-            },
-            onDeleteCategory = {}
-        )
-
-        if (isEditDialogVisible && categoryToEdit != null) {
-            EditCategoryDialog(
-                initialName = categoryToEdit!!.categoryName,
-                onDismiss = {
-                    isEditDialogVisible = false
-                    categoryToEdit = null
-                },
-                onSave = { newName ->
-                    // Update category name di list
-                    val index = menuCategories.indexOfFirst { it.idCategory == categoryToEdit!!.idCategory }
-                    if (index >= 0) {
-                        menuCategories[index] = menuCategories[index].copy(categoryName = newName)
-                    }
-                    isEditDialogVisible = false
-                    categoryToEdit = null
-                }
-            )
-        }
-    }
-}
-@Composable
-fun MenuListContent(
-    modifier: Modifier = Modifier,
-    innerPadding: PaddingValues,
-    menuCategories: List<MenuCategory>,
-    isAddOn: Boolean,
-    onDelete: (Int) -> Unit,
-    onShowSnackbar: (String) -> Unit,
-    onEditCategory: (MenuCategory) -> Unit,
-    onDeleteCategory: (MenuCategory) -> Unit
-) {
-    LazyColumn(
-        contentPadding = PaddingValues(
-            top = innerPadding.calculateTopPadding() + 8.dp,
-            bottom = innerPadding.calculateBottomPadding() + 80.dp // Tambahkan ekstra padding untuk FAB
-        ),
-        modifier = modifier.padding(horizontal = 8.dp)
-    ) {
-        menuCategories.forEach { category ->
-            item {
-                Column(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .border(
-                            width = 1.dp,
-                            color = Color.LightGray,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(8.dp)
-                ) {
-                    Text(
-                        text = category.categoryName,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                        modifier = Modifier.padding(start = 8.dp, top = 4.dp, bottom = 8.dp)
-                    )
-
-                    HorizontalDivider(
-                        thickness = 0.5.dp,
-                        color = Color(0xFFBDBDBD),
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-
-                    category.menus.forEachIndexed { index, menu ->
-                        MenuItem(
-                            menu = menu,
-                            isAddOn = isAddOn,
-                            onDelete = { onDelete(menu.menuId) },
-                            onShowSnackbar = onShowSnackbar
-                        )
-
-                        if (index != category.menus.lastIndex) {
-                            HorizontalDivider(
-                                thickness = 0.5.dp,
-                                color = Color(0xFFBDBDBD),
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
-                        }
-                    }
-                    HorizontalDivider(
-                        thickness = 0.5.dp,
-                        color = Color(0xFFBDBDBD),
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Button(
-                            onClick = { onEditCategory(category)},
-                            colors = ButtonDefaults.buttonColors(containerColor = SecondColor), // Warna oranye
-                            shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
-                        ) {
-                            Text(
-                                text = "Edit Kategori",
-                                color = Color.White,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = { onDeleteCategory(category) },
-                            colors = ButtonDefaults.buttonColors(containerColor = DeleteColor), // Warna oranye
-                            shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
-                        ) {
-                            Text(
-                                text = "Hapus",
-                                color = Color.White,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalGlideComposeApi::class)
-@Composable
-fun MenuItem(
-    menu: Menu,
-    isAddOn: Boolean,
-    onDelete: () -> Unit,
-    onShowSnackbar: (String) -> Unit
-) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    if (showDeleteDialog) {
-        DeleteMenuDialog(
-            objek = if (isAddOn) "Add-On" else "Menu",
-            title = menu.menuName,
-            onConfirmDelete = {
-                onDelete()
-                onShowSnackbar("${if (isAddOn) "Add-On" else "Menu"} \"${menu.menuName}\" berhasil dihapus")
-            },
-            onDismiss = { showDeleteDialog = false }
-        )
-    }
-
-    val formattedPrice = NumberFormat.getNumberInstance(Locale("id", "ID")).format(menu.menuPrice)
-
-    Row(verticalAlignment = Alignment.Top) {
-        GlideImage(
-            model = menu.menuImageRes,
-            contentDescription = "Menu Image",
-            modifier = Modifier
-                .size(90.dp)
-                .padding(8.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .background(Color(0xFFF1F1FA)),
-            contentScale = ContentScale.Crop,
-            loading = placeholder(ColorPainter(Color.LightGray)),
-            failure = placeholder(ColorPainter(Color.Red))
-        )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(top = 10.dp),
-            verticalArrangement = Arrangement.Top
-        ) {
-            Text(
-                text = menu.menuName,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(bottom = 2.dp)
-            )
-            Text(
-                text = "Rp$formattedPrice",
-                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp)
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = menu.menuAvailable,
-                    onCheckedChange = { /* handle toggle */ }
-                )
-                Text(
-                    text = if (isAddOn) "Tampilkan Add-On" else "Tampilkan Menu",
-                    fontSize = 14.sp
-                )
-            }
-        }
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.padding(10.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Edit,
-                contentDescription = "Edit",
-                tint = Color(0xFF3F5185),
-                modifier = Modifier
-                    .size(20.dp)
-                    .clickable { /* handle edit */ }
-            )
-            Icon(
-                imageVector = Icons.Filled.Delete,
-                contentDescription = "Delete",
-                tint = DeleteColor,
-                modifier = Modifier
-                    .size(20.dp)
-                    .clickable { showDeleteDialog = true }
-            )
-        }
-    }
-}
-
-
-@OptIn(ExperimentalGlideComposeApi::class)
-@Composable
-fun AddOnListScreen(
-    navController: NavController = rememberNavController(),
-    onSwitchToMenu: () -> Unit = {}
-) {
-    val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
-    //val vm: MenuViewModel = viewModel()
-
-//    LaunchedEffect(Unit) {
-//        vm.fetchMenus()
-//    }
-
-    val addOnCategories = dummyAddOnCategories
-
-    Scaffold(
-        containerColor = Color.White,
-        topBar = {
-            Column {
-                TopBarMenu(
-                    title = "Daftar Add-On",
-                    navController = navController,
-                    showBackButton = false
-                )
-                //pindah button menu and add-on
-                ButtonStatus(
-                    currentScreen = "Add-On",
-                    onMenuClick = onSwitchToMenu,
-                    onAddOnClick = { /* already on add-on */ }
-                )
-            }
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate(AddAddOnCategory) },
-                containerColor = SecondColor,
-                shape = CircleShape
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    modifier = Modifier.size(35.dp),
-                    contentDescription = "Tambah Add-On",
-                    tint = Color.White
-                )
-            }
-        },
-        bottomBar = {
-            BottomNavBar(navController = navController)
-        }
-    ) { innerPadding ->
-        AddOnListContent(
-            innerPadding = innerPadding,
-            addOnCategories = addOnCategories,
-            onDelete = { /*vm.deleteAddOn(it)*/ },
-            onShowSnackbar = { message ->
-                coroutineScope.launch {
-                    snackbarHostState.showSnackbar(message)
-                }
-            },
-            navController = navController,
-            onEditAddCategory = {},
-            onDeleteAddCategory = {}
-        )
-    }
-}
-
-@Composable
-fun AddOnListContent(
-    modifier: Modifier = Modifier,
-    innerPadding: PaddingValues,
-    addOnCategories: List<AddOnCategory>,
-    onDelete: (Int) -> Unit,
-    onShowSnackbar: (String) -> Unit,
-    navController: NavController,
-    onEditAddCategory: (AddOnCategory) -> Unit,
-    onDeleteAddCategory: (AddOnCategory) -> Unit
-) {
-    LazyColumn(
-        contentPadding = PaddingValues(
-            top = innerPadding.calculateTopPadding() + 8.dp,
-            bottom = innerPadding.calculateBottomPadding() + 80.dp // Tambahkan ekstra padding untuk FAB
-        ),
-        modifier = modifier.padding(horizontal = 8.dp)
-    ) {
-        addOnCategories.forEach { category ->
-            item {
-                Column(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .border(
-                            width = 1.dp,
-                            color = Color.LightGray,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(8.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = category.addOnCategoryName,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 8.dp)
-                        )
-                        Text(
-                            text = if (category.addOnCategoryMultiple) "Multiple" else "Single",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
-                        )
-                    }
-                    HorizontalDivider(
-                        thickness = 0.5.dp,
-                        color = Color(0xFFBDBDBD),
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-
-                    category.addOns.forEachIndexed { index, addOn ->
-                        AddOnItem(
-                            addOn = addOn,
-                            onDelete = { onDelete(addOn.AddOnId) },
-                            onShowSnackbar = onShowSnackbar,
-                            navController = navController
-                        )
-
-                        if (index != category.addOns.lastIndex) {
-                            HorizontalDivider(
-                                thickness = 0.5.dp,
-                                color = Color(0xFFBDBDBD),
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
-                        }
-                    }
-                    HorizontalDivider(
-                        thickness = 0.5.dp,
-                        color = Color(0xFFBDBDBD),
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Button(
-                            onClick = { onEditAddCategory(category) },
-                            colors = ButtonDefaults.buttonColors(containerColor = SecondColor), // Warna oranye
-                            shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
-                        ) {
-                            Text(
-                                text = "Edit Kategori",
-                                color = Color.White,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = { onDeleteAddCategory(category) },
-                            colors = ButtonDefaults.buttonColors(containerColor = DeleteColor), // Warna oranye
-                            shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
-                        ) {
-                            Text(
-                                text = "Hapus",
-                                color = Color.White,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalGlideComposeApi::class)
-@Composable
-fun AddOnItem(
-    addOn: AddOn,
-    onDelete: () -> Unit,
-    onShowSnackbar: (String) -> Unit,
-    navController: NavController
-) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    if (showDeleteDialog) {
-        DeleteMenuDialog(
-            objek = "Add-On",
-            title = addOn.AddOnName,
-            onConfirmDelete = {
-                onDelete()
-                onShowSnackbar("Add-On \"${addOn.AddOnName}\" berhasil dihapus")
-            },
-            onDismiss = { showDeleteDialog = false }
-        )
-    }
-
-    val formattedPrice = NumberFormat.getNumberInstance(Locale("id", "ID")).format(addOn.AddOnPrice)
-
-    Row(verticalAlignment = Alignment.Top) {
-
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(top = 10.dp),
-            verticalArrangement = Arrangement.Top
-        ) {
-            Text(
-                text = addOn.AddOnName,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(bottom = 2.dp, start = 12.dp)
-            )
-            Text(
-                text = "Rp$formattedPrice",
-                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
-                modifier = Modifier.padding(start = 12.dp)
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = addOn.AddOnAvailable,
-                    onCheckedChange = { /* handle toggle */ }
-                )
-                Text(
-                    text = "Tampilkan Add-On",
-                    fontSize = 14.sp
-                )
-            }
-        }
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.padding(10.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Edit,
-                contentDescription = "Edit",
-                tint = Color(0xFF3F5185),
-                modifier = Modifier
-                    .size(20.dp)
-                    .clickable { navController.navigate("add_on_category//{categoryName}/{isSingleChoice}") }
-            )
-            Icon(
-                imageVector = Icons.Filled.Delete,
-                contentDescription = "Delete",
-                tint = DeleteColor,
-                modifier = Modifier
-                    .size(20.dp)
-                    .clickable { showDeleteDialog = true }
-            )
-        }
     }
 }
 
@@ -652,66 +109,607 @@ fun ButtonStatus(
     }
 }
 
-
-// Preview functions for Add-On screens
-@Preview(showBackground = true, device = Devices.PIXEL_4)
+//===========Menu Screen===========//
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun PreviewAddOnListScreen() {
-    AddOnListScreen()
-}
+fun MenuListScreen(
+    navController: NavController,
+    onSwitchToAddOn: () -> Unit = {}
+) {
+    // Untuk snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewAddOnListContent() {
-    Surface {
-        AddOnListContent(
-            innerPadding = PaddingValues(0.dp),
-            addOnCategories = dummyAddOnCategories,
-            onDelete = {},
-            onShowSnackbar = {},
-            navController = rememberNavController(),
-            onEditAddCategory = {},
-            onDeleteAddCategory = {}
-        )
-    }
-}
+    // Untuk edit dialog kategori
+    var isEditDialogVisible by remember { mutableStateOf(false) }
+    var categoryToEdit by remember { mutableStateOf<MenuCategory?>(null) }
+    var showDeleteCategoryDialog by remember { mutableStateOf(false) }
+    var categoryToDelete by remember { mutableStateOf<MenuCategory?>(null) }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewAddOnItem() {
-    Surface {
-        Column {
-            AddOnItem(
-                addOn = AddOn(
-                    AddOnId = 1,
-                    AddOnName = "Extra Cheese",
-                    AddOnPrice = 5000.0,
-                    AddOnAvailable = true
-                ),
-                onDelete = {},
-                onShowSnackbar = {},
-                navController = rememberNavController()
+    // Pakai data dummy dulu
+    val menuCategories =
+        remember { mutableStateListOf<MenuCategory>().apply { addAll(dummyMenuCategories) } }
+
+    Scaffold(
+        containerColor = Color.White,
+        topBar = {
+            Column {
+                TopBarMenu(
+                    title = "Daftar Menu",
+                    navController = navController,
+                    showBackButton = false
+                )
+                ButtonStatus(
+                    currentScreen = "Menu",
+                    onMenuClick = { /* already on menu */ },
+                    onAddOnClick = onSwitchToAddOn
+                )
+            }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate(AddMenu) }, // ke addMenuScreen
+                containerColor = SecondColor,
+                shape = CircleShape
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    modifier = Modifier.size(35.dp),
+                    contentDescription = "Tambah Menu",
+                    tint = Color.White
+                )
+            }
+        },
+        bottomBar = {
+            BottomNavBar(navController = navController)
+        }
+    ) { innerPadding ->
+        //===========Konten Menu===========//
+        LazyColumn(
+            contentPadding = PaddingValues(
+                top = innerPadding.calculateTopPadding(),
+                bottom = innerPadding.calculateBottomPadding() + 80.dp // Tambahkan ekstra padding untuk FAB
+            ),
+            modifier = Modifier.padding(horizontal = 8.dp)
+        ) {
+            //===========Loop Kategori Menu===========//
+            menuCategories.forEach { category ->
+                item {
+                    Column(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .border(
+                                width = 1.dp,
+                                color = Color.LightGray,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(8.dp)
+                    ) {
+                        //===========Nama Menu Kategori===========//
+                        Text(
+                            text = category.categoryName,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            modifier = Modifier.padding(start = 8.dp, top = 4.dp, bottom = 8.dp)
+                        )
+                        //garis
+                        HorizontalDivider(
+                            thickness = 0.5.dp,
+                            color = Color(0xFFBDBDBD),
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+
+                        category.menus.forEachIndexed { index, menu ->
+                            //===========Masuk ke Item Menu===========//
+                            MenuItem(
+                                menu = menu,
+                                isAddOn = false,
+                                onDelete = { /* delete logic here */ },
+                                onShowSnackbar = { message ->
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(message)
+                                    }
+                                }
+                            )
+                            HorizontalDivider(
+                                thickness = 0.5.dp,
+                                color = Color(0xFFBDBDBD),
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            //===========Button edit Kategori Menu===========//
+                            Button(
+                                onClick = {
+                                    categoryToEdit = category
+                                    isEditDialogVisible = true
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = SecondColor),
+                                shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
+                            ) {
+                                Text(
+                                    text = "Edit Kategori",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            //===========Button delete Kategori Menu===========//
+                            Button(
+                                onClick = {
+                                    categoryToDelete = category
+                                    showDeleteCategoryDialog = true
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = DeleteColor),
+                                shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
+                            ) {
+                                Text(
+                                    text = "Hapus",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        //===========Dialog edit kategori Menu===========//
+        if (isEditDialogVisible && categoryToEdit != null) {
+            EditCategoryDialog(
+                initialName = categoryToEdit!!.categoryName,
+                onDismiss = {
+                    isEditDialogVisible = false
+                    categoryToEdit = null
+                },
+                onSave = { newName ->
+                    // Update category name di list
+                    val index =
+                        menuCategories.indexOfFirst { it.idCategory == categoryToEdit!!.idCategory }
+                    if (index >= 0) {
+                        menuCategories[index] = menuCategories[index].copy(categoryName = newName)
+                    }
+                    isEditDialogVisible = false
+                    categoryToEdit = null
+
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("Kategori berhasil diubah")
+                    }
+                }
             )
-            AddOnItem(
-                addOn = AddOn(
-                    AddOnId = 2,
-                    AddOnName = "Spicy Level 2",
-                    AddOnPrice = 0.0,
-                    AddOnAvailable = false
-                ),
-                onDelete = {},
-                onShowSnackbar = {},
-                navController = rememberNavController()
+        }
+
+        //===========Dialog delete kategori Menu===========//
+        if (showDeleteCategoryDialog && categoryToDelete != null) {
+            DeleteMenuDialog(
+                objek = "Kategori Menu",
+                title = categoryToDelete!!.categoryName,
+                onConfirmDelete = {
+                    menuCategories.remove(categoryToDelete)
+                    showDeleteCategoryDialog = false
+                    categoryToDelete = null
+
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("Kategori berhasil dihapus")
+                    }
+                },
+                onDismiss = {
+                    showDeleteCategoryDialog = false
+                    categoryToDelete = null
+                }
             )
         }
     }
 }
 
-// Preview functions remain the same...
+//===========Item Menu===========//
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+fun MenuItem(
+    menu: Menu,
+    isAddOn: Boolean,
+    onDelete: () -> Unit,
+    onShowSnackbar: (String) -> Unit
+)  {
+    //===========Button Delete Item Menu===========//
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    if (showDeleteDialog) {
+        DeleteMenuDialog(
+            objek = if (isAddOn) "Add-On" else "Menu",
+            title = menu.menuName,
+            onConfirmDelete = {
+                onDelete()
+                onShowSnackbar("${if (isAddOn) "Add-On" else "Menu"} \"${menu.menuName}\" berhasil dihapus")
+            },
+            onDismiss = { showDeleteDialog = false }
+        )
+    }
+
+    //ubah biar jadi int
+    val formattedPrice = NumberFormat.getNumberInstance(Locale("id", "ID")).format(menu.menuPrice)
+
+    Row(verticalAlignment = Alignment.Top) {
+        //===========Gambar Item Menu===========//
+        GlideImage(
+            model = menu.menuImageRes,
+            contentDescription = "Menu Image",
+            modifier = Modifier
+                .size(90.dp)
+                .padding(8.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .background(Color(0xFFF1F1FA)),
+            contentScale = ContentScale.Crop,
+            loading = placeholder(ColorPainter(Color.LightGray)),
+            failure = placeholder(ColorPainter(Color.Red))
+        )
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        //===========Deskripsi Item Menu===========//
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(top = 10.dp),
+            verticalArrangement = Arrangement.Top
+        ) {
+            Text(
+                text = menu.menuName,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(bottom = 2.dp)
+            )
+            Text(
+                text = "Rp$formattedPrice",
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp)
+            )
+            //===========Checkbox untuk buka tutup Menu===========//
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = menu.menuAvailable,
+                    onCheckedChange = { /* handle toggle */ }
+                )
+                Text(
+                    text = if (isAddOn) "Tampilkan Add-On" else "Tampilkan Menu",
+                    fontSize = 14.sp
+                )
+            }
+        }
+
+        //===========Button edit dan delete item Menu===========//
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.padding(10.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Edit,
+                contentDescription = "Edit",
+                tint = Color(0xFF3F5185),
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable { /* handle edit */ }
+            )
+            Icon(
+                imageVector = Icons.Filled.Delete,
+                contentDescription = "Delete",
+                tint = DeleteColor,
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable { showDeleteDialog = true }
+            )
+        }
+    }
+}
+
+//===========Add On Screen===========//
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+fun AddOnListScreen(
+    navController: NavController,
+    onSwitchToMenu: () -> Unit = {}
+) {
+    // For snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
+    // For dialogs
+    var isEditDialogVisible by remember { mutableStateOf(false) }
+    var categoryToEdit by remember { mutableStateOf<AddOnCategory?>(null) }
+    var showDeleteCategoryDialog by remember { mutableStateOf(false) }
+    var categoryToDelete by remember { mutableStateOf<AddOnCategory?>(null) }
+
+    // Using dummy data for now
+    val addOnCategories =
+        remember { mutableStateListOf<AddOnCategory>().apply { addAll(dummyAddOnCategories) } }
+
+    Scaffold(
+        containerColor = Color.White,
+        topBar = {
+            Column {
+                TopBarMenu(
+                    title = "Daftar Add-On",
+                    navController = navController,
+                    showBackButton = false
+                )
+                // Switch button between menu and add-on
+                ButtonStatus(
+                    currentScreen = "Add-On",
+                    onMenuClick = onSwitchToMenu,
+                    onAddOnClick = { /* already on add-on */ }
+                )
+            }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }, //pop up
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate(AddAddOnCategory) },
+                containerColor = SecondColor,
+                shape = CircleShape
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    modifier = Modifier.size(35.dp),
+                    contentDescription = "Tambah Add-On",
+                    tint = Color.White
+                )
+            }
+        },
+        bottomBar = {
+            BottomNavBar(navController = navController)
+        }
+    ) { innerPadding ->
+        //===========Konten kategori Add On===========//
+        LazyColumn(
+            contentPadding = PaddingValues(
+                top = innerPadding.calculateTopPadding(),
+                bottom = innerPadding.calculateBottomPadding() + 80.dp // Extra padding buat FAB
+            ),
+            modifier = Modifier.padding(horizontal = 8.dp)
+        ) {
+            addOnCategories.forEach { category ->
+                item {
+                    Column(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .border(
+                                width = 1.dp,
+                                color = Color.LightGray,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(8.dp)
+                    ) {
+                        //===========Add On Kategori ( nama & multiple )===========//
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = category.addOnCategoryName,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 8.dp)
+                            )
+                            Text(
+                                text = if (category.addOnCategoryMultiple) "Multiple" else "Single",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
+
+                        //garis
+                        HorizontalDivider(
+                            thickness = 0.5.dp,
+                            color = Color(0xFFBDBDBD),
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+
+                        //===========Loop Kategori Add On===========//
+                        category.addOns.forEachIndexed { index, addOn ->
+                            //masuk fun item add on
+                            AddOnItem(
+                                addOn = addOn,
+                                onDelete = { /* delete logic here */ },
+                                onShowSnackbar = { message ->
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(message)
+                                    }
+                                }
+                            )
+                            //garis
+                            HorizontalDivider(
+                                thickness = 0.5.dp,
+                                color = Color(0xFFBDBDBD),
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+
+                        }
+
+                        //===========Button Kategori Add On===========//
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Button(
+//edit
+                                onClick = {
+                                    navController.navigate("edit_addOnCategory/${category.addOnCategoryId}")
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = SecondColor),
+                                shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
+                            ) {
+                                Text(
+                                    text = "Edit Kategori",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+//delete
+                                onClick = {
+                                    categoryToDelete = category
+                                    showDeleteCategoryDialog = true
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = DeleteColor),
+                                shape = MaterialTheme.shapes.large.copy(all = CornerSize(50)),
+                            ) {
+                                Text(
+                                    text = "Hapus",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        //===========Delete Category Add-On Dialog===========//
+        if (showDeleteCategoryDialog && categoryToDelete != null) {
+            DeleteMenuDialog(
+                objek = "Kategori Add-On",
+                title = categoryToDelete!!.addOnCategoryName,
+                onConfirmDelete = {
+                    addOnCategories.remove(categoryToDelete)
+                    showDeleteCategoryDialog = false
+                    categoryToDelete = null
+
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("Kategori berhasil dihapus")
+                    }
+                },
+                onDismiss = {
+                    showDeleteCategoryDialog = false
+                    categoryToDelete = null
+                }
+            )
+        }
+    }
+}
+
+//===========Add On Item===========//
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+fun AddOnItem(
+    addOn: AddOn,
+    onDelete: () -> Unit,
+    onShowSnackbar: (String) -> Unit
+) {
+    //delete item add on Dialog
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    if (showDeleteDialog) {
+        DeleteMenuDialog(
+            objek = "Add-On",
+            title = addOn.AddOnName,
+            onConfirmDelete = {
+                onDelete()
+                onShowSnackbar("Add-On \"${addOn.AddOnName}\" berhasil dihapus")
+            },
+            onDismiss = { showDeleteDialog = false }
+        )
+    }
+
+    //edit item addON Dialog
+    var showEditDialog by remember { mutableStateOf(false) }
+    //simpan data edit
+    var newNamaAddOn by remember { mutableStateOf("") }
+    var newHargaAddOn by remember { mutableStateOf(0.0) }
+
+    if (showEditDialog) {
+        Add_AddOnDialog(
+            newAddOn = newNamaAddOn,
+            harga = newHargaAddOn,
+            AddOnNamaChange = { newNamaAddOn = it },
+            AddOnHargaChange = { newHargaAddOn = it.toDouble() },
+            onConfirm = {
+                //kurang logika update edit
+                onShowSnackbar("Add-On \"${addOn.AddOnName}\" berhasil diubah")
+            },
+            onDismiss = { showEditDialog = false }
+        )
+    }
+
+    val formattedPrice = NumberFormat.getNumberInstance(Locale("id", "ID")).format(addOn.AddOnPrice)
+
+    Row(verticalAlignment = Alignment.Top) {
+        //===========Add On Item ( Nama dan Harga) ===========//
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(top = 10.dp),
+            verticalArrangement = Arrangement.Top
+        ) {
+            Text(
+                text = addOn.AddOnName,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(bottom = 2.dp, start = 12.dp)
+            )
+            Text(
+                text = "Rp$formattedPrice",
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
+                modifier = Modifier.padding(start = 12.dp)
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = addOn.AddOnAvailable,
+                    onCheckedChange = { /* handle toggle */ }
+                )
+                Text(
+                    text = "Tampilkan Add-On",
+                    fontSize = 14.sp
+                )
+            }
+        }
+
+        //===========Button Edit & Delete Item Add On===========//
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.padding(10.dp)
+        ) {
+            Icon( //edit button item add-on
+                imageVector = Icons.Filled.Edit,
+                contentDescription = "Edit",
+                tint = Color(0xFF3F5185),
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable {
+                        newNamaAddOn = addOn.AddOnName
+                        newHargaAddOn = addOn.AddOnPrice
+                        showEditDialog = true
+                    }
+            )
+            Icon( // delete button item add-on
+                imageVector = Icons.Filled.Delete,
+                contentDescription = "Delete",
+                tint = DeleteColor,
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable { showDeleteDialog = true }
+            )
+        }
+    }
+}
+
+
+//===========Preview===========//
 @Preview(showBackground = true, device = Devices.PIXEL_4)
 @Composable
 fun PreviewMenuManagementScreen() {
-    MenuManagementScreen()
+    val navController = rememberNavController()
+    MenuManagementScreen(navController = navController)
 }
 
 @Preview(showBackground = true)
@@ -732,27 +730,47 @@ fun PreviewButtonStatus() {
     }
 }
 
-//menu
 @Preview(showBackground = true, device = Devices.PIXEL_4)
 @Composable
-fun PreviewMenuListScreen() {
-    MenuListScreen()
+fun PreviewAddOnListScreen() {
+    val navController = rememberNavController()
+    AddOnListScreen(navController = navController)
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewAddOnItem() {
+    Surface {
+        Column {
+            AddOnItem(
+                addOn = AddOn(
+                    AddOnId = 1,
+                    AddOnName = "Extra Cheese",
+                    AddOnPrice = 5000.0,
+                    AddOnAvailable = true
+                ),
+                onDelete = {},
+                onShowSnackbar = {}
+            )
+            AddOnItem(
+                addOn = AddOn(
+                    AddOnId = 2,
+                    AddOnName = "Spicy Level 2",
+                    AddOnPrice = 0.0,
+                    AddOnAvailable = false
+                ),
+                onDelete = {},
+                onShowSnackbar = {}
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true, device = Devices.PIXEL_4)
 @Composable
-fun PreviewMenuListContent() {
-    Surface {
-        MenuListContent(
-            innerPadding = PaddingValues(0.dp),
-            menuCategories = dummyMenuCategories,
-            isAddOn = false,
-            onDelete = {},
-            onShowSnackbar = {},
-            onEditCategory = {},
-            onDeleteCategory = {}
-        )
-    }
+fun PreviewMenuListScreen() {
+    val navController = rememberNavController()
+    MenuListScreen(navController = navController)
 }
 
 @Preview(showBackground = true)
@@ -788,15 +806,4 @@ fun PreviewMenuItem() {
     }
 }
 
-@Preview(showBackground = true, device = Devices.PIXEL_4_XL)
-@Composable
-fun PreviewMenuListScreenTablet() {
-    MenuListScreen()
-}
 
-//addon
-@Preview(showBackground = true, device = Devices.PIXEL_4_XL)
-@Composable
-fun PreviewAddOnListScreenTablet() {
-    AddOnListScreen()
-}

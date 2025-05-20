@@ -1,5 +1,5 @@
-//package com.example.eatzy_seller.ui.screen.menu
-//
+package com.example.eatzy_seller.ui.screen.menu
+
 //import androidx.lifecycle.ViewModel
 //import kotlinx.coroutines.flow.MutableStateFlow
 //import kotlinx.coroutines.flow.StateFlow

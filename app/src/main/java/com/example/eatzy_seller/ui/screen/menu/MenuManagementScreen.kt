@@ -76,10 +76,11 @@ fun MenuListScreen(
     navController: NavController = rememberNavController(),
     onSwitchToAddOn: () -> Unit = {}
 ) {
+    //untuk snackbar
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-
+    //untuk edit dialog kategori
     var isEditDialogVisible by remember { mutableStateOf(false) }
     var categoryToEdit by remember { mutableStateOf<MenuCategory?>(null) }
 
@@ -111,7 +112,7 @@ fun MenuListScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigate(AddMenu) },
+                onClick = { navController.navigate(AddMenu) },//ke addMenuScreen
                 containerColor = SecondColor,
                 shape = CircleShape
             ) {

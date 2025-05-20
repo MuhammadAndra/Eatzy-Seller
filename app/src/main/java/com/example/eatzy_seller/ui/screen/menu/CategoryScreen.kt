@@ -48,6 +48,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.eatzy_seller.ui.components.AddCategoryDialog
 import com.example.eatzy_seller.ui.components.BottomNavBar
+import com.example.eatzy_seller.ui.components.DeleteMenuDialog
+import com.example.eatzy_seller.ui.components.EditCategoryDialog
 import com.example.eatzy_seller.ui.components.TopBarMenu
 import com.example.eatzy_seller.ui.theme.PrimaryColor
 import com.example.eatzy_seller.ui.theme.SecondColor
@@ -60,6 +62,36 @@ fun CategoryScreen(
     val kategoriList = remember { mutableStateListOf("Makanan", "Minuman", "Dessert") }
     var isDialogVisible by remember { mutableStateOf(false) }
     var newKategori by remember { mutableStateOf("") }
+
+    var kategoriToEdit by remember { mutableStateOf<String?>(null) }
+    var kategoriToDelete by remember { mutableStateOf<String?>(null) }
+
+    kategoriToEdit?.let { currentKategori ->
+        EditCategoryDialog(
+            initialName = currentKategori,
+            onDismiss = { kategoriToEdit = null },
+            onSave = { editedName ->
+                if (editedName.isNotBlank() && editedName != currentKategori && !kategoriList.contains(editedName)) {
+                    val index = kategoriList.indexOf(currentKategori)
+                    if (index != -1) {
+                        kategoriList[index] = editedName
+                    }
+                }
+                kategoriToEdit = null
+            }
+        )
+    }
+    kategoriToDelete?.let { kategori ->
+        DeleteMenuDialog(
+            objek = "Kategori",
+            title = kategori,
+            onConfirmDelete = {
+                kategoriList.remove(kategori)
+            },
+            onDismiss = { kategoriToDelete = null }
+        )
+    }
+
 
     Scaffold(
         containerColor = Color.White,
@@ -107,8 +139,8 @@ fun CategoryScreen(
                     itemsIndexed(kategoriList) { index, kategori ->
                         CategoryItem(
                             kategori = kategori,
-                            onEditClick = { /* editKategori*/ },
-                            onDeleteClick = { /* HapusKategori*/ },
+                            onEditClick = { kategoriToEdit = kategori },
+                            onDeleteClick = { kategoriToDelete = kategori },
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }

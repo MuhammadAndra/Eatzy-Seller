@@ -209,7 +209,8 @@ fun MenuListScreen(
                                     coroutineScope.launch {
                                         snackbarHostState.showSnackbar(message)
                                     }
-                                }
+                                },
+                                navController = navController,
                             )
                             HorizontalDivider(
                                 thickness = 0.5.dp,
@@ -318,7 +319,8 @@ fun MenuItem(
     menu: Menu,
     isAddOn: Boolean,
     onDelete: () -> Unit,
-    onShowSnackbar: (String) -> Unit
+    onShowSnackbar: (String) -> Unit,
+    navController: NavController
 )  {
     //===========Button Delete Item Menu===========//
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -386,7 +388,7 @@ fun MenuItem(
         //===========Button edit dan delete item Menu===========//
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.spacedBy(35.dp),
             modifier = Modifier.padding(10.dp)
         ) {
             Icon(
@@ -395,7 +397,8 @@ fun MenuItem(
                 tint = Color(0xFF3F5185),
                 modifier = Modifier
                     .size(20.dp)
-                    .clickable { /* handle edit */ }
+                    .clickable {navController.navigate("edit_menu/${menu.menuId}")
+                    }
             )
             Icon(
                 imageVector = Icons.Filled.Delete,
@@ -676,7 +679,7 @@ fun AddOnItem(
         //===========Button Edit & Delete Item Add On===========//
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.spacedBy(35.dp),
             modifier = Modifier.padding(10.dp)
         ) {
             Icon( //edit button item add-on
@@ -776,6 +779,7 @@ fun PreviewMenuListScreen() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewMenuItem() {
+    val navController = rememberNavController()
     Surface {
         Column {
             MenuItem(
@@ -788,7 +792,8 @@ fun PreviewMenuItem() {
                 ),
                 isAddOn = false,
                 onDelete = {},
-                onShowSnackbar = {}
+                onShowSnackbar = {},
+                navController = navController
             )
             MenuItem(
                 menu = Menu(
@@ -800,7 +805,8 @@ fun PreviewMenuItem() {
                 ),
                 isAddOn = true,
                 onDelete = {},
-                onShowSnackbar = {}
+                onShowSnackbar = {},
+                navController = navController
             )
         }
     }

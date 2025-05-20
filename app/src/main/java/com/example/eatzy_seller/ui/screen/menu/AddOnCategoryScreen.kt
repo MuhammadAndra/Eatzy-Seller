@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,14 +26,20 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.eatzy_seller.data.model.AddOn
+import com.example.eatzy_seller.data.model.AddOnCategory
+import com.example.eatzy_seller.data.model.MenuCategory
 import com.example.eatzy_seller.data.model.dummyAddOnCategories
 import com.example.eatzy_seller.data.model.dummyAddOns1
 import com.example.eatzy_seller.data.model.fetchCategoryById
 import com.example.eatzy_seller.ui.components.Add_AddOnDialog
 import com.example.eatzy_seller.ui.components.BottomNavBar
+import com.example.eatzy_seller.ui.components.DeleteMenuDialog
+import com.example.eatzy_seller.ui.components.EditCategoryDialog
 import com.example.eatzy_seller.ui.components.TopBarMenu
 import com.example.eatzy_seller.ui.theme.PrimaryColor
 import com.example.eatzy_seller.ui.theme.SecondColor
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -42,6 +49,10 @@ fun AddOnCategoryScreen(
     mode: AddOnMode = AddOnMode.ADD,
     categoryId: Int? = null
 ) {
+    // Untuk snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
     var isDialogVisible by remember { mutableStateOf(false) }
     var newNamaAddOn by remember { mutableStateOf("") }
     var newHargaAddOn by remember { mutableStateOf(0.0) }
@@ -49,6 +60,10 @@ fun AddOnCategoryScreen(
     var categoryName by remember { mutableStateOf("") }
     var isSingleChoice by remember { mutableStateOf(false) }
     var addOnList = remember { mutableStateListOf<AddOn>() }
+
+    var showDeleteAddOnCategoryDialog by remember { mutableStateOf(false) }
+    var addOnCategoryToDelete by remember { mutableStateOf<AddOn?>(null) }
+
 
     // Simulasi ambil data jika mode edit
     LaunchedEffect(categoryId) {
@@ -72,6 +87,7 @@ fun AddOnCategoryScreen(
                 navController = navController
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             Spacer(modifier = Modifier.height(10.dp))
             BottomNavBar(navController = navController)
@@ -181,7 +197,7 @@ fun AddOnCategoryScreen(
                                 .padding(horizontal = 16.dp, vertical = 14.dp)
                         ) {
                             Text(
-                                text = addOn.AddOnName +" - "+ formatted,
+                                text = addOn.AddOnName + " - " + formatted,
                                 fontSize = 16.sp,
                                 color = Color.Black
                             )
@@ -203,7 +219,10 @@ fun AddOnCategoryScreen(
                         }
 
                         IconButton(
-                            onClick = { addOnList.removeAt(index) }
+                            onClick = {
+                                addOnCategoryToDelete = addOn
+                                showDeleteAddOnCategoryDialog = true
+                            }
                         ) {
                             Icon(
                                 Icons.Default.Delete,
@@ -223,6 +242,7 @@ fun AddOnCategoryScreen(
                         AddOnMode.ADD -> {
                             // Simpan ke DB atau repo
                         }
+
                         AddOnMode.EDIT -> {
                             // Update ke DB atau repo
                         }
@@ -275,6 +295,27 @@ fun AddOnCategoryScreen(
                 }
             )
 
+        }
+
+        //===========Dialog delete kategori Menu===========//
+        if (showDeleteAddOnCategoryDialog && addOnCategoryToDelete != null) {
+            DeleteMenuDialog(
+                objek = "Kategori Menu",
+                title = addOnCategoryToDelete!!.AddOnName,
+                onConfirmDelete = {
+                    addOnList.remove(addOnCategoryToDelete)
+                    showDeleteAddOnCategoryDialog = false
+                    addOnCategoryToDelete = null
+
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("Kategori berhasil dihapus")
+                    }
+                },
+                onDismiss = {
+                    showDeleteAddOnCategoryDialog = false
+                    addOnCategoryToDelete = null
+                }
+            )
         }
     }
 }

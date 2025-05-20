@@ -1,72 +1,89 @@
 package com.example.eatzy_seller.ui.screen.menu
 
-//import androidx.lifecycle.ViewModel
-//import kotlinx.coroutines.flow.MutableStateFlow
-//import kotlinx.coroutines.flow.StateFlow
-//import kotlinx.coroutines.launch
-//
-//class MenuViewModel : ViewModel() {
-//
-//    private val _menuCategories = MutableStateFlow<List<MenuCategory>>(emptyList())
-//    val menuCategories: StateFlow<List<MenuCategory>> = _menuCategories
-//
-//    fun fetchMenus() {
-//        RetrofitClient.menuApi.getMenusWithCategories()
-//            .enqueue(object : Callback<List<MenuCategory>> {
-//                override fun onResponse(
-//                    call: Call<List<MenuCategory>?>?,
-//                    response: Response<List<MenuCategory>>
-//                ) {
-//                    if (response.isSuccessful) {
-//                        val result = response.body() ?: emptyList()
-//                        _menuCategories.value = result.map { category ->
-//                            MenuCategory(
-//                                idCategory = category.idCategory,
-//                                idCanteen = category.idCanteen,
-//                                categoryName = category.categoryName,
-//                                menus = category.menus.map { menu ->
-//                                    Menu(
-//                                        menuId = menu.menuId,
-//                                        menuName = menu.menuName,
-//                                        menuPrice = menu.menuPrice,
-//                                        menuImageRes = menu.menuImageRes,
-//                                        menuAvailable = menu.menuAvailable
-//                                    )
-//                                }
-//                            )
-//                        }
-//                    }
-//                }
-//
-//                override fun onFailure(
-//                    call: Call<List<MenuCategory>?>?,
-//                    t: Throwable?
-//                ) {
-//                }
-//
-//            })
-//
-//    }
-//
-//    fun deleteMenu(menuId: Int) {
-//        RetrofitClient.menuApi.deleteMenu(menuId).enqueue(object : Callback<Unit> {
-//            override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
-//                if (response.isSuccessful) {
-//                    // Update local state
-//                    _menuCategories.value = _menuCategories.value.map { category ->
-//                        category.copy(
-//                            menus = category.menus.filterNot { it.menuId == menuId }
-//                        )
-//                    }
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<Unit>, t: Throwable) {
-//                // Bisa tampilkan error kalau mau
-//            }
-//        })
-//    }
-//
-//
-//
-//}
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.eatzy_seller.data.model.*
+import com.example.eatzy_seller.data.repository.MenuRepository
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+
+class MenuViewModel(
+    private val repository: MenuRepository
+) : ViewModel() {
+
+    // Menu Category
+    private val _menuCategories = MutableStateFlow<List<MenuCategory>>(emptyList())
+    val menuCategories: StateFlow<List<MenuCategory>> = _menuCategories
+
+    // Addon Category
+    private val _addonCategories = MutableStateFlow<List<AddOnCategory>>(emptyList())
+    val addonCategories: StateFlow<List<AddOnCategory>> = _addonCategories
+
+    // Fetch from API
+    fun fetchAllMenus() {
+        viewModelScope.launch {
+            val result = repository.getMenus()
+            _menuCategories.value = result
+        }
+    }
+
+    fun fetchAllAddons() {
+        viewModelScope.launch {
+            val result = repository.getAddons()
+            _addonCategories.value = result
+        }
+    }
+
+    // Insert
+    fun insertMenu(menu: Menu) = viewModelScope.launch {
+        repository.insertMenu(menu)
+        fetchAllMenus()
+    }
+
+    fun insertAddon(addon: AddOn) = viewModelScope.launch {
+        repository.insertAddon(addon)
+        fetchAllAddons()
+    }
+
+    fun insertMenuCategory(category: MenuCategory) = viewModelScope.launch {
+        repository.insertMenuCategory(category)
+        fetchAllMenus()
+    }
+
+    fun insertAddonCategory(category: AddOnCategory) = viewModelScope.launch {
+        repository.insertAddonCategory(category)
+        fetchAllAddons()
+    }
+
+    // Update
+    fun updateMenu(menu: Menu) = viewModelScope.launch {
+        repository.updateMenu(menu)
+        fetchAllMenus()
+    }
+
+    fun updateAddon(addon: AddOn) = viewModelScope.launch {
+        repository.updateAddon(addon)
+        fetchAllAddons()
+    }
+
+    // Delete
+    fun deleteMenu(menuId: Int) = viewModelScope.launch {
+        repository.deleteMenu(menuId)
+        fetchAllMenus()
+    }
+
+    fun deleteAddon(addonId: Int) = viewModelScope.launch {
+        repository.deleteAddon(addonId)
+        fetchAllAddons()
+    }
+
+    fun deleteMenuCategory(categoryId: Int) = viewModelScope.launch {
+        repository.deleteMenuCategory(categoryId)
+        fetchAllMenus()
+    }
+
+    fun deleteAddonCategory(categoryId: Int) = viewModelScope.launch {
+        repository.deleteAddonCategory(categoryId)
+        fetchAllAddons()
+    }
+}

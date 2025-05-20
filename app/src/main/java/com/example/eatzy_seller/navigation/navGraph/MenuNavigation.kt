@@ -45,5 +45,15 @@ fun NavGraphBuilder.menuGraph(navController: NavController) {
         AddOnCategoryScreen(navController = navController, categoryId = categoryId, mode = AddOnMode.EDIT)
     }
 
+    composable(
+        route = "edit_menu/{menuId}",
+        arguments = listOf(
+            navArgument("menuId") { type = NavType.IntType } // atau StringType jika ID berupa string
+        )
+    ) { backStackEntry ->
+        val menuId = backStackEntry.arguments?.getInt("menuId") ?: 0
+        EditMenuScreen(navController = navController, menuId = menuId)
+    }
+
 
 }

@@ -16,7 +16,7 @@ import com.example.eatzy_seller.navigation.navGraph.testGraph
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Home) {
+    NavHost(navController = navController, startDestination = Test) {
         authGraph(navController)
         homeGraph(navController)
         testGraph(navController)

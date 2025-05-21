@@ -34,56 +34,56 @@ class MenuViewModel(
         }
     }
 
-    // Insert
-    fun insertMenu(menu: Menu) = viewModelScope.launch {
-        repository.insertMenu(menu)
-        fetchAllMenus()
-    }
-
-    fun insertAddon(addon: AddOn) = viewModelScope.launch {
-        repository.insertAddon(addon)
-        fetchAllAddons()
-    }
-
-    fun insertMenuCategory(category: MenuCategory) = viewModelScope.launch {
-        repository.insertMenuCategory(category)
-        fetchAllMenus()
-    }
-
-    fun insertAddonCategory(category: AddOnCategory) = viewModelScope.launch {
-        repository.insertAddonCategory(category)
-        fetchAllAddons()
-    }
-
-    // Update
-    fun updateMenu(menu: Menu) = viewModelScope.launch {
-        repository.updateMenu(menu)
-        fetchAllMenus()
-    }
-
-    fun updateAddon(addon: AddOn) = viewModelScope.launch {
-        repository.updateAddon(addon)
-        fetchAllAddons()
-    }
-
-    // Delete
-    fun deleteMenu(menuId: Int) = viewModelScope.launch {
-        repository.deleteMenu(menuId)
-        fetchAllMenus()
-    }
-
-    fun deleteAddon(addonId: Int) = viewModelScope.launch {
-        repository.deleteAddon(addonId)
-        fetchAllAddons()
-    }
-
-    fun deleteMenuCategory(categoryId: Int) = viewModelScope.launch {
-        repository.deleteMenuCategory(categoryId)
-        fetchAllMenus()
-    }
-
-    fun deleteAddonCategory(categoryId: Int) = viewModelScope.launch {
-        repository.deleteAddonCategory(categoryId)
-        fetchAllAddons()
-    }
+//    // Insert
+//    fun insertMenu(menu: Menu) = viewModelScope.launch {
+//        repository.insertMenu(menu)
+//        fetchAllMenus()
+//    }
+//
+//    fun insertAddon(addon: AddOn) = viewModelScope.launch {
+//        repository.insertAddon(addon)
+//        fetchAllAddons()
+//    }
+//
+//    fun insertMenuCategory(category: MenuCategory) = viewModelScope.launch {
+//        repository.insertMenuCategory(category)
+//        fetchAllMenus()
+//    }
+//
+//    fun insertAddonCategory(category: AddOnCategory) = viewModelScope.launch {
+//        repository.insertAddonCategory(category)
+//        fetchAllAddons()
+//    }
+//
+//    // Update
+//    fun updateMenu(menu: Menu) = viewModelScope.launch {
+//        repository.updateMenu(menu)
+//        fetchAllMenus()
+//    }
+//
+//    fun updateAddon(addon: AddOn) = viewModelScope.launch {
+//        repository.updateAddon(addon)
+//        fetchAllAddons()
+//    }
+//
+//    // Delete
+//    fun deleteMenu(menuId: Int) = viewModelScope.launch {
+//        repository.deleteMenu(menuId)
+//        fetchAllMenus()
+//    }
+//
+//    fun deleteAddon(addonId: Int) = viewModelScope.launch {
+//        repository.deleteAddon(addonId)
+//        fetchAllAddons()
+//    }
+//
+//    fun deleteMenuCategory(categoryId: Int) = viewModelScope.launch {
+//        repository.deleteMenuCategory(categoryId)
+//        fetchAllMenus()
+//    }
+//
+//    fun deleteAddonCategory(categoryId: Int) = viewModelScope.launch {
+//        repository.deleteAddonCategory(categoryId)
+//        fetchAllAddons()
+//    }
 }

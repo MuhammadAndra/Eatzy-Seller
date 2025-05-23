@@ -38,27 +38,27 @@ val dummyAddOnCategories = listOf(
 
 // Dummy Menu data
 val dummyMenus1 = listOf(
-    Menu(1, "Cheese Burger", 25000.0, "burger_img", true),
-    Menu(2, "Chicken Burger", 22000.0, "chicken_burger_img", true),
-    Menu(3, "Veggie Burger", 20000.0, "veggie_burger_img", false)
+    Menu(1, "Cheese Burger", 25000.0,25, "burger_img", true, dummyAddOnCategories),
+    Menu(2, "Chicken Burger", 22000.0,25, "chicken_burger_img", true, dummyAddOnCategories),
+    Menu(3, "Veggie Burger", 20000.0,25, "veggie_burger_img", false, dummyAddOnCategories)
 )
 
 val dummyMenus2 = listOf(
-    Menu(4, "Spaghetti Carbonara", 30000.0, "carbonara_img", true),
-    Menu(5, "Spaghetti Bolognese", 32000.0, "bolognese_img", true),
-    Menu(6, "Spaghetti Aglio Olio", 28000.0, "aglio_img", true)
+    Menu(4, "Spaghetti Carbonara", 30000.0,25, "burger_img", true, dummyAddOnCategories),
+    Menu(5, "Spaghetti Bolognese", 32000.0,25, "burger_img", true, dummyAddOnCategories),
+    Menu(6, "Spaghetti Aglio Olio", 28000.0,25, "burger_img", false, dummyAddOnCategories),
 )
 
 val dummyMenus3 = listOf(
-    Menu(7, "Iced Tea", 10000.0, "iced_tea_img", true),
-    Menu(8, "Orange Juice", 12000.0, "orange_juice_img", true),
-    Menu(9, "Coffee Latte", 15000.0, "latte_img", true)
+    Menu(7, "Iced Tea", 10000.0, 25, "burger_img", true, dummyAddOnCategories),
+    Menu(8, "Orange Juice", 12000.0,25, "burger_img", true, dummyAddOnCategories),
+    Menu(9, "Coffee Latte", 15000.0,25, "burger_img", true, dummyAddOnCategories),
 )
 
 val dummyMenus4 = listOf(
-    Menu(10, "Chocolate Cake", 18000.0, "choco_cake_img", true),
-    Menu(11, "Cheesecake", 20000.0, "cheesecake_img", false),
-    Menu(12, "Tiramisu", 22000.0, "tiramisu_img", true)
+    Menu(10, "Chocolate Cake", 18000.0,25, "burger_img", true, dummyAddOnCategories),
+    Menu(11, "Cheesecake", 20000.0,25, "burger_img", true, dummyAddOnCategories),
+    Menu(12, "Tiramisu", 22000.0,25, "burger_img", true, dummyAddOnCategories),
 )
 
 // Dummy MenuCategory data

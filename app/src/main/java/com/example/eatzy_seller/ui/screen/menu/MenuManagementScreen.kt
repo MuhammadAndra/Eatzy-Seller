@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -47,6 +48,7 @@ import com.example.eatzy_seller.ui.theme.SecondColor
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
+import androidx.compose.runtime.livedata.observeAsState
 
 enum class MenuType {
     REGULAR_MENU, ADD_ON
@@ -58,11 +60,14 @@ fun MenuManagementScreen(navController: NavController) {
     //default menu screen ke Menu
     var currentMenuType by remember { mutableStateOf(MenuType.REGULAR_MENU) }
 
+    val viewModel: MenuViewModel = viewModel()
+
     //===========Pindah Menu dan Add On===========//
     when (currentMenuType) {
         MenuType.REGULAR_MENU -> MenuListScreen(
             navController = navController,
-            onSwitchToAddOn = { currentMenuType = MenuType.ADD_ON }
+            onSwitchToAddOn = { currentMenuType = MenuType.ADD_ON },
+            viewModel = viewModel
         )
 
         MenuType.ADD_ON -> AddOnListScreen(
@@ -114,7 +119,8 @@ fun ButtonStatus(
 @Composable
 fun MenuListScreen(
     navController: NavController,
-    onSwitchToAddOn: () -> Unit = {}
+    onSwitchToAddOn: () -> Unit = {},
+    viewModel: MenuViewModel = viewModel()
 ) {
     // Untuk snackbar
     val snackbarHostState = remember { SnackbarHostState() }
@@ -126,9 +132,15 @@ fun MenuListScreen(
     var showDeleteCategoryDialog by remember { mutableStateOf(false) }
     var categoryToDelete by remember { mutableStateOf<MenuCategory?>(null) }
 
+    val menuCategories by viewModel.menuCategories.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchMenus()
+    }
+
     // Pakai data dummy dulu
-    val menuCategories =
-        remember { mutableStateListOf<MenuCategory>().apply { addAll(dummyMenuCategories) } }
+//    val menuCategories =
+//        remember { mutableStateListOf<MenuCategory>().apply { addAll(dummyMenuCategories) } }
 
     Scaffold(
         containerColor = Color.White,
@@ -211,6 +223,7 @@ fun MenuListScreen(
                                     }
                                 },
                                 navController = navController,
+                                menuViewModel = viewModel
                             )
                             HorizontalDivider(
                                 thickness = 0.5.dp,
@@ -277,7 +290,7 @@ fun MenuListScreen(
                     val index =
                         menuCategories.indexOfFirst { it.idCategory == categoryToEdit!!.idCategory }
                     if (index >= 0) {
-                        menuCategories[index] = menuCategories[index].copy(categoryName = newName)
+                       // menuCategories[index] = menuCategories[index].copy(categoryName = newName)
                     }
                     isEditDialogVisible = false
                     categoryToEdit = null
@@ -295,7 +308,7 @@ fun MenuListScreen(
                 objek = "Kategori Menu",
                 title = categoryToDelete!!.categoryName,
                 onConfirmDelete = {
-                    menuCategories.remove(categoryToDelete)
+                    //menuCategories.remove(categoryToDelete)
                     showDeleteCategoryDialog = false
                     categoryToDelete = null
 
@@ -320,7 +333,8 @@ fun MenuItem(
     isAddOn: Boolean,
     onDelete: () -> Unit,
     onShowSnackbar: (String) -> Unit,
-    navController: NavController
+    navController: NavController,
+    menuViewModel: MenuViewModel = viewModel()
 )  {
     //===========Button Delete Item Menu===========//
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -606,10 +620,14 @@ fun AddOnListScreen(
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun AddOnItem(
-    addOn: AddOn,
+    addOn: AddOn?,
     onDelete: () -> Unit,
     onShowSnackbar: (String) -> Unit
 ) {
+    if (addOn == null) {
+        return // Atau bisa tampilkan UI placeholder
+    }
+
     //delete item add on Dialog
     var showDeleteDialog by remember { mutableStateOf(false) }
     if (showDeleteDialog) {
@@ -776,40 +794,40 @@ fun PreviewMenuListScreen() {
     MenuListScreen(navController = navController)
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewMenuItem() {
-    val navController = rememberNavController()
-    Surface {
-        Column {
-            MenuItem(
-                menu = Menu(
-                    menuId = 1,
-                    menuName = "Nasi Goreng Spesial",
-                    menuPrice = 25000.0,
-                    menuImageRes = "https://via.placeholder.com/150",
-                    menuAvailable = true
-                ),
-                isAddOn = false,
-                onDelete = {},
-                onShowSnackbar = {},
-                navController = navController
-            )
-            MenuItem(
-                menu = Menu(
-                    menuId = 2,
-                    menuName = "Extra Keju",
-                    menuPrice = 5000.0,
-                    menuImageRes = "https://via.placeholder.com/150",
-                    menuAvailable = false
-                ),
-                isAddOn = true,
-                onDelete = {},
-                onShowSnackbar = {},
-                navController = navController
-            )
-        }
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewMenuItem() {
+//    val navController = rememberNavController()
+//    Surface {
+//        Column {
+//            MenuItem(
+//                menu = Menu(
+//                    menuId = 1,
+//                    menuName = "Nasi Goreng Spesial",
+//                    menuPrice = 25000.0,
+//                    menuImageRes = "https://via.placeholder.com/150",
+//                    menuAvailable = true
+//                ),
+//                isAddOn = false,
+//                onDelete = {},
+//                onShowSnackbar = {},
+//                navController = navController
+//            )
+//            MenuItem(
+//                menu = Menu(
+//                    menuId = 2,
+//                    menuName = "Extra Keju",
+//                    menuPrice = 5000.0,
+//                    menuImageRes = "https://via.placeholder.com/150",
+//                    menuAvailable = false
+//                ),
+//                isAddOn = true,
+//                onDelete = {},
+//                onShowSnackbar = {},
+//                navController = navController
+//            )
+//        }
+//    }
+//}
 
 

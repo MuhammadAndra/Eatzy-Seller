@@ -17,5 +17,10 @@ interface MenuApiService {
     suspend fun getMenusWithAddOns(
         @Header("Authorization") token: String
     ): Response<List<MenuCategory>>
+
+    @GET("menus/addon") // endpoint dari controller
+    suspend fun getAddOnWithAddOns(
+        @Header("Authorization") token: String
+    ): Response<List<AddOnCategory>>
 }
 

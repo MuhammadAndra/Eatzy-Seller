@@ -138,10 +138,6 @@ fun MenuListScreen(
         viewModel.fetchMenus()
     }
 
-    // Pakai data dummy dulu
-//    val menuCategories =
-//        remember { mutableStateListOf<MenuCategory>().apply { addAll(dummyMenuCategories) } }
-
     Scaffold(
         containerColor = Color.White,
         topBar = {
@@ -431,7 +427,8 @@ fun MenuItem(
 @Composable
 fun AddOnListScreen(
     navController: NavController,
-    onSwitchToMenu: () -> Unit = {}
+    onSwitchToMenu: () -> Unit = {},
+    viewModel: MenuViewModel = viewModel()
 ) {
     // For snackbar
     val snackbarHostState = remember { SnackbarHostState() }
@@ -443,9 +440,11 @@ fun AddOnListScreen(
     var showDeleteCategoryDialog by remember { mutableStateOf(false) }
     var categoryToDelete by remember { mutableStateOf<AddOnCategory?>(null) }
 
-    // Using dummy data for now
-    val addOnCategories =
-        remember { mutableStateListOf<AddOnCategory>().apply { addAll(dummyAddOnCategories) } }
+    val addOnCategories by viewModel.addonCategories.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchAddons()
+    }
 
     Scaffold(
         containerColor = Color.White,
@@ -599,7 +598,7 @@ fun AddOnListScreen(
                 objek = "Kategori Add-On",
                 title = categoryToDelete!!.addOnCategoryName,
                 onConfirmDelete = {
-                    addOnCategories.remove(categoryToDelete)
+                    //addOnCategories.remove(categoryToDelete)
                     showDeleteCategoryDialog = false
                     categoryToDelete = null
 

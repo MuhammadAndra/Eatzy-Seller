@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
+import com.example.eatzy_seller.navigation.navGraph.AddMenu
 import com.example.eatzy_seller.navigation.navGraph.EditCategory
 import com.example.eatzy_seller.ui.components.*
 import com.example.eatzy_seller.ui.theme.*
@@ -273,17 +274,10 @@ fun EditMenuScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Save Button
-            SaveEditMenuButton(
-                onSave = {
-                    // Save edited menu data
-                    // viewModel.updateMenu(menuId, updatedData)
-                    navController.popBackStack()
-                },
-                onCancel = {
-                    navController.popBackStack()
-                }
-            )
+            // Simpan Button
+            SimpanTambahMenuButton {
+                navController.navigate(AddMenu)
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -384,51 +378,6 @@ fun EditImageComponent(
                 )
                 Text("Unggah foto", color = Color.Gray)
             }
-        }
-    }
-}
-
-@Composable
-fun SaveEditMenuButton(
-    onSave: () -> Unit,
-    onCancel: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        OutlinedButton(
-            onClick = onCancel,
-            modifier = Modifier
-                .weight(1f)
-                .height(56.dp),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = DeleteColor
-            ),
-            border = BorderStroke(1.dp, DeleteColor),
-            shape = MaterialTheme.shapes.large.copy(all = CornerSize(50))
-        ) {
-            Text(
-                text = "Batal",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Button(
-            onClick = onSave,
-            colors = ButtonDefaults.buttonColors(containerColor = SecondColor),
-            modifier = Modifier
-                .weight(1f)
-                .height(56.dp),
-            shape = MaterialTheme.shapes.large.copy(all = CornerSize(50))
-        ) {
-            Text(
-                text = "Simpan",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
         }
     }
 }

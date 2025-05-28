@@ -14,4 +14,40 @@ class MenuRepository(private val apiService: MenuApiService) {
     suspend fun getAddons(token: String): Response<List<AddOnCategory>> {
         return apiService.getAddOnWithAddOns(token)
     }
+
+    suspend fun updateCategoryName(token: String, id: Int, newName: String): Boolean {
+        return try {
+            val response = apiService.updateCategoryName(token,id, mapOf("categoryName" to newName))
+            response.isSuccessful
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun deleteCategory(token: String, id: Int): Boolean {
+        return try {
+            val response = apiService.deleteCategory(token,id)
+            response.isSuccessful
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun deleteMenu(token: String, id: Int): Boolean {
+        return try {
+            val response = apiService.deleteMenu(token,id)
+            response.isSuccessful
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun toggleMenuAvailability(token: String, id: Int, isAvailable: Boolean): Boolean {
+        return try {
+            val response = apiService.toggleMenuAvailability(token,id, mapOf("menuAvailable" to isAvailable))
+            response.isSuccessful
+        } catch (e: Exception) {
+            false
+        }
+    }
 }

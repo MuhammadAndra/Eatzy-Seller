@@ -8,22 +8,29 @@ import com.example.eatzy_seller.data.network.RetrofitClient
 import com.example.eatzy_seller.data.repository.MenuRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MenuViewModel : ViewModel() {
-    val token= "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJidWtyaXNAZXhhbXBsZS5jb20iLCJyb2xlIjoiY2FudGVlbiIsImlhdCI6MTc0ODA3NTE3MywiZXhwIjoxNzQ4MDc4NzczfQ.W_IavJdfp0IlA8A8FXQPt51lYAd-hPp92jNgEFY_uiE"
+    // token
+    val token= "bearer " +
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJidWtyaXNAZXhhbXBsZS5jb20iLCJyb2xlIjoiY2FudGVlbiIsImlhdCI6MTc0ODM1MzgzOCwiZXhwIjoxNzQ4MzU3NDM4fQ.cgMRbfWj3Y53jLux5nq4I6J-p7Wpw163at-6DTQ9FDs"
+    //nyambung ke repository
     private val repository = MenuRepository(RetrofitClient.menuApi)
 
+    //buat ambil semua kategori menu, addon
     private val _menuCategories = MutableStateFlow<List<MenuCategory>>(emptyList())
     val menuCategories: StateFlow<List<MenuCategory>> = _menuCategories
 
+    //buat ambil semua addon
     private val _addonCategories = MutableStateFlow<List<AddOnCategory>>(emptyList())
     val addonCategories: StateFlow<List<AddOnCategory>> = _addonCategories
 
-
+    //buat erro tapi belum dipake
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    //ambil semua kategori menu, menu, kategori addon, addon yang di menu
     fun fetchMenus() {
         viewModelScope.launch {
             try {
@@ -41,6 +48,7 @@ class MenuViewModel : ViewModel() {
         }
     }
 
+    //ambil semua addon yang dipunya
     fun fetchAddons() {
         viewModelScope.launch {
             try {
@@ -54,6 +62,62 @@ class MenuViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 _error.value = "Terjadi kesalahan: ${e.message}"
+            }
+        }
+    }
+
+    fun updateCategoryName(categoryId: Int, newName: String) {
+        viewModelScope.launch {
+            val success = repository.updateCategoryName(token, categoryId, newName)
+            if (success) {
+                _menuCategories.update { list ->
+                    list.map {
+                        if (it.idCategory == categoryId) it.copy(categoryName = newName)
+                        else it
+                    }
+                }
+            }
+        }
+    }
+
+    fun deleteCategory(categoryId: Int) {
+        viewModelScope.launch {
+            val success = repository.deleteCategory(token, categoryId)
+            if (success) {
+                _menuCategories.update { list ->
+                    list.filter { it.idCategory != categoryId }
+                }
+            }
+        }
+    }
+
+    fun deleteMenu(menuId: Int) {
+        viewModelScope.launch {
+            val success = repository.deleteMenu(token, menuId)
+            if (success) {
+                _menuCategories.update { list ->
+                    list.map { category ->
+                        category.copy(menus = category.menus.filter { it.menuId != menuId })
+                    }
+                }
+            }
+        }
+    }
+
+    fun toggleMenuAvailability(menuId: Int, isAvailable: Boolean) {
+        viewModelScope.launch {
+            val success = repository.toggleMenuAvailability(token, menuId, isAvailable)
+            if (success) {
+                _menuCategories.update { list ->
+                    list.map { category ->
+                        category.copy(
+                            menus = category.menus.map {
+                                if (it.menuId == menuId) it.copy(menuAvailable = isAvailable)
+                                else it
+                            }
+                        )
+                    }
+                }
             }
         }
     }

@@ -282,12 +282,7 @@ fun MenuListScreen(
                     categoryToEdit = null
                 },
                 onSave = { newName ->
-                    // Update category name di list
-                    val index =
-                        menuCategories.indexOfFirst { it.idCategory == categoryToEdit!!.idCategory }
-                    if (index >= 0) {
-                       // menuCategories[index] = menuCategories[index].copy(categoryName = newName)
-                    }
+                    viewModel.updateCategoryName(categoryToEdit!!.idCategory, newName)
                     isEditDialogVisible = false
                     categoryToEdit = null
 
@@ -304,7 +299,7 @@ fun MenuListScreen(
                 objek = "Kategori Menu",
                 title = categoryToDelete!!.categoryName,
                 onConfirmDelete = {
-                    //menuCategories.remove(categoryToDelete)
+                    viewModel.deleteCategory(categoryToDelete!!.idCategory)
                     showDeleteCategoryDialog = false
                     categoryToDelete = null
 
@@ -339,7 +334,7 @@ fun MenuItem(
             objek = if (isAddOn) "Add-On" else "Menu",
             title = menu.menuName,
             onConfirmDelete = {
-                onDelete()
+                menuViewModel.deleteMenu(menu.menuId)
                 onShowSnackbar("${if (isAddOn) "Add-On" else "Menu"} \"${menu.menuName}\" berhasil dihapus")
             },
             onDismiss = { showDeleteDialog = false }
@@ -386,7 +381,11 @@ fun MenuItem(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = menu.menuAvailable,
-                    onCheckedChange = { /* handle toggle */ }
+                    onCheckedChange = {
+                            isChecked ->
+                        menuViewModel.toggleMenuAvailability(menu.menuId, isChecked)
+                        onShowSnackbar("${menu.menuName} ${if (isChecked) "tersedia" else "tidak tersedia"}")
+                    }
                 )
                 Text(
                     text = if (isAddOn) "Tampilkan Add-On" else "Tampilkan Menu",

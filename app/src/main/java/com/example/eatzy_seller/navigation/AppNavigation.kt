@@ -11,18 +11,20 @@ import com.example.eatzy_seller.navigation.navGraph.homeGraph
 import com.example.eatzy_seller.navigation.navGraph.orderGraph
 import com.example.eatzy_seller.navigation.navGraph.testGraph
 import com.example.eatzy_seller.navigation.navGraph.orderDetailGraph
+import com.example.eatzy_seller.token
 import com.example.eatzy_seller.ui.screen.orderState.OrderStateViewModel
 
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier) {
+//fun AppNavigation(modifier: Modifier = Modifier) {
+fun AppNavigation(viewModel: OrderStateViewModel) {
     val navController = rememberNavController()
-    val orderViewModel: OrderStateViewModel = viewModel()
+//    val orderViewModel: OrderStateViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = Order.route) {
         authGraph(navController)
         homeGraph(navController)
         testGraph(navController)
-        orderGraph(navController, orderViewModel)
-        orderDetailGraph(navController, orderViewModel)
+        orderGraph(navController, "Bearer $token", viewModel)
+        orderDetailGraph(navController, "Bearer $token", viewModel)
     }
 }

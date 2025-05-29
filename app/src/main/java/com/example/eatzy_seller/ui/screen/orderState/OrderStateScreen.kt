@@ -30,7 +30,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 //import com.bumptech.glide.integration.compose.GlideImage
 import coil.compose.AsyncImage
-import com.example.eatzy_seller.R
 import com.example.eatzy_seller.data.dummyOrders
 import com.example.eatzy_seller.data.model.OrderState
 //import com.example.eatzy_seller.data.dummyOrders
@@ -39,7 +38,7 @@ import com.example.eatzy_seller.ui.components.BottomNavBar
 import java.text.NumberFormat
 import java.util.Locale
 
-//topbar
+//aman
 @Composable
 fun TopNavBar(
     title: String,
@@ -157,23 +156,25 @@ fun TopNavBar(
 //        }
 //    }
 //}
+
+//perlu dicek
 @Composable
 fun OrderListScreen(
     navController: NavHostController,
     orders: List<OrderState>,
-    selectedStatus: String,
-    onStatusSelected: (String) -> Unit,
+    selectedStatus: OrderStatus,
+    onStatusSelected: (OrderStatus) -> Unit,
     onOrderAccepted: (OrderState) -> Unit,
     onOrderRejected: (OrderState) -> Unit,
     onOrderDetailed: (OrderState) -> Unit
 ) {
-    val statuses = listOf("Semua") + OrderStatusUI.values().map { it.displayName }
+    val statuses = OrderStatus.values().toList()
 
-    val filteredOrders = if (selectedStatus == "Semua") {
+    val filteredOrders = if (selectedStatus == OrderStatus.SEMUA) {
         orders
     } else {
-        val statusEnum = OrderStatusUI.fromDisplayName(selectedStatus)
-        orders.filter { it.order_status.equals(statusEnum?.dbValue, ignoreCase = true) }
+//        val statusEnum = OrderStatus.fromDisplayName(selectedStatus)
+        orders.filter { it.order_status == selectedStatus.dbValue }
 //        orders.filter { it.order_status == statusEnum?.dbValue }
 //        val dbStatus = statusEnum?.dbValue ?: ""  // kalau ga ketemu mapping, pakai string kosong
 //
@@ -213,7 +214,7 @@ fun OrderListScreen(
                 items(statuses) { status ->
                     TextButton(onClick = { onStatusSelected(status) }) {
                         Text(
-                            text = status,
+                            text = status.displayName,
                             color = if (status == selectedStatus) Color(0xFFFC9824) else Color.Gray,
                             fontWeight = if (status == selectedStatus) FontWeight.Bold else FontWeight.Normal,
                             fontSize = 14.sp
@@ -237,6 +238,7 @@ fun OrderListScreen(
     }
 }
 
+//aman
 fun formatPrice(price: Double): String {
     val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
     return " Rp ${formatter.format(price)}"
@@ -252,6 +254,10 @@ fun OrderCard(
     // dialog konfirmasi tolak pesanan
     var showRejectDialog by remember { mutableStateOf(false) }
 
+//    val statusEnum = OrderStatus.values().find { it.displayName ==  }
+
+    //aman
+    //dialog konfirmasi tolak pesanan
     if (showRejectDialog) {
         AlertDialog(
             containerColor = Color.White,
@@ -274,6 +280,7 @@ fun OrderCard(
         )
     }
 
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -281,7 +288,7 @@ fun OrderCard(
             .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(12.dp))
             .clickable {
 //                if (order.order_status == "Proses") onOrderDetailed(order)
-                if (order.order_status == OrderStatusUI.PROSES.dbValue) onOrderDetailed(order)
+                if (order.order_status == OrderStatus.PROSES.dbValue) onOrderDetailed(order)
             }
             .padding(12.dp)
             .background(Color.White)
@@ -305,11 +312,11 @@ fun OrderCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AsyncImage(
                     model = item.menu_image,
-                    contentDescription = null,
+                    contentDescription = "Gambar Menu",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(80.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(8.dp)),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
@@ -333,6 +340,7 @@ fun OrderCard(
                 }
             }
 
+            //aman
             if (index == order.items.lastIndex) {
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
                 val total = order.items.sumOf { it.quantity * it.menu_price }
@@ -366,13 +374,15 @@ fun OrderCard(
 //                }
 //            }
 //        }
-        if (order.order_status == OrderStatusUI.KONFIRMASI.dbValue) {
+        if (order.order_status == OrderStatus.KONFIRMASI.dbValue) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
+                    //ini mungkin perlu di cek
                     onClick = { onOrderAccepted(order) },
+                    //ini ke bawah aman
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFC9824))
                 ) {
@@ -390,26 +400,12 @@ fun OrderCard(
     }
 }
 
+
+//aman
 @Composable
 fun StatusPesanan(statusDbValue: String) {
-    val statusUI = OrderStatusUI.fromDbValue(statusDbValue)
+    val statusUI = OrderStatus.fromDbValue(statusDbValue)
     val displayName = statusUI?.displayName ?: statusDbValue
-
-//    val color = when (statusDbValue) {
-//        "Proses" -> Color(0xFFFC9824)
-//        "Selesai" -> Color(0xFF4CAF50)
-//        "Batal" -> Color(0xFFF44336)
-//        "Konfirmasi" -> Color(0xFF1976D2)
-//        else -> Color.Gray
-//    }
-//
-//    val bgColor = when (statusDbValue) {
-//        "Proses" -> Color(0xFFFFF3E0)
-//        "Selesai" -> Color(0xFFE8F5E9)
-//        "Batal" -> Color(0xFFFFEBEE)
-//        "Konfirmasi" -> Color(0xFFE3F2FD)
-//        else -> Color(0xFFE0E0E0)
-//    }
 
     val (color, bgColor) = when (displayName) {
         "Proses" -> Color(0xFFFC9824) to Color(0xFFFFF3E0)
@@ -434,7 +430,7 @@ fun StatusPesanan(statusDbValue: String) {
 @Composable
 fun PreviewOrderListScreen() {
     val navController = rememberNavController()
-    var selectedStatus by remember { mutableStateOf("Semua") }
+    var selectedStatus by remember { mutableStateOf(OrderStatus.SEMUA) }
     val dummyOrders = dummyOrders // dari file OrderDummyData.kt
 //    val viewModel = OrderStateViewModel()
 

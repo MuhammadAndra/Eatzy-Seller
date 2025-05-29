@@ -31,10 +31,14 @@ import java.util.Locale
 import coil.compose.AsyncImage
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import androidx.navigation.compose.rememberNavController
+import com.example.eatzy_seller.data.network.api.OrderApiService
+import com.example.eatzy_seller.data.repository.OrderRepository
 import com.example.eatzy_seller.navigation.navGraph.Order
 import com.example.eatzy_seller.token
 import com.example.eatzy_seller.ui.screen.orderState.OrderStateViewModel
+import com.example.eatzy_seller.ui.screen.orderState.OrderStatus
 
+//aman
 @Composable
 fun TopNavBar(
     title: String,
@@ -69,7 +73,7 @@ fun TopNavBar(
 }
 
 @Composable
-fun OrderDetailScreen(navController: NavHostController, order: OrderList, onNavigateToOrderFinished : () -> Unit) {
+fun OrderDetailScreen(navController: NavHostController, order: OrderList, token: String, onNavigateToOrderFinished: () -> Unit) {
     val viewModel: OrderStateViewModel = viewModel()
 
     Scaffold(
@@ -131,9 +135,10 @@ fun OrderDetailScreen(navController: NavHostController, order: OrderList, onNavi
                     viewModel.updateOrderStatus(
                         token = token,
                         orderId = order.order_id,
-                        newStatus = "Selesai",
+                        newStatus = OrderStatus.SELESAI.dbValue,
+//                        canteenId = order.canteen_id,
                         onSuccess = {
-                            viewModel.updateSelectedStatus("Selesai", token)
+                            viewModel.updateSelectedStatus(OrderStatus.SELESAI, token)
                             navController.navigate(Order.route) {
                                 popUpTo(Order.route) { inclusive = true }
                             }
@@ -158,11 +163,13 @@ fun OrderDetailScreen(navController: NavHostController, order: OrderList, onNavi
     }
 }
 
+//aman
 fun formatPrice(price: Double): String {
     val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
     return "Rp ${formatter.format(price)}"
 }
 
+//aman
 @Composable
 fun OrderDetailRow(label: String, value: String) {
     Row(
@@ -174,6 +181,7 @@ fun OrderDetailRow(label: String, value: String) {
     }
 }
 
+//aman
 @Composable
 fun OrderItemCard(item: OrderItem) {
     Row(
@@ -234,20 +242,31 @@ fun OrderItemCard(item: OrderItem) {
 @Composable
 fun PreviewOrderDetailScreen() {
     val navHostController = rememberNavController()
+
     val order = OrderList(
         order_id = 1,
         order_time = "13/03/2025",
-        total_price = 25.000,
+        total_price = 25000.0,
         items = listOf(
-            OrderItem(1, "Ayam Bakar", "nasinya dikit aja", "https://img.freepik.com/premium-photo/ayam-goreng-serundeng-fried-chicken-sprinkled-with-grated-coconut-with-curry-spices-serundeng_431906-4528.jpg?w=1480", 12000.0, 1, "sambal bawang")
-//            OrderItem("Ayam Goreng", 1, "sambalnya banyakin", "sambal bawang, makan di tempat", 12000.0, "https://img.freepik.com/premium-photo/ayam-goreng-serundeng-fried-chicken-sprinkled-with-grated-coconut-with-curry-spices-serundeng_431906-4528.jpg?w=1480"),
-//            OrderItem("Jamur Crispy", 1, "nasinya dikit aja","sambal tomat, bungkus",13000.0, "https://lh3.googleusercontent.com/-1tk-T-5FB6I/W-zojV95WHI/AAAAAAAAACQ/VPjFLsTS4cIZ61q_IhQt_n0i7H_Nb9xtwCHMYCw/s1600/20181113_094220.png"),
-//            OrderItem("Ayam Ungkep", 1, "sambalnya banyakin","sambal bawang, bungkus",13000.0, "https://whattocooktoday.com/wp-content/uploads/2020/03/ayam-ungkep-7-585x878.jpg")
+            OrderItem(
+                order_id = 1,
+                menu_name = "Ayam Bakar",
+                item_details = "nasinya dikit aja",
+                menu_image = "https://example.com/image.jpg",
+                menu_price = 12000.0,
+                quantity = 1,
+                add_on = "sambal bawang"
+            )
         )
     )
+
     MaterialTheme {
-        Surface {
-            OrderDetailScreen(navController = navHostController, order = order, onNavigateToOrderFinished = {})
-        }
+        OrderDetailScreen(
+            token = "Bearer $token",
+            navController = navHostController,
+//            viewModel = OrderStateViewModel(repository = OrderRepository(api = )),
+            order = order,
+            onNavigateToOrderFinished = {}
+        )
     }
 }

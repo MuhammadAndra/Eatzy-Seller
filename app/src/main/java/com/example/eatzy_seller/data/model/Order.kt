@@ -1,13 +1,5 @@
 package com.example.eatzy_seller.data.model
 
-import androidx.compose.ui.graphics.Color
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import androidx.room.Relation
-import androidx.room.TypeConverters
-import com.example.eatzy_seller.data.local.OrderItemEntity
-import com.example.eatzy_seller.data.local.OrderStateEntity
 import kotlinx.serialization.Serializable
 
 //ini untuk tampilan detail pesanan
@@ -15,11 +7,11 @@ data class OrderList(
     val order_id: Int,
     val order_time: String,
     val total_price: Double,
+//    val canteen_id: Int,
     val items: List<OrderItem>
 )
-//ini untuk di order state
+//ini untuk di luaran pesanan (dlm card)
 data class OrderState(
-    @PrimaryKey
     val order_id: Int,
     val order_status: String,
     val order_time: String,
@@ -37,8 +29,9 @@ data class OrderItem(
     val menu_image: String?,
     val menu_price: Double,
     val quantity: Int,
-    val add_on: String
+    val add_on: String = ""
 ) {
+    //untuk menghitung quantity
     companion object {
         fun groupWithQuantity(items: List<OrderItem>): List<OrderItem> {
             return items
@@ -51,22 +44,14 @@ data class OrderItem(
     }
 }
 
+data class UpdateOrderStatusRequest(
+    val order_id: Int,
+    val order_status: String
+)
+
 //data class newStatus(
 //    val order_id: Int,
 //    val order_status: String
 //)
 
-//data class UpdateOrderStatusRequest(
-//    val order_id: Int,
-//    val order_status: String
-//)
 
-data class UpdateOrderStatusRequest(
-//    val order_id: Int,
-    val order_status: String
-)
-
-data class Status(
-    val label: String,
-    val color: Color
-)

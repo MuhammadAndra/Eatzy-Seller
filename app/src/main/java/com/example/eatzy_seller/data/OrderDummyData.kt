@@ -2,12 +2,12 @@ package com.example.eatzy_seller.data
 
 import com.example.eatzy_seller.data.model.OrderItem
 import com.example.eatzy_seller.data.model.OrderState
-import com.example.eatzy_seller.ui.screen.orderState.OrderStatusUI
+import com.example.eatzy_seller.ui.screen.orderState.OrderStatus
 
 val dummyOrders = listOf(
     OrderState(
         order_id = 1,
-        order_status = OrderStatusUI.KONFIRMASI.dbValue,
+        order_status = OrderStatus.KONFIRMASI.dbValue,
         order_time = "13/03/2025",
         estimation_time = "10",
         total_price = 12000.0,

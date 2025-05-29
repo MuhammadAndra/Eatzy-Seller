@@ -17,9 +17,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.eatzy_seller.data.local.AppDatabase
+//import com.example.eatzy_seller.data.local.AppDatabase
 import com.example.eatzy_seller.data.network.RetrofitClient
 import com.example.eatzy_seller.data.repository.OrderRepository
+import com.example.eatzy_seller.ui.screen.orderState.OrderStatus
 
 @Serializable
 object Order {
@@ -30,6 +31,7 @@ fun NavGraphBuilder.orderGraph(
     navController: NavHostController,
     token: String,
     viewModel: OrderStateViewModel
+//    canteenId: Int
 ) {
     composable(route = Order.route) {
 
@@ -37,11 +39,11 @@ fun NavGraphBuilder.orderGraph(
 
 
         //asli
-        val selectedStatus by viewModel.selectedStatus.collectAsState(initial = "Semua")
+        val selectedStatus by viewModel.selectedStatus.collectAsState(initial = OrderStatus.SEMUA)
         val orders by viewModel.orders.collectAsStateWithLifecycle()
 
         LaunchedEffect(Unit) {
-            viewModel.loadOrders(token)
+            viewModel.fetchOrders()
             Log.d("TEST ORDERS",orders.toString())
         }
 
@@ -51,12 +53,12 @@ fun NavGraphBuilder.orderGraph(
             selectedStatus = selectedStatus,
             onStatusSelected = { newStatus -> viewModel.updateSelectedStatus(newStatus, token) },
             onOrderAccepted = { acceptedOrder ->
-                viewModel.updateOrderStatus(token, acceptedOrder.order_id, "Proses")
-                viewModel.updateSelectedStatus("Proses", token)
+                viewModel.updateOrderStatus(token, acceptedOrder.order_id, OrderStatus.PROSES.dbValue, onSuccess = {}, onError = {})
+                viewModel.updateSelectedStatus(OrderStatus.PROSES, token)
             },
             onOrderRejected = { rejectedOrder ->
-                viewModel.updateOrderStatus(token, rejectedOrder.order_id, "Batal")
-                viewModel.updateSelectedStatus("Batal", token)
+                viewModel.updateOrderStatus(token, rejectedOrder.order_id, OrderStatus.BATAL.dbValue, onSuccess = {}, onError = {})
+                viewModel.updateSelectedStatus(OrderStatus.BATAL, token)
             },
             onOrderDetailed = { selectedOrder ->
                 navController.navigate("orderDetail/${selectedOrder.order_id}")
@@ -68,23 +70,21 @@ fun NavGraphBuilder.orderGraph(
 fun NavGraphBuilder.orderDetailGraph(
     navController: NavHostController,
     token: String,
-    viewModel: OrderStateViewModel
+    viewModel: OrderStateViewModel,
+//    canteenId: Int
 ) {
     composable(
         route = "orderDetail/{orderId}",
         arguments = listOf(navArgument("orderId") { type = NavType.IntType })
     ) { backStackEntry ->
 
-        //asli
         val orderId = backStackEntry.arguments?.getInt("orderId")
-
         if (orderId == null) {
             navController.popBackStack()
             return@composable
         }
 
         val selectedOrderState = viewModel.getOrderById(orderId)
-
         if (selectedOrderState == null) {
             navController.popBackStack()
             return@composable
@@ -94,22 +94,34 @@ fun NavGraphBuilder.orderDetailGraph(
             order_id = selectedOrderState.order_id,
             order_time = selectedOrderState.order_time,
             items = selectedOrderState.items,
+//            canteen_id = canteenId,
             total_price = selectedOrderState.items.sumOf { it.menu_price * it.quantity }
         )
 
         OrderDetailScreen(
             navController = navController,
             order = order,
+            token = token,
+//            viewModel = viewModel,
             onNavigateToOrderFinished = {
-                viewModel.updateOrderStatus(token, order.order_id, "Selesai")
-                viewModel.updateSelectedStatus("Selesai", token)
-                navController.navigate(Order.route) {
-                    popUpTo(Order.route) { inclusive = true }
-                }
+                viewModel.updateOrderStatus(
+                    token = token,
+                    orderId = order.order_id,
+                    newStatus = OrderStatus.SELESAI.dbValue,
+//                    canteenId = canteenId,
+                    onSuccess = {
+                        viewModel.updateSelectedStatus(OrderStatus.SELESAI, token)
+                        navController.navigate(Order.route) {
+                            popUpTo(Order.route) { inclusive = true }
+                        }
+                    },
+                    onError = { Log.e("ORDER_ERROR", it) }
+                )
             }
         )
     }
 }
+
 
 
 //class OrderViewModel : ViewModel() {

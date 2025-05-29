@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.eatzy_seller.data.local.AppDatabase
+//import com.example.eatzy_seller.data.local.AppDatabase
 import com.example.eatzy_seller.data.network.RetrofitClient
 import com.example.eatzy_seller.data.repository.OrderRepository
 import com.example.eatzy_seller.navigation.AppNavigation
@@ -23,11 +23,10 @@ const val token ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJzZ
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val database = AppDatabase.getDatabase(applicationContext)
+//        val database = AppDatabase.getDatabase(applicationContext)
         val api = RetrofitClient.orderApi
-        val dao = database.orderDao()
-        val repository = OrderRepository(api, dao)
+//        val dao = database.orderDao()
+        val repository = OrderRepository(api)
         val viewModel = OrderStateViewModel(repository)
 
 //        enableEdgeToEdge()

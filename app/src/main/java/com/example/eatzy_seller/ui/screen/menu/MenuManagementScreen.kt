@@ -1,5 +1,6 @@
 package com.example.eatzy_seller.ui.screen.menu
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -136,6 +137,8 @@ fun MenuListScreen(
 
     LaunchedEffect(Unit) {
         viewModel.fetchMenus()
+        Log.d("",menuCategories.toString())
+
     }
 
     Scaffold(

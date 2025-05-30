@@ -20,16 +20,10 @@ interface MenuApiService {
         @Header("Authorization") token: String
     ): Response<List<MenuCategory>>
 
-    @GET("menus/addon") // endpoint dari controller
-    suspend fun getAddOnWithAddOns(
-        @Header("Authorization") token: String
-    ): Response<List<AddOnCategory>>
-
     @PUT("menus/categories")
     suspend fun updateCategoryName(
         @Header("Authorization") token: String,
-        @Path("id") id: Int,//ganti ke body
-        @Body body: Map<String, String>
+        @Body body: Map<String, Any>
     ): Response<Unit>
 
     @DELETE("menus/categories/{id}")
@@ -50,5 +44,12 @@ interface MenuApiService {
         @Path("id") id: Int,
         @Body body: Map<String, Boolean>
     ): Response<Unit>
+
+
+    //===================Addon===================
+    @GET("menus/addon") // endpoint dari controller
+    suspend fun getAddOnWithAddOns(
+        @Header("Authorization") token: String
+    ): Response<List<AddOnCategory>>
 }
 

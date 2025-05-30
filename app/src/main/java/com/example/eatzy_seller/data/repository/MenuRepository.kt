@@ -17,7 +17,7 @@ class MenuRepository(private val apiService: MenuApiService) {
 
     suspend fun updateCategoryName(token: String, id: Int, newName: String): Boolean {
         return try {
-            val response = apiService.updateCategoryName(token,id, mapOf("categoryName" to newName))
+            val response = apiService.updateCategoryName(token, mapOf( "id" to id,"categoryName" to newName))
             response.isSuccessful
         } catch (e: Exception) {
             false

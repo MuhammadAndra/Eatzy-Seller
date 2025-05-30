@@ -61,7 +61,7 @@ fun EditMenuScreen(
             Pair("Topping", false)
         )
     }
-    val selectedAddOns = remember { mutableStateListOf("Level Pedas") }
+    val selectedAddOns = remember { mutableStateListOf("") }
 
     var newKategoriAddOn by remember { mutableStateOf("") }
     var isSingleChoice by remember { mutableStateOf(false) }
@@ -389,11 +389,11 @@ fun EditImageComponent(
 }
 
 
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewEditMenuScreen() {
-//    EditMenuScreen(
-//        navController = rememberNavController(),
-//        menuId = 1
-//    )
-//}
+@Preview(showBackground = true)
+@Composable
+fun PreviewEditMenuScreen() {
+    EditMenuScreen(
+        navController = rememberNavController(),
+        menuId = 1
+    )
+}

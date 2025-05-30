@@ -53,7 +53,7 @@ fun NavGraphBuilder.menuGraph(navController: NavController) {
         )
     ) { backStackEntry ->
         val menuId = backStackEntry.arguments?.getInt("menuId") ?: 0
-        EditMenuScreen(navController = navController, menuId = menuId, menuViewModel = viewModel())
+        EditMenuScreen(navController = navController, menuId = menuId)
     }
 
 

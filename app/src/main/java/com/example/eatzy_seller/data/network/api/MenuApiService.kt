@@ -54,6 +54,22 @@ interface MenuApiService {
         @Body body: UpdateMenuRequest
     ): Response<Unit>
 
+    @GET("menus/menuItem/{id}")
+    suspend fun getMenuItem(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
+    ): Response<Menu>
+
+    @GET("menus/categoryList")
+    suspend fun getMenuCategories(
+        @Header("Authorization") token: String
+    ):  Response<List<MenuCategory>>
+
+    @GET("menus/categoryAddonList")
+    suspend fun getAddonCategories(
+        @Header("Authorization") token: String
+    ):  Response<List<AddOnCategory>>
+
 
     //===================Addon===================
     @GET("menus/addon") // endpoint dari controller

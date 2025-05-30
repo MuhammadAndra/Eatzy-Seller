@@ -252,7 +252,7 @@ fun AddOnCategoryScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = categoryName.isNotBlank(),
+                enabled = categoryName.isNotBlank()&&addOnList.isNotEmpty(),
                 colors = ButtonDefaults.buttonColors(containerColor = SecondColor),
                 shape = MaterialTheme.shapes.large.copy(all = CornerSize(50))
             ) {

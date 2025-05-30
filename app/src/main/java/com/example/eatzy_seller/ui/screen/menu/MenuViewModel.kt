@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 class MenuViewModel : ViewModel() {
     // token
     val token = "bearer " +
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJidWtyaXNAZXhhbXBsZS5jb20iLCJyb2xlIjoiY2FudGVlbiIsImlhdCI6MTc0ODQ5NzE0NywiZXhwIjoxNzQ4NTAwNzQ3fQ.IHV-x8mcgkVciYy4OZK5U3RoyCQcX3Pzprve10vWYK0"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJidWtyaXNAZXhhbXBsZS5jb20iLCJyb2xlIjoiY2FudGVlbiIsImlhdCI6MTc0ODU2NDc4MSwiZXhwIjoxNzY0MTE2NzgxfQ.UVXsenWc8EouRLgKZ9O8kpm_Ae2RP89jomX5-FWLYOQ"
     //nyambung ke repository
     private val repository = MenuRepository(RetrofitClient.menuApi)
 

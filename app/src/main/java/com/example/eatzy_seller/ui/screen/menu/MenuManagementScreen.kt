@@ -527,25 +527,34 @@ fun AddOnListScreen(
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
 
-                        //===========Loop Kategori Add On===========//
-                        category.addOns.forEachIndexed { index, addOn ->
-                            //masuk fun item add on
-                            AddOnItem(
-                                addOn = addOn,
-                                onDelete = { /* delete logic here */ },
-                                onShowSnackbar = { message ->
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(message)
+                        if (category.addOns.isEmpty()) {
+                            Text(
+                                text = "Add-on kosong",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        } else {
+                            //===========Loop Kategori Add On===========//
+                            category.addOns.forEachIndexed { index, addOn ->
+                                //masuk fun item add on
+                                AddOnItem(
+                                    addOn = addOn,
+                                    onDelete = { /* delete logic here */ },
+                                    onShowSnackbar = { message ->
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar(message)
+                                        }
                                     }
-                                }
-                            )
-                            //garis
-                            HorizontalDivider(
-                                thickness = 0.5.dp,
-                                color = Color(0xFFBDBDBD),
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
+                                )
+                                //garis
+                                HorizontalDivider(
+                                    thickness = 0.5.dp,
+                                    color = Color(0xFFBDBDBD),
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
 
+                            }
                         }
 
                         //===========Button Kategori Add On===========//

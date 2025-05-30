@@ -16,13 +16,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
@@ -35,7 +38,8 @@ import com.example.eatzy_seller.ui.theme.*
 @Composable
 fun EditMenuScreen(
     navController: NavController,
-    menuId: Int // Pass the menu ID from navigation
+    menuId: Int, // Pass the menu ID from navigation
+    viewModel: MenuViewModel = viewModel()
 ) {
     // State for menu data (would normally be loaded from ViewModel)
     var namaMenu by remember { mutableStateOf("Nasi Goreng Spesial") }
@@ -326,6 +330,7 @@ fun EditImageComponent(
     onImageSelected: (Uri) -> Unit
 ) {
     val context = LocalContext.current
+
     val getContent = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -342,13 +347,14 @@ fun EditImageComponent(
         if (currentImageUri != null) {
             Image(
                 painter = rememberImagePainter(currentImageUri),
-                contentDescription = "Menu Image",
+                contentDescription = "Gambar Menu",
                 modifier = Modifier
                     .fillMaxSize()
-                    .clickable { getContent.launch("image/*") }
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable { getContent.launch("image/*") },
+                contentScale = ContentScale.Crop
             )
 
-            // Edit overlay
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -359,8 +365,8 @@ fun EditImageComponent(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    Icons.Default.Edit,
-                    contentDescription = "Edit Image",
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit Gambar",
                     tint = Color.White,
                     modifier = Modifier.size(20.dp)
                 )
@@ -371,7 +377,7 @@ fun EditImageComponent(
                 modifier = Modifier.clickable { getContent.launch("image/*") }
             ) {
                 Icon(
-                    Icons.Default.CameraAlt,
+                    imageVector = Icons.Default.CameraAlt,
                     contentDescription = "Upload Foto",
                     tint = Color.Gray,
                     modifier = Modifier.size(48.dp)
@@ -382,11 +388,12 @@ fun EditImageComponent(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewEditMenuScreen() {
-    EditMenuScreen(
-        navController = rememberNavController(),
-        menuId = 1
-    )
-}
+
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewEditMenuScreen() {
+//    EditMenuScreen(
+//        navController = rememberNavController(),
+//        menuId = 1
+//    )
+//}

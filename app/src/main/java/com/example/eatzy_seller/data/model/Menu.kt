@@ -24,3 +24,24 @@ data class Menu(
     @SerializedName("addon_categories")
     val listCategoryAddOn: List<AddOnCategory>?
 )
+
+//untuk request create menu
+data class UpdateMenuRequest(
+    @SerializedName("menu_name")
+    val menuName: String,
+
+    @SerializedName("menu_price")
+    val menuPrice: Double,
+
+    @SerializedName("preparation_time")
+    val menuPreparationTime: Int,
+
+    @SerializedName("menu_image")
+    val menuImageRes: String,
+
+    @SerializedName("menu_is_available")
+    val menuAvailable: Boolean,
+
+    @SerializedName("addon_categories")
+    val addonCategoryIds: List<Int> = emptyList()
+)

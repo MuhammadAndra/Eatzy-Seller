@@ -3,6 +3,7 @@ package com.example.eatzy_seller.data.repository
 //import com.example.eatzy_seller.data.local.MenuDao
 import com.example.eatzy_seller.data.model.AddOnCategory
 import com.example.eatzy_seller.data.model.MenuCategory
+import com.example.eatzy_seller.data.model.UpdateMenuRequest
 import com.example.eatzy_seller.data.network.api.MenuApiService
 import retrofit2.Response
 
@@ -11,13 +12,11 @@ class MenuRepository(private val apiService: MenuApiService) {
         return apiService.getMenusWithAddOns(token)
     }
 
-    suspend fun getAddons(token: String): Response<List<AddOnCategory>> {
-        return apiService.getAddOnWithAddOns(token)
-    }
-
     suspend fun updateCategoryName(token: String, id: Int, newName: String): Boolean {
         return try {
-            val response = apiService.updateCategoryName(token, mapOf( "id" to id,"categoryName" to newName))
+            val response = apiService.updateCategoryName(token, id,
+                mapOf("menu_category_name" to newName)
+            )
             response.isSuccessful
         } catch (e: Exception) {
             false
@@ -26,7 +25,7 @@ class MenuRepository(private val apiService: MenuApiService) {
 
     suspend fun deleteCategory(token: String, id: Int): Boolean {
         return try {
-            val response = apiService.deleteCategory(token,id)
+            val response = apiService.deleteCategory(token, id)
             response.isSuccessful
         } catch (e: Exception) {
             false
@@ -49,5 +48,20 @@ class MenuRepository(private val apiService: MenuApiService) {
         } catch (e: Exception) {
             false
         }
+    }
+
+    suspend fun updateMenu(token: String, id: Int, menu: UpdateMenuRequest): Boolean {
+        return try {
+            val response = apiService.updateMenu(token, id, menu)
+            response.isSuccessful
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+
+    //===================Addon===================
+    suspend fun getAddons(token: String): Response<List<AddOnCategory>> {
+        return apiService.getAddOnWithAddOns(token)
     }
 }

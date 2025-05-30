@@ -210,25 +210,34 @@ fun MenuListScreen(
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
 
-                        category.menus.forEachIndexed { index, menu ->
-                            //===========Masuk ke Item Menu===========//
-                            MenuItem(
-                                menu = menu,
-                                isAddOn = false,
-                                onDelete = { /* delete logic here */ },
-                                onShowSnackbar = { message ->
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(message)
-                                    }
-                                },
-                                navController = navController,
-                                menuViewModel = viewModel
+                        if (category.menus.isNullOrEmpty()) {
+                            Text(
+                                text = "Menu kosong",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray,
+                                modifier = Modifier.padding(vertical = 8.dp)
                             )
-                            HorizontalDivider(
-                                thickness = 0.5.dp,
-                                color = Color(0xFFBDBDBD),
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
+                        } else {
+                            category.menus.forEachIndexed { index, menu ->
+                                //===========Masuk ke Item Menu===========//
+                                MenuItem(
+                                    menu = menu,
+                                    isAddOn = false,
+                                    onDelete = { /* delete logic here */ },
+                                    onShowSnackbar = { message ->
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar(message)
+                                        }
+                                    },
+                                    navController = navController,
+                                    menuViewModel = viewModel
+                                )
+                                HorizontalDivider(
+                                    thickness = 0.5.dp,
+                                    color = Color(0xFFBDBDBD),
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                            }
                         }
                         Row(
                             modifier = Modifier

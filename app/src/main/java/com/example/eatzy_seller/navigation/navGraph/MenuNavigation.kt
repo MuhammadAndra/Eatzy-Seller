@@ -1,5 +1,6 @@
 package com.example.eatzy_seller.navigation.navGraph
 
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -52,7 +53,7 @@ fun NavGraphBuilder.menuGraph(navController: NavController) {
         )
     ) { backStackEntry ->
         val menuId = backStackEntry.arguments?.getInt("menuId") ?: 0
-        EditMenuScreen(navController = navController, menuId = menuId)
+        EditMenuScreen(navController = navController, menuId = menuId, menuViewModel = viewModel())
     }
 
 

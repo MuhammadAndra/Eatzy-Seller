@@ -1,9 +1,10 @@
 package com.example.eatzy_seller.data.network.api
 
 import com.example.eatzy_seller.data.model.AddOnCategory
+import com.example.eatzy_seller.data.model.Menu
 import com.example.eatzy_seller.data.model.MenuCategory
-import com.google.gson.annotations.SerializedName
-import retrofit2.Call
+import com.example.eatzy_seller.data.model.UpdateMenuRequest
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -20,29 +21,37 @@ interface MenuApiService {
         @Header("Authorization") token: String
     ): Response<List<MenuCategory>>
 
-    @PUT("menus/categories")
+    @PUT("menus/categories/{id}")
     suspend fun updateCategoryName(
         @Header("Authorization") token: String,
-        @Body body: Map<String, Any>
+        @Path("id") id: Int,
+        @Body body: Map<String, String>
     ): Response<Unit>
 
-    @DELETE("menus/categories/{id}")
+    @DELETE("menus/deleteCategoriesMenu/{id}")
     suspend fun deleteCategory(
         @Header("Authorization") token: String,
-        @Body id: Int
+        @Path("id") id: Int
     ): Response<Unit>
 
     @DELETE("menus/deleteMenu/{id}")
     suspend fun deleteMenu(
         @Header("Authorization") token: String,
-        @Body id: Int
+        @Path("id") id: Int
     ): Response<Unit>
 
-    @PATCH("menus/menus/{id}")
+    @PUT("menus/availableMenu/{id}")
     suspend fun toggleMenuAvailability(
         @Header("Authorization") token: String,
         @Path("id") id: Int,
         @Body body: Map<String, Boolean>
+    ): Response<Unit>
+
+    @PUT("menus/menus/{id}")
+    suspend fun updateMenu(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int,
+        @Body body: UpdateMenuRequest
     ): Response<Unit>
 
 

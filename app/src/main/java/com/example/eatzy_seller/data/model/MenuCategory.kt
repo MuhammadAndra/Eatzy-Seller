@@ -13,5 +13,5 @@ data class MenuCategory(
     val categoryName: String,
 
     @SerializedName("menus")
-    val menus: List<Menu>
+    val menus: List<Menu>?
 )

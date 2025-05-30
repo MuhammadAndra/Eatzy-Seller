@@ -63,9 +63,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.eatzy_seller.navigation.navGraph.AddMenu
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import com.example.eatzy_seller.ui.components.TopBarMenu
@@ -80,7 +82,8 @@ import com.example.eatzy_seller.ui.theme.PrimaryColor
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddMenuScreen(
-    navController: NavController = rememberNavController()
+    navController: NavController = rememberNavController(),
+    viewModel: MenuViewModel = viewModel()
 ) {
     // Menyimpan input user
     var namaMenu by remember { mutableStateOf("") }
@@ -108,6 +111,7 @@ fun AddMenuScreen(
     var newKategoriAddOn by remember { mutableStateOf("") }
     var isSingleChoice by remember { mutableStateOf(false) }
 
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     Scaffold(
         containerColor = Color.White,
@@ -315,7 +319,10 @@ fun AddMenuScreen(
                 "Tambah Gambar", fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(6.dp)
             )
-            UploadImageComponent()
+            UploadImageComponent(
+                selectedImageUri = selectedImageUri,
+                onImageSelected = { selectedImageUri = it }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -388,52 +395,68 @@ fun SimpanTambahMenuButton(onClick: () -> Unit) {
 }
 
 @Composable
-fun UploadImageComponent() {
-    // State untuk menyimpan gambar yang dipilih
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-
-    // Setup ActivityResultLauncher untuk memilih gambar dari galeri
+fun UploadImageComponent(
+    selectedImageUri: Uri?,
+    onImageSelected: (Uri) -> Unit
+) {
     val context = LocalContext.current
-    val getContent =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            // Setelah gambar dipilih, simpan URI-nya
-            selectedImageUri = uri
-        }
 
-    // Tombol untuk memilih gambar
+    val getContent = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { onImageSelected(it) }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
-            .border(1.dp, Color.Gray, RoundedCornerShape(16.dp))
-            .clickable {
-                // Menjalankan launcher untuk memilih gambar dari galeri
-                getContent.launch("image/*")
-            },
+            .border(1.dp, Color.Gray, RoundedCornerShape(16.dp)),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                painter = painterResource(id = android.R.drawable.ic_menu_camera), // Ganti dengan ikon kamera
-                contentDescription = "Upload Foto",
-                tint = Color.Gray
+        if (selectedImageUri != null) {
+            Image(
+                painter = rememberImagePainter(data = selectedImageUri),
+                contentDescription = "Gambar Terpilih",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable { getContent.launch("image/*") },
+                contentScale = ContentScale.Crop
             )
-            Text("Unggah foto", color = Color.Gray)
-        }
 
-        // Jika ada gambar yang dipilih, tampilkan gambar tersebut
-        selectedImageUri?.let {
-            Image(painter = rememberImagePainter(it), contentDescription = null)
+            // Overlay edit icon
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(8.dp)
+                    .size(36.dp)
+                    .background(Color.Black.copy(alpha = 0.6f), shape = CircleShape)
+                    .clickable { getContent.launch("image/*") },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit Gambar",
+                    tint = Color.White
+                )
+            }
+        } else {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.clickable { getContent.launch("image/*") }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CameraAlt,
+                    contentDescription = "Upload Foto",
+                    tint = Color.Gray,
+                    modifier = Modifier.size(48.dp)
+                )
+                Text("Unggah foto", color = Color.Gray)
+            }
         }
     }
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewUploadImage() {
-    UploadImageComponent()
-}
 
 @Preview(showBackground = true)
 @Composable

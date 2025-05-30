@@ -25,8 +25,8 @@ interface OrderApiService {
     @GET("orders")
     suspend fun getOrders(
         @Header("Authorization") token: String,
-        @Query("canteenId") canteenId: Int, //mengirimkan userID di url
-        @Query("status") status: String
+        @Header("user_id") user_id: Int //mengirimkan userID di url
+//        @Query("status") status: String
     ): Response<List<OrderState>> //mengembalikan list dari OrderState
 
     @PUT("orders/{order_id}")

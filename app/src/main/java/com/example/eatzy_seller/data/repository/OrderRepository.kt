@@ -12,7 +12,8 @@ class OrderRepository(
 
     suspend fun getOrders(token: String, canteenId: Int, status: String): List<OrderState>? {
         return try {
-            val response = api.getOrders(token, canteenId, status)
+            val response = api.getOrders("Bearer $token", canteenId, status)
+            Log.d("OrderRepository", "getOrders response: code=${response.code()}, message=${response.message()}")
             if (response.isSuccessful) response.body() else null // bisa ditambahkan log error
         } catch (e:Exception) {
             Log.e("OrderRepository", "getOrders failed: ${e.message}")

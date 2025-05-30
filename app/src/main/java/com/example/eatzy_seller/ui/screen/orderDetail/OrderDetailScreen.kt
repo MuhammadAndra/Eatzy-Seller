@@ -118,10 +118,9 @@ fun OrderDetailScreen(navController: NavHostController, order: OrderList, token:
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val totalHarga = order.items.sumOf { it.quantity * it.menu_price }
             OrderDetailRow(
                 label = "Subtotal Pesanan (${order.items.size} item)",
-                value = "${formatPrice(totalHarga)}"
+                value = "${formatPrice(order.total_price)}"
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -213,6 +212,8 @@ fun OrderItemCard(item: OrderItem) {
             }
         }
 
+        Log.d("IMAGE_URL", "Image URL: ${item.menu_image}")
+
 //        AsyncImage(
 //            model = item.menu_image,
 //            contentDescription = null,
@@ -230,7 +231,7 @@ fun OrderItemCard(item: OrderItem) {
                 Text(item.menu_name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Text("${formatPrice(item.menu_price)}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
             }
-            Text("Jumlah: ${item.quantity}", fontSize = 14.sp)
+//            Text("Jumlah: ${item.quantity}", fontSize = 14.sp)
             Text(item.add_on, fontSize = 14.sp)
             Text("Catatan: ${item.item_details}", fontSize = 14.sp, color = Color.Gray)
         }
@@ -254,7 +255,7 @@ fun PreviewOrderDetailScreen() {
                 item_details = "nasinya dikit aja",
                 menu_image = "https://example.com/image.jpg",
                 menu_price = 12000.0,
-                quantity = 1,
+//                quantity = 1,
                 add_on = "sambal bawang"
             )
         )

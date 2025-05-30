@@ -79,17 +79,20 @@ fun NavGraphBuilder.orderDetailGraph(
     ) { backStackEntry ->
 
         val orderId = backStackEntry.arguments?.getInt("orderId")
+        //jika orderId null akan kembali kescreen sebelumnya
         if (orderId == null) {
             navController.popBackStack()
             return@composable
         }
 
+        //mengambil detail pesanan berdasarkan Id
         val selectedOrderState = viewModel.getOrderById(orderId)
         if (selectedOrderState == null) {
             navController.popBackStack()
             return@composable
         }
 
+        //konversi dari orderState ke orderList untuk tampilan detail
         val order = OrderList(
             order_id = selectedOrderState.order_id,
             order_time = selectedOrderState.order_time,
@@ -98,21 +101,22 @@ fun NavGraphBuilder.orderDetailGraph(
             total_price = selectedOrderState.items.sumOf { it.menu_price * it.quantity }
         )
 
+        //menampilkan orderDetailScreen
         OrderDetailScreen(
-            navController = navController,
-            order = order,
+            navController = navController, //navigasi
+            order = order, //data pesanan yg ditampilkan, ini dari OrderList
             token = token,
 //            viewModel = viewModel,
             onNavigateToOrderFinished = {
                 viewModel.updateOrderStatus(
                     token = token,
                     orderId = order.order_id,
-                    newStatus = OrderStatus.SELESAI.dbValue,
+                    newStatus = OrderStatus.SELESAI.dbValue, //ubah status ke selesai
 //                    canteenId = canteenId,
                     onSuccess = {
                         viewModel.updateSelectedStatus(OrderStatus.SELESAI, token)
                         navController.navigate(Order.route) {
-                            popUpTo(Order.route) { inclusive = true }
+                            popUpTo(Order.route) { inclusive = true } //kembali ke layar daftar pesanan (OrderStateScreen)
                         }
                     },
                     onError = { Log.e("ORDER_ERROR", it) }

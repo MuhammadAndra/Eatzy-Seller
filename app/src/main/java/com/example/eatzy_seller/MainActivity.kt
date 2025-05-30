@@ -19,7 +19,7 @@ import com.example.eatzy_seller.ui.screen.orderState.OrderStateViewModel
 import com.example.eatzy_seller.ui.theme.EatzySellerTheme
 
 //tokennya taro sini, kalo apinya butuh authorisasi
-const val token ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJzZWxsZXJAZXhhbXBsZS5jb20iLCJyb2xlIjoiY2FudGVlbiIsImlhdCI6MTc0ODMzOTE4OSwiZXhwIjoxNzYzODkxMTg5fQ.9qdlggSj1R_CMBm0lPNObxbIKXjDCf6fk16un3S480k"
+const val token =" Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJleGFtcGxlQGdtYWlsLmNvbSIsInJvbGUiOiJjYW50ZWVuIiwiaWF0IjoxNzQ4NTgwOTA1LCJleHAiOjE3NjQxMzI5MDV9.tJkw_TgWbrk0465LPNL1l9IDUoH49wEjKFTroNtC1Fs"
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

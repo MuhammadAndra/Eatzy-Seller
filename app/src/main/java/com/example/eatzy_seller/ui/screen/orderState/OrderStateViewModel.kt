@@ -13,6 +13,7 @@ import com.example.eatzy_seller.data.model.User
 import com.example.eatzy_seller.data.network.RetrofitClient
 import com.example.eatzy_seller.data.network.api.OrderApiService
 import com.example.eatzy_seller.data.repository.OrderRepository
+import com.example.eatzy_seller.token
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +32,10 @@ class OrderStateViewModel(
 
     private val _orders = MutableStateFlow<List<OrderState>>(emptyList())
     val orders: StateFlow<List<OrderState>> = _orders.asStateFlow()
+
+    init {
+        fetchOrders()
+    }
 
     private val _selectedStatus = MutableStateFlow(OrderStatus.SEMUA)
     val selectedStatus: StateFlow<OrderStatus> = _selectedStatus.asStateFlow()
@@ -51,7 +56,9 @@ class OrderStateViewModel(
     }
 
     fun fetchOrders() {
+        Log.d("OrderViewModel", "Token used: $token")
         val token = currentToken ?: return
+//        Log.d("TokenCheck", "currentToken = $currentToken")
         val canteenId = currentCanteenId ?: return
         val status = _selectedStatus.value.dbValue
 
@@ -123,16 +130,14 @@ class OrderStateViewModel(
         token: String,
         orderId: Int,
         newStatus: String,
-//        canteenId: Int,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
         viewModelScope.launch {
             _isLoading.value = true
 
-            val statusEnum = try {
-                OrderStatus.valueOf(newStatus.uppercase())
-            } catch (e: IllegalArgumentException) {
+            val statusEnum = OrderStatus.values().find { it.dbValue == newStatus }
+            if (statusEnum == null) {
                 onError("Status tidak valid")
                 _isLoading.value = false
                 return@launch
@@ -152,7 +157,6 @@ class OrderStateViewModel(
             _isLoading.value = false
         }
     }
-
 
 //    fun acceptOrder(order: OrderState) {
 //        viewModelScope.launch {

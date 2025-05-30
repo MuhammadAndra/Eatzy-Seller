@@ -1,5 +1,6 @@
 package com.example.eatzy_seller.data.model
 
+import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.Serializable
 
 //ini untuk tampilan detail pesanan
@@ -12,10 +13,12 @@ data class OrderList(
 )
 //ini untuk di luaran pesanan (dlm card)
 data class OrderState(
+    @SerializedName("order_id")
     val order_id: Int,
+    @SerializedName("order_status")
     val order_status: String,
-    val order_time: String,
-    val estimation_time: String,
+    val order_time: String?,
+    val estimation_time: String?,
     val total_price: Double,
     val items: List<OrderItem>
 )
@@ -28,21 +31,10 @@ data class OrderItem(
     val item_details: String,
     val menu_image: String?,
     val menu_price: Double,
-    val quantity: Int,
-    val add_on: String = ""
-) {
-    //untuk menghitung quantity
-    companion object {
-        fun groupWithQuantity(items: List<OrderItem>): List<OrderItem> {
-            return items
-                .groupBy { it.menu_name to it.add_on }
-                .map { (_, group) ->
-                    val first = group.first()
-                    first.copy(quantity = group.size)
-                }
-        }
-    }
-}
+//    val quantity: Int,
+    val add_on: String
+//    val add_on_prices: List<Double>
+)
 
 data class UpdateOrderStatusRequest(
     val order_id: Int,

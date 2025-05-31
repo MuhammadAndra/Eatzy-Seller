@@ -47,6 +47,7 @@ interface MenuApiService {
         @Body body: Map<String, Boolean>
     ): Response<Unit>
 
+    //update menu
     @PUT("menus/menus/{id}")
     suspend fun updateMenu(
         @Header("Authorization") token: String,

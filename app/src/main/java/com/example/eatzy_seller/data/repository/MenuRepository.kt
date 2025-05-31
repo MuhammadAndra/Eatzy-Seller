@@ -59,6 +59,16 @@ class MenuRepository(private val apiService: MenuApiService) {
         }
     }
 
+    suspend fun getMenuItem(token: String, id: Int): Boolean {
+        return try {
+            val response = apiService.getMenuItem(token, id)
+            response.isSuccessful
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+
 
     //===================Addon===================
     suspend fun getAddons(token: String): Response<List<AddOnCategory>> {

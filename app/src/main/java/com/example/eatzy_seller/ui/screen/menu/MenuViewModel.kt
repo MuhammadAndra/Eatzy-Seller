@@ -123,6 +123,18 @@ class MenuViewModel : ViewModel() {
         }
     }
 
+    fun fetchMenuItem(menuId: Int){
+        viewModelScope.launch {
+            val success = repository.getMenuItem(token, menuId)
+            if (success) {
+                fetchMenus()
+            } else {
+                _error.value = "Gagal mengambil menu."
+            }
+        }
+    }
+
+
 
 
 

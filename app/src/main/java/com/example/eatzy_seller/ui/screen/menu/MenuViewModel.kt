@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 // token
 const val token = "bearer " +
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJidWtyaXNAZXhhbXBsZS5jb20iLCJyb2xlIjoiY2FudGVlbiIsImlhdCI6MTc0ODU2NDc4MSwiZXhwIjoxNzY0MTE2NzgxfQ.UVXsenWc8EouRLgKZ9O8kpm_Ae2RP89jomX5-FWLYOQ"
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJyaWRva0BleGFtcGxlLmNvbSIsInJvbGUiOiJjYW50ZWVuIiwiaWF0IjoxNzQ4NzY3MDk3LCJleHAiOjE3NjQzMTkwOTd9.hbc02JnglTLaqqFoqEjCuB9QGHooox_Cm59MQHuku6k"
 
 class MenuViewModel : ViewModel() {
     //nyambung ke repository

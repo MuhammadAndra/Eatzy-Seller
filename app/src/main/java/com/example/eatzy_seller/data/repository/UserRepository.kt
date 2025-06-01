@@ -4,6 +4,7 @@ package com.example.eatzy_seller.data.repository
 import android.content.Context
 import android.util.Log
 import com.example.eatzy_seller.data.network.RetrofitClient
+import com.example.eatzy_seller.data.network.RetrofitClient.apiService
 import com.example.eatzy_seller.data.network.api.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,12 +25,12 @@ data class UserState(
 )
 
 class UserRepository(private val context: Context) {
-    private val apiService = try {
-        RetrofitClient.instance
-    } catch (e: Exception) {
-        Log.e("UserRepository", "Failed to initialize Retrofit: ${e.message}", e)
-        throw e
-    }
+//    private val apiService = try {
+//        RetrofitClient.instance
+//    } catch (e: Exception) {
+//        Log.e("UserRepository", "Failed to initialize Retrofit: ${e.message}", e)
+//        throw e
+//    }
 
     private val sharedPreferences = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
 

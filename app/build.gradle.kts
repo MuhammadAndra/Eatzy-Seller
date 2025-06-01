@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.devtools.ksp") version "2.0.21-1.0.27"
+//    id("com.google.devtools.ksp") version "2.0.21-1.0.27"
     kotlin("plugin.serialization") version "2.0.21"
     id("com.google.devtools.ksp") version "2.0.21-1.0.25"
 }
@@ -70,6 +70,7 @@ dependencies {
     implementation ("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation ("androidx.room:room-runtime:2.5.0")
     implementation("androidx.room:room-ktx:2.5.0")
+    implementation(libs.androidx.room.common.jvm)
     ksp("androidx.room:room-compiler:2.5.0")
 //    implementation("com.squareup.okhttp3:okhttp:3.4.1")
 //    implementation("com.squareup.okhttp3:logging-interceptor:3.4.1")
@@ -107,10 +108,10 @@ dependencies {
     implementation ("androidx.compose.material3:material3:1.0.0")
     implementation("io.coil-kt:coil-compose:2.7.0") // atau versi terbaru
 
-    implementation("androidx.room:room-runtime:2.7.1")
-    implementation("androidx.room:room-ktx:2.7.1")
-
-    ksp("androidx.room:room-compiler:2.7.1")
+//    implementation("androidx.room:room-runtime:2.7.1")
+//    implementation("androidx.room:room-ktx:2.7.1")
+//
+//    ksp("androidx.room:room-compiler:2.7.1")
 
     implementation ("androidx.compose.runtime:runtime-livedata:1.6.0")
 

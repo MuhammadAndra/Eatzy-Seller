@@ -82,7 +82,7 @@ fun TopBarMenu(
 }
 
 @Composable
-fun DeleteMenuDialog(
+fun DeleteDialog(
     objek: String,
     title: String,
     onConfirmDelete: () -> Unit,
@@ -353,7 +353,7 @@ fun TopBarMenuPreview() {
 @Preview(showBackground = true)
 @Composable
 fun DeleteMenuDialogPreview() {
-    DeleteMenuDialog(
+    DeleteDialog(
         objek = "menu",
         title = "Nasi Goreng",
         onConfirmDelete = {},

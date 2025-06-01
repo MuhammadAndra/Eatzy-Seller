@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -19,26 +18,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.eatzy_seller.data.model.AddOn
-import com.example.eatzy_seller.data.model.AddOnCategory
-import com.example.eatzy_seller.data.model.MenuCategory
 import com.example.eatzy_seller.data.model.dummyAddOnCategories
-import com.example.eatzy_seller.data.model.dummyAddOns1
 import com.example.eatzy_seller.data.model.fetchCategoryById
 import com.example.eatzy_seller.ui.components.Add_AddOnDialog
 import com.example.eatzy_seller.ui.components.BottomNavBar
-import com.example.eatzy_seller.ui.components.DeleteMenuDialog
-import com.example.eatzy_seller.ui.components.EditCategoryDialog
+import com.example.eatzy_seller.ui.components.DeleteDialog
 import com.example.eatzy_seller.ui.components.TopBarMenu
 import com.example.eatzy_seller.ui.theme.PrimaryColor
 import com.example.eatzy_seller.ui.theme.SecondColor
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -299,7 +292,7 @@ fun AddOnCategoryScreen(
 
         //===========Dialog delete kategori Menu===========//
         if (showDeleteAddOnCategoryDialog && addOnCategoryToDelete != null) {
-            DeleteMenuDialog(
+            DeleteDialog(
                 objek = "Kategori Menu",
                 title = addOnCategoryToDelete!!.AddOnName,
                 onConfirmDelete = {

@@ -1,6 +1,5 @@
 package com.example.eatzy_seller.ui.screen.menu
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,7 +27,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -39,8 +37,6 @@ import com.example.eatzy_seller.data.model.AddOn
 import com.example.eatzy_seller.data.model.AddOnCategory
 import com.example.eatzy_seller.data.model.Menu
 import com.example.eatzy_seller.data.model.MenuCategory
-import com.example.eatzy_seller.data.model.dummyAddOnCategories
-import com.example.eatzy_seller.data.model.dummyMenuCategories
 import com.example.eatzy_seller.navigation.navGraph.AddAddOnCategory
 import com.example.eatzy_seller.navigation.navGraph.AddMenu
 import com.example.eatzy_seller.ui.components.*
@@ -49,7 +45,6 @@ import com.example.eatzy_seller.ui.theme.SecondColor
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
-import androidx.compose.runtime.livedata.observeAsState
 
 enum class MenuType {
     REGULAR_MENU, ADD_ON
@@ -137,7 +132,6 @@ fun MenuListScreen(
 
     LaunchedEffect(Unit) {
         viewModel.fetchMenus()
-        Log.d("",menuCategories.toString())
 
     }
 
@@ -223,7 +217,6 @@ fun MenuListScreen(
                                 MenuItem(
                                     menu = menu,
                                     isAddOn = false,
-                                    onDelete = { /* delete logic here */ },
                                     onShowSnackbar = { message ->
                                         coroutineScope.launch {
                                             snackbarHostState.showSnackbar(message)
@@ -307,7 +300,7 @@ fun MenuListScreen(
 
         //===========Dialog delete kategori Menu===========//
         if (showDeleteCategoryDialog && categoryToDelete != null) {
-            DeleteMenuDialog(
+            DeleteDialog(
                 objek = "Kategori Menu",
                 title = categoryToDelete!!.categoryName,
                 onConfirmDelete = {
@@ -334,7 +327,6 @@ fun MenuListScreen(
 fun MenuItem(
     menu: Menu,
     isAddOn: Boolean,
-    onDelete: () -> Unit,
     onShowSnackbar: (String) -> Unit,
     navController: NavController,
     menuViewModel: MenuViewModel = viewModel()
@@ -342,12 +334,12 @@ fun MenuItem(
     //===========Button Delete Item Menu===========//
     var showDeleteDialog by remember { mutableStateOf(false) }
     if (showDeleteDialog) {
-        DeleteMenuDialog(
-            objek = if (isAddOn) "Add-On" else "Menu",
+        DeleteDialog(
+            objek = "Menu",
             title = menu.menuName,
             onConfirmDelete = {
                 menuViewModel.deleteMenu(menu.menuId)
-                onShowSnackbar("${if (isAddOn) "Add-On" else "Menu"} \"${menu.menuName}\" berhasil dihapus")
+                onShowSnackbar("Menu ${menu.menuName}\" berhasil dihapus")
             },
             onDismiss = { showDeleteDialog = false }
         )
@@ -393,14 +385,13 @@ fun MenuItem(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = menu.menuAvailable,
-                    onCheckedChange = {
-                            isChecked ->
+                    onCheckedChange = { isChecked ->
                         menuViewModel.toggleMenuAvailability(menu.menuId, isChecked)
                         onShowSnackbar("${menu.menuName} ${if (isChecked) "tersedia" else "tidak tersedia"}")
                     }
                 )
                 Text(
-                    text = if (isAddOn) "Tampilkan Add-On" else "Tampilkan Menu",
+                    text = "Tampilkan Menu",
                     fontSize = 14.sp
                 )
             }
@@ -575,7 +566,7 @@ fun AddOnListScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Button(
-//edit
+                                //edit
                                 onClick = {
                                     navController.navigate("edit_addOnCategory/${category.addOnCategoryId}")
                                 },
@@ -591,7 +582,7 @@ fun AddOnListScreen(
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
-//delete
+                                //delete
                                 onClick = {
                                     categoryToDelete = category
                                     showDeleteCategoryDialog = true
@@ -614,11 +605,11 @@ fun AddOnListScreen(
 
         //===========Delete Category Add-On Dialog===========//
         if (showDeleteCategoryDialog && categoryToDelete != null) {
-            DeleteMenuDialog(
+            DeleteDialog(
                 objek = "Kategori Add-On",
                 title = categoryToDelete!!.addOnCategoryName,
                 onConfirmDelete = {
-                    //addOnCategories.remove(categoryToDelete)
+                    viewModel.deleteAddonCategory(categoryToDelete!!.addOnCategoryId)
                     showDeleteCategoryDialog = false
                     categoryToDelete = null
 
@@ -641,7 +632,8 @@ fun AddOnListScreen(
 fun AddOnItem(
     addOn: AddOn?,
     onDelete: () -> Unit,
-    onShowSnackbar: (String) -> Unit
+    onShowSnackbar: (String) -> Unit,
+    addonViewModel: MenuViewModel = viewModel()
 ) {
     if (addOn == null) {
         return // Atau bisa tampilkan UI placeholder
@@ -650,11 +642,11 @@ fun AddOnItem(
     //delete item add on Dialog
     var showDeleteDialog by remember { mutableStateOf(false) }
     if (showDeleteDialog) {
-        DeleteMenuDialog(
+        DeleteDialog(
             objek = "Add-On",
             title = addOn.AddOnName,
             onConfirmDelete = {
-                onDelete()
+                addonViewModel.deleteAddon(addOn.AddOnId)
                 onShowSnackbar("Add-On \"${addOn.AddOnName}\" berhasil dihapus")
             },
             onDismiss = { showDeleteDialog = false }
@@ -704,7 +696,10 @@ fun AddOnItem(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = addOn.AddOnAvailable,
-                    onCheckedChange = { /* handle toggle */ }
+                    onCheckedChange = { isChecked ->
+                        addonViewModel.toggleAddonAvailability(addOn.AddOnId, isChecked)
+                        onShowSnackbar("${addOn.AddOnName} ${if (isChecked) "tersedia" else "tidak tersedia"}")
+                    }
                 )
                 Text(
                     text = "Tampilkan Add-On",

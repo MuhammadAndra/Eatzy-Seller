@@ -77,5 +77,24 @@ interface MenuApiService {
     suspend fun getAddOnWithAddOns(
         @Header("Authorization") token: String
     ): Response<List<AddOnCategory>>
+
+    @DELETE("menus/deleteCategoriesAddon/{id}")
+    suspend fun deleteAddonCategory(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
+    ): Response<Unit>
+
+    @DELETE("menus/deleteAddons/{id}")
+    suspend fun deleteAddon(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
+    ): Response<Unit>
+
+    @PUT("menus/availableAddon/{id}")
+    suspend fun toggleAddonAvailability(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int,
+        @Body body: Map<String, Boolean>
+    ): Response<Unit>
 }
 

@@ -158,6 +158,50 @@ class MenuViewModel : ViewModel() {
         }
     }
 
+    fun deleteAddonCategory(categoryId: Int) {
+        viewModelScope.launch {
+            val success = repository.deleteAddonCategory(token, categoryId)
+            Log.d("id","$categoryId")
+            if (success) {
+                _addonCategories.update { list ->
+                    list.filter { it.addOnCategoryId != categoryId }
+                }
+            }
+        }
+    }
+
+    fun deleteAddon(addonId: Int) {
+        viewModelScope.launch {
+            val success = repository.deleteAddon(token, addonId)
+            if (success) {
+                _addonCategories.update { list ->
+                    list.map { category ->
+                        category.copy(
+                            addOns = category.addOns?.filter { it.AddOnId != addonId } ?: emptyList()
+                        )                    }
+                }
+            }
+        }
+    }
+
+    fun toggleAddonAvailability(addonId: Int, isAvailable: Boolean) {
+        viewModelScope.launch {
+            val success = repository.toggleAddonAvailability(token, addonId, isAvailable)
+            if (success) {
+                _addonCategories.update { list ->
+                    list.map { category ->
+                        category.copy(
+                            addOns = category.addOns?.map {
+                                if (it.AddOnId == addonId) it.copy(AddOnAvailable = isAvailable)
+                                else it
+                            } ?: emptyList()
+                        )
+                    }
+                }
+            }
+        }
+    }
+
 
 
 }

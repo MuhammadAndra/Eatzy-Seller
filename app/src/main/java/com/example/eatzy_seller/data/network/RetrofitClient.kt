@@ -1,5 +1,6 @@
 package com.example.eatzy_seller.data.network
 
+import com.example.eatzy_seller.data.network.api.OrderApiService
 import com.example.eatzy_seller.data.network.api.ApiService
 import com.example.eatzy_seller.data.network.api.SalesApi
 import com.example.eatzy_seller.data.network.api.MenuApiService
@@ -32,5 +33,6 @@ object RetrofitClient {
     val apiService: ApiService by lazy { retrofit.create(ApiService::class.java) }
     val menuApi: MenuApiService by lazy { retrofit.create(MenuApiService::class.java) }
     val salesApi: SalesApi by lazy { retrofit.create(SalesApi::class.java)}
+    val orderApi: OrderApiService by lazy { retrofit.create(OrderApiService::class.java) }
 
 }

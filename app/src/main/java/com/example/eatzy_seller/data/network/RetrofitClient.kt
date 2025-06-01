@@ -1,32 +1,35 @@
-// data/network/RetrofitClient.kt
 package com.example.eatzy_seller.data.network
 
 import com.example.eatzy_seller.data.network.api.ApiService
 import com.example.eatzy_seller.data.network.api.SalesApi
+import com.example.eatzy_seller.data.network.api.MenuApiService
+import com.example.eatzy_seller.data.network.api.TestApiService
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "http://10.0.2.2:3002/" // Matches emulator environment
+    private const val BASEURL = "http://10.0.2.2:3002/"
+    private val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+    private val okHttpClient = OkHttpClient.Builder().addInterceptor(
+        loggingInterceptor
+    ).build()
 
-    val instance: ApiService by lazy {
-        val client = OkHttpClient.Builder().build()
+    private val retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BASEURL)
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
-            .client(client)
             .build()
-            .create(ApiService::class.java)
     }
 
-    val salesApi: SalesApi by lazy {
-        val client = OkHttpClient.Builder().build()
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(client)
-            .build()
-            .create(SalesApi::class.java)
-    }
+
+
+    val testApi: TestApiService by lazy { retrofit.create(TestApiService::class.java) }
+    val menuApi: MenuApiService by lazy { retrofit.create(MenuApiService::class.java) }
+    val salesApi: SalesApi by lazy { retrofit.create(SalesApi::class.java)}
+
 }

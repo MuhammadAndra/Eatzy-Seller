@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.eatzy_seller.token
+import com.example.eatzy_seller.ui.screen.menu.token
 import com.example.eatzy_seller.ui.screen.test.TestApiViewModel
 
 @Composable

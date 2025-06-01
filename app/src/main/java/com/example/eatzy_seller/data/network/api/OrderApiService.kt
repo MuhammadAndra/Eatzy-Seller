@@ -1,0 +1,36 @@
+package com.example.eatzy_seller.data.network.api
+
+import com.example.eatzy_seller.data.model.OrderList
+import com.example.eatzy_seller.data.model.OrderState
+import com.example.eatzy_seller.data.model.UpdateOrderStatusRequest
+//import com.example.eatzy_seller.data.model.OrderState
+//import com.example.eatzy_seller.data.model.UpdateOrderStatusRequest
+//import com.example.eatzy_seller.data.model.newStatus
+import com.example.eatzy_seller.data.network.RetrofitClient
+//import com.example.eatzy_seller.navigation.navGraph.Order
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.PUT
+import retrofit2.http.Path
+import retrofit2.http.Query
+
+import retrofit2.http.*
+
+interface OrderApiService {
+
+    @GET("orders")
+    suspend fun getOrders(
+        @Header("Authorization") token: String,
+        @Query("status") status: String
+    ): Response<List<OrderState>>
+
+    @PUT("orders/{order_id}")
+    suspend fun updateOrderStatus(
+        @Header("Authorization") token: String,
+        @Path("order_id") orderId: Int,
+        @Body statusRequest: UpdateOrderStatusRequest
+    ): Response<Unit>
+}

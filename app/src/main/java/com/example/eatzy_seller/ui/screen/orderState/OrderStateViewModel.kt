@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 //import com.example.eatzy_seller.data.local.toModel
 import com.example.eatzy_seller.data.model.OrderState
 import com.example.eatzy_seller.data.model.UpdateOrderStatusRequest
@@ -25,91 +26,126 @@ import okio.IOException
 import retrofit2.HttpException
 import kotlin.collections.emptyList
 
-class OrderStateViewModel(
-    private val repository: OrderRepository
-//    private val token: String
-) : ViewModel() {
+class OrderStateViewModel : ViewModel() {
 
     private val _orders = MutableStateFlow<List<OrderState>>(emptyList())
-    val orders: StateFlow<List<OrderState>> = _orders.asStateFlow()
-
-    init {
-        fetchOrders()
-    }
+    val orders: StateFlow<List<OrderState>> = _orders
 
     private val _selectedStatus = MutableStateFlow(OrderStatus.SEMUA)
-    val selectedStatus: StateFlow<OrderStatus> = _selectedStatus.asStateFlow()
+    val selectedStatus: StateFlow<OrderStatus> = _selectedStatus
 
     private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
+    val error: StateFlow<String?> = _error
 
-    private var currentToken: String? = null
-    private var currentCanteenId: Int? = null
+    // Variabel repository untuk berkomunikasi dgn backend API
+    private var repository: OrderRepository? = null
 
-    fun setUser(token: String, canteenId: Int) {
-        currentToken = token
-        currentCanteenId = canteenId
-        fetchOrders()
+    /**
+     * Set token untuk autentikasi.
+     * Harus dipanggil sebelum fetchOrders atau updateOrderStatus.
+     */
+    fun setAuth(token: String) {
+        val bearerToken = if (token.startsWith("Bearer ")) token else "Bearer $token"
+        this.repository = OrderRepository(RetrofitClient.orderApi, bearerToken)
     }
 
+    /**
+     * Ambil daftar pesanan berdasarkan status terpilih.
+     */
     fun fetchOrders() {
-        Log.d("OrderViewModel", "Token used: $token")
-        val token = currentToken ?: return
-//        Log.d("TokenCheck", "currentToken = $currentToken")
-        val canteenId = currentCanteenId ?: return
-        val status = _selectedStatus.value.dbValue
+        val currentStatus = _selectedStatus.value
 
         viewModelScope.launch {
             _isLoading.value = true
-            val result = repository.getOrders(token, canteenId, status)
+
+            val result = repository?.getOrders(currentStatus)
             if (result != null) {
                 _orders.value = result
                 _error.value = null
             } else {
                 _error.value = "Gagal mengambil pesanan"
             }
+
             _isLoading.value = false
         }
     }
 
-//    fun loadOrders(token: String) {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            _isLoading.value = true
-//            try {
-//                // For "SEMUA" status, we pass empty string to get all orders
-//                val statusParam = if (_selectedStatus.value == OrderStatus.SEMUA) {
-//                    ""
-//                } else {
-//                    _selectedStatus.value.dbValue
-//                }
-//
-//                val result = repository.getOrders(token, statusParam)
-//
-//                result.onSuccess { orders ->
-//                    _orders.value = orders.map { order ->
-//                        // Convert database status to our frontend status
-//                        order.copy(
-//                            order_status = OrderStatus.fromDbValue(order.order_status)?.displayName
-//                                ?: order.order_status
-//                        )
-//                    }
-//                }.onFailure {
-//                    Log.e("OrderViewModel", "Failed to load orders", it)
-//                }
-//            } finally {
-//                _isLoading.value = false
-//            }
-//        }
-//    }
+    fun getOrderById(orderId: Int): OrderState? {
+        return _orders.value.find { it.orderId == orderId }
+    }
 
-    //mengubah status filter
-    fun updateSelectedStatus(status: OrderStatus, token: String) {
-        _selectedStatus.value = status
+    /**
+     * Ubah status yang dipilih dan ambil ulang data.
+     */
+    //ubah status di state ke state, untuk filter daftar pesanan
+    fun updateSelectedStatus(newStatus: OrderStatus) {
+        _selectedStatus.value = newStatus
         fetchOrders()
     }
+
+    /**
+     * Update status dari suatu pesanan.
+     */
+    //ubah status, setelah menyelesaikan suatu proses, misal dari konfirmasi ke proses
+    fun updateOrderStatus(
+        orderId: Int,
+        newStatus: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            _isLoading.value = true
+
+            val statusEnum = OrderStatus.values().find { it.dbValue == newStatus }
+            if (statusEnum == null) {
+                _isLoading.value = false
+                onError("Status tidak valid")
+                return@launch
+            }
+
+            Log.d("UpdateOrder", "Sending update status request for order $orderId with status $newStatus")
+            val success = repository?.updateOrderStatus(orderId, UpdateOrderStatusRequest(newStatus)) ?: false
+            if (success) {
+                fetchOrders()
+                onSuccess()
+            } else {
+                onError("Gagal mengubah status pesanan")
+            }
+
+            _isLoading.value = false
+        }
+    }
+
+    fun acceptOrder(order: OrderState) = viewModelScope.launch {
+        //jika repo tdk null, panggil fun updateOrderStatus
+        val success = repository?.updateOrderStatus(
+            order.orderId,
+            UpdateOrderStatusRequest(orderStatus = OrderStatus.PROSES.dbValue)
+        ) ?: false
+        if (success) fetchOrders() else _error.value = "Gagal update status pesanan"
+    }
+
+    fun rejectOrder(order: OrderState) = viewModelScope.launch {
+        val success = repository?.updateOrderStatus(
+            order.orderId,
+            UpdateOrderStatusRequest(orderStatus = OrderStatus.BATAL.dbValue)
+        ) ?: false
+        if (success) fetchOrders() else _error.value = "Gagal update status pesanan"
+    }
+
+    fun finishOrder(order:OrderState) = viewModelScope.launch {
+        val success = repository?.updateOrderStatus(
+            order.orderId,
+            UpdateOrderStatusRequest(orderStatus = OrderStatus.SELESAI.dbValue)
+        ) ?: false
+        if (success) fetchOrders() else _error.value = "Gagal update status pesanan"
+
+    }
+}
+
 
 //    // Fungsi untuk menerima pesanan (pindah ke state "proses")
 //    fun acceptOrder(token: String, orderId: Int, canteenId: Int) {
@@ -126,37 +162,37 @@ class OrderStateViewModel(
 //        updateOrderStatus(token, orderId, OrderStatus.SELESAI.dbValue, canteenId)
 //    }
 
-    fun updateOrderStatus(
-        token: String,
-        orderId: Int,
-        newStatus: String,
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit
-    ) {
-        viewModelScope.launch {
-            _isLoading.value = true
-
-            val statusEnum = OrderStatus.values().find { it.dbValue == newStatus }
-            if (statusEnum == null) {
-                onError("Status tidak valid")
-                _isLoading.value = false
-                return@launch
-            }
-
-            val success = repository.updateOrderStatus(
-                token,
-                orderId,
-                UpdateOrderStatusRequest(orderId, statusEnum.dbValue)
-            )
-            if (success) {
-                fetchOrders()
-                onSuccess()
-            } else {
-                onError("Gagal mengubah status pesanan")
-            }
-            _isLoading.value = false
-        }
-    }
+//    fun updateOrderStatus(
+//        orderId: Int,
+//        newStatus: String,
+//        onSuccess: () -> Unit,
+//        onError: (String) -> Unit
+//    ) {
+//        val token = currentToken ?: return onError("Token tidak tersedia")
+//
+//        viewModelScope.launch {
+//            _isLoading.value = true
+//
+//            val statusEnum = OrderStatus.values().find { it.dbValue == newStatus }
+//            if (statusEnum == null) {
+//                onError("Status tidak valid")
+//                _isLoading.value = false
+//                return@launch
+//            }
+//
+//            val success = repository.updateOrderStatus(
+//                orderId,
+//                UpdateOrderStatusRequest(statusEnum.dbValue)
+//            )
+//            if (success) {
+//                fetchOrders()
+//                onSuccess()
+//            } else {
+//                onError("Gagal mengubah status pesanan")
+//            }
+//            _isLoading.value = false
+//        }
+//    }
 
 //    fun acceptOrder(order: OrderState) {
 //        viewModelScope.launch {
@@ -214,17 +250,17 @@ class OrderStateViewModel(
 //        }
 //    }
 
-    fun changeOrderStatus(orderId: Int, newStatus: OrderStatus, onSuccess: () -> Unit, onError: (String) -> Unit) {
-        val token = currentToken ?: return onError("Token tidak tersedia")
-        val canteenId = currentCanteenId ?: return onError("Canteen ID tidak tersedia")
+//    fun changeOrderStatus(orderId: Int, newStatus: OrderStatus, onSuccess: () -> Unit, onError: (String) -> Unit) {
+//        val token = currentToken ?: return onError("Token tidak tersedia")
+//        val canteenId = currentCanteenId ?: return onError("Canteen ID tidak tersedia")
+//
+//        updateOrderStatus(orderId, newStatus.dbValue, onSuccess, onError)
+//    }
 
-        updateOrderStatus(token, orderId, newStatus.dbValue, onSuccess, onError)
-    }
-
-    fun getOrderById(orderId: Int): OrderState? {
-        return _orders.value.find { it.order_id == orderId }
-    }
-}
+//    fun getOrderById(orderId: Int): OrderState? {
+//        return _orders.value.find { it.orderId == orderId }
+//    }
+//}
 //class OrderStateViewModel(
 //    private val repository: OrderRepository
 //) : ViewModel() {

@@ -19,12 +19,12 @@ class TestApiViewModel: ViewModel(){
     private val _users = MutableStateFlow<List<User>>(emptyList())
     val users: StateFlow<List<User>> = _users
 
-    suspend fun fetchUsersResponse(token: String) {
-        val response = repository.getUsersResponse(token = token)
-        if (response.isSuccessful) {
-            _users.value = response.body() ?: emptyList()
-        }
-    }
+//    suspend fun fetchUsersResponse(token: String) {
+//        val response = repository.getUsersResponse(token = token)
+//        if (response.isSuccessful) {
+//            _users.value = response.body() ?: emptyList()
+//        }
+//    }
 
 //    ini fungsi ambil data dari pak aryo
 //    fun fetchUsers(token: String) {

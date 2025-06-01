@@ -11,7 +11,7 @@ import com.example.eatzy_seller.navigation.navGraph.authGraph
 import com.example.eatzy_seller.navigation.navGraph.homeGraph
 import com.example.eatzy_seller.navigation.navGraph.menuGraph
 import com.example.eatzy_seller.navigation.navGraph.orderGraph
-import com.example.eatzy_seller.navigation.navGraph.testGraph
+//import com.example.eatzy_seller.navigation.navGraph.testGraph
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
@@ -19,7 +19,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     NavHost(navController = navController, startDestination = Welcome) {
         authGraph(navController)
         homeGraph(navController)
-        testGraph(navController)
+//        testGraph(navController)
         orderGraph(navController)
         menuGraph(navController)
     }

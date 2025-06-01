@@ -1,3 +1,4 @@
+// navigation/navGraph/HomeNavigation.kt
 package com.example.eatzy_seller.navigation.navGraph
 
 import androidx.navigation.NavController
@@ -6,7 +7,6 @@ import androidx.navigation.compose.composable
 import com.example.eatzy_seller.ui.screen.canteen.CanteenScreen
 import com.example.eatzy_seller.ui.screen.home.HomeScreen
 import com.example.eatzy_seller.ui.screen.profile.ProfileScreen
-
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -21,20 +21,36 @@ object Home
 @Serializable
 object Profile
 
+@Serializable
+object EditProfile
+
+
+@Serializable
+object AuthGraph
+
 fun NavGraphBuilder.homeGraph(navController: NavController) {
     composable<Search> {
-
+        // Define Search screen if needed
     }
     composable<Canteen> {
         CanteenScreen(onNavigateToLogin = { navController.navigate(Login) })
     }
-
     composable<Home> {
         HomeScreen(navController = navController)
     }
-
     composable<Profile> {
-        ProfileScreen(navController = navController)
+        ProfileScreen(
+            navController = navController,
+            onNavigateToEdit = {
+                navController.navigate(EditProfile)
+            },
+            onLogout = {
+                navController.navigate(AuthGraph) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
+            }
+        )
     }
-
 }

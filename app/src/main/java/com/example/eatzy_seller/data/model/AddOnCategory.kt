@@ -6,8 +6,6 @@ data class AddOnCategory(
     @SerializedName("addon_category_id")
     val addOnCategoryId : Int,
 
-    //val kantinId: Int,
-
     @SerializedName("addon_category_name")
     val addOnCategoryName: String,
 

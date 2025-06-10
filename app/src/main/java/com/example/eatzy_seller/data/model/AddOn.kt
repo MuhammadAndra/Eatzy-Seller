@@ -15,3 +15,11 @@ data class AddOn(
     @SerializedName("addon_is_available")
     val AddOnAvailable : Boolean
 )
+
+data class UpdateAddonRequest(
+    @SerializedName("addon_name")
+    val AddOnName: String,
+
+    @SerializedName("addon_price")
+    val AddOnPrice: Double
+)

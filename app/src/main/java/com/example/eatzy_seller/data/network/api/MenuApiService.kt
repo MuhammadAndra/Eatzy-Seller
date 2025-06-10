@@ -3,6 +3,7 @@ package com.example.eatzy_seller.data.network.api
 import com.example.eatzy_seller.data.model.AddOnCategory
 import com.example.eatzy_seller.data.model.Menu
 import com.example.eatzy_seller.data.model.MenuCategory
+import com.example.eatzy_seller.data.model.UpdateAddonRequest
 import com.example.eatzy_seller.data.model.UpdateMenuRequest
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -72,6 +73,8 @@ interface MenuApiService {
     ):  Response<List<AddOnCategory>>
 
 
+
+
     //===================Addon===================
     @GET("menus/addon") // endpoint dari controller
     suspend fun getAddOnWithAddOns(
@@ -95,6 +98,13 @@ interface MenuApiService {
         @Header("Authorization") token: String,
         @Path("id") id: Int,
         @Body body: Map<String, Boolean>
+    ): Response<Unit>
+
+    @PATCH("menus/updateAddon/{id}")
+    suspend fun updateAddonItem(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int,
+        @Body body: UpdateAddonRequest
     ): Response<Unit>
 }
 

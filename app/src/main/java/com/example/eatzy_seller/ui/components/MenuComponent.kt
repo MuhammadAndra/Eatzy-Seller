@@ -304,6 +304,7 @@ fun Add_AddOnDialog(
                     value = newAddOn,
                     onValueChange = AddOnNamaChange,
                     label = { Text("Nama Add-On") },
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )

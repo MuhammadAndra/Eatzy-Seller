@@ -37,6 +37,7 @@ import com.example.eatzy_seller.data.model.AddOn
 import com.example.eatzy_seller.data.model.AddOnCategory
 import com.example.eatzy_seller.data.model.Menu
 import com.example.eatzy_seller.data.model.MenuCategory
+import com.example.eatzy_seller.data.model.UpdateAddonRequest
 import com.example.eatzy_seller.navigation.navGraph.AddAddOnCategory
 import com.example.eatzy_seller.navigation.navGraph.AddMenu
 import com.example.eatzy_seller.ui.components.*
@@ -667,7 +668,11 @@ fun AddOnItem(
             AddOnHargaChange = { newHargaAddOn = it.toDouble() },
             onConfirm = {
                 //kurang logika update edit
+                addonViewModel.updateAddon(addOn.AddOnId,
+                    UpdateAddonRequest(AddOnName = newNamaAddOn, AddOnPrice = newHargaAddOn)
+                )
                 onShowSnackbar("Add-On \"${addOn.AddOnName}\" berhasil diubah")
+                showEditDialog = false
             },
             onDismiss = { showEditDialog = false }
         )

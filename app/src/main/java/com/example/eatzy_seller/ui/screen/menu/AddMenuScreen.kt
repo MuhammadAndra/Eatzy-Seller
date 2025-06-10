@@ -93,7 +93,7 @@ fun AddMenuScreen(
 
 
     // List kategori yang sudah ada
-    val kategoriList = remember { mutableStateListOf("Makanan", "Minuman", "Dessert") }
+    val kategoriList = remember { mutableStateListOf("") }
     var selectedKategori by remember { mutableStateOf(kategoriList.firstOrNull() ?: "") }
     //var newKategori by remember { mutableStateOf("") }
 

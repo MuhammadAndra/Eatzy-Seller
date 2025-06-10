@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eatzy_seller.data.model.AddOnCategory
 import com.example.eatzy_seller.data.model.MenuCategory
+import com.example.eatzy_seller.data.model.UpdateAddonRequest
 import com.example.eatzy_seller.data.model.UpdateMenuRequest
 import com.example.eatzy_seller.data.network.RetrofitClient
 import com.example.eatzy_seller.data.repository.MenuRepository
@@ -198,6 +199,17 @@ class MenuViewModel : ViewModel() {
                         )
                     }
                 }
+            }
+        }
+    }
+
+    fun updateAddon(menuId: Int, updatedAddon: UpdateAddonRequest) {
+        viewModelScope.launch {
+            val success = repository.updateAddonItem(token, menuId, updatedAddon)
+            if (success) {
+                fetchAddons()
+            } else {
+                _error.value = "Gagal mengupdate menu."
             }
         }
     }

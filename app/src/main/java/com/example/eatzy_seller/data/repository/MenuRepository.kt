@@ -3,6 +3,7 @@ package com.example.eatzy_seller.data.repository
 //import com.example.eatzy_seller.data.local.MenuDao
 import com.example.eatzy_seller.data.model.AddOnCategory
 import com.example.eatzy_seller.data.model.MenuCategory
+import com.example.eatzy_seller.data.model.UpdateAddonRequest
 import com.example.eatzy_seller.data.model.UpdateMenuRequest
 import com.example.eatzy_seller.data.network.api.MenuApiService
 import retrofit2.Response
@@ -96,6 +97,15 @@ class MenuRepository(private val apiService: MenuApiService) {
     suspend fun toggleAddonAvailability(token: String, id: Int, isAvailable: Boolean): Boolean {
         return try {
             val response = apiService.toggleAddonAvailability(token,id, mapOf("menuAvailable" to isAvailable))
+            response.isSuccessful
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun updateAddonItem(token: String, id: Int, addon: UpdateAddonRequest): Boolean {
+        return try {
+            val response = apiService.updateAddonItem(token, id, addon)
             response.isSuccessful
         } catch (e: Exception) {
             false

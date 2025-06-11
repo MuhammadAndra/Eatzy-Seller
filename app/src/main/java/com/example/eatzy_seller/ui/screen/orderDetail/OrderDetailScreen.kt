@@ -31,12 +31,14 @@ import java.util.Locale
 import coil.compose.AsyncImage
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import androidx.navigation.compose.rememberNavController
+import com.example.eatzy_seller.data.model.AddOn
 import com.example.eatzy_seller.data.network.api.OrderApiService
 import com.example.eatzy_seller.data.repository.OrderRepository
 import com.example.eatzy_seller.navigation.navGraph.Order
 import com.example.eatzy_seller.token
 import com.example.eatzy_seller.ui.screen.orderState.OrderStateViewModel
 import com.example.eatzy_seller.ui.screen.orderState.OrderStatus
+import java.text.SimpleDateFormat
 
 //aman
 @Composable
@@ -72,8 +74,9 @@ fun TopNavBar(
     }
 }
 
+//kalau di order detail pakai orderList
 @Composable
-fun OrderDetailScreen(navController: NavHostController, order: OrderList, token: String, onNavigateToOrderFinished: () -> Unit) {
+fun OrderDetailScreen(navController: NavHostController, order: OrderList, onNavigateToOrderFinished: () -> Unit) {
     val viewModel: OrderStateViewModel = viewModel()
 
     Scaffold(
@@ -99,14 +102,14 @@ fun OrderDetailScreen(navController: NavHostController, order: OrderList, token:
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text("No. Pesanan", fontWeight = FontWeight.Medium, fontSize = 14.sp)
-                    Text("${order.order_id}", fontWeight = FontWeight.Medium, fontSize = 14.sp)
+                    Text("${order.orderId}", fontWeight = FontWeight.Medium, fontSize = 14.sp)
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text("Tanggal Pemesanan", fontWeight = FontWeight.Medium, fontSize = 14.sp)
-                    Text("${order.order_time}", fontWeight = FontWeight.Medium, fontSize = 14.sp)
+                    Text("${com.example.eatzy_seller.ui.screen.orderState.formatOrderTime(order.orderTime)}", fontWeight = FontWeight.Medium, fontSize = 14.sp)
                 }
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
             }
@@ -118,10 +121,9 @@ fun OrderDetailScreen(navController: NavHostController, order: OrderList, token:
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val totalHarga = order.items.sumOf { it.quantity * it.menu_price }
             OrderDetailRow(
                 label = "Subtotal Pesanan (${order.items.size} item)",
-                value = "${formatPrice(totalHarga)}"
+                value = "${formatPrice(order.totalPrice)}"
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -133,14 +135,12 @@ fun OrderDetailScreen(navController: NavHostController, order: OrderList, token:
 //                        onNavigateToOrderFinished()
 //                    }
                     viewModel.updateOrderStatus(
-                        token = token,
-                        orderId = order.order_id,
+                        orderId = order.orderId,
                         newStatus = OrderStatus.SELESAI.dbValue,
-//                        canteenId = order.canteen_id,
                         onSuccess = {
-                            viewModel.updateSelectedStatus(OrderStatus.SELESAI, token)
+                            viewModel.updateSelectedStatus(OrderStatus.SELESAI)
                             navController.navigate(Order.route) {
-                                popUpTo(Order.route) { inclusive = true }
+                                popUpTo(Order.route) { inclusive = false }
                             }
                             // aksi jika berhasil, misal tampilkan snackbar atau navigasi
                         },
@@ -149,7 +149,6 @@ fun OrderDetailScreen(navController: NavHostController, order: OrderList, token:
                             Log.e("UpdateOrder", "Gagal update: $errorMessage")
                         }
                     )
-
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFC9824)),
                 modifier = Modifier
@@ -167,6 +166,16 @@ fun OrderDetailScreen(navController: NavHostController, order: OrderList, token:
 fun formatPrice(price: Double): String {
     val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
     return "Rp ${formatter.format(price)}"
+}
+
+fun formatOrderTime(raw: String): String {
+    return try {
+        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val formatter = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("id", "ID"))
+        formatter.format(parser.parse(raw)!!)
+    } catch (e: Exception) {
+        raw
+    }
 }
 
 //aman
@@ -188,9 +197,9 @@ fun OrderItemCard(item: OrderItem) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
-        if (item.menu_image != null) {
+        if (item.menuImage != null) {
             AsyncImage(
-                model = item.menu_image,
+                model = item.menuImage,
                 contentDescription = "Menu Image",
                 modifier = Modifier
                     .size(80.dp)
@@ -213,6 +222,8 @@ fun OrderItemCard(item: OrderItem) {
             }
         }
 
+        Log.d("IMAGE_URL", "Image URL: ${item.menuImage}")
+
 //        AsyncImage(
 //            model = item.menu_image,
 //            contentDescription = null,
@@ -227,12 +238,18 @@ fun OrderItemCard(item: OrderItem) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ){
-                Text(item.menu_name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text("${formatPrice(item.menu_price)}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text(item.menuName, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("${formatPrice(item.menuPrice)}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
             }
-            Text("Jumlah: ${item.quantity}", fontSize = 14.sp)
-            Text(item.add_on, fontSize = 14.sp)
-            Text("Catatan: ${item.item_details}", fontSize = 14.sp, color = Color.Gray)
+//            Text("Jumlah: ${item.quantity}", fontSize = 14.sp)
+            if (item.addOns.isNotEmpty()) {
+                Text(
+                    text = "${item.addOns.joinToString(", ") { it.name }}",
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp
+                )
+            }
+            Text("Catatan: ${item.itemDetails}", fontSize = 14.sp, color = Color.Gray)
         }
     }
     Spacer(modifier = Modifier.height(8.dp))
@@ -244,25 +261,26 @@ fun PreviewOrderDetailScreen() {
     val navHostController = rememberNavController()
 
     val order = OrderList(
-        order_id = 1,
-        order_time = "13/03/2025",
-        total_price = 25000.0,
+        orderId = 1,
+        orderTime = "13/03/2025",
+        totalPrice = 25000.0,
         items = listOf(
             OrderItem(
-                order_id = 1,
-                menu_name = "Ayam Bakar",
-                item_details = "nasinya dikit aja",
-                menu_image = "https://example.com/image.jpg",
-                menu_price = 12000.0,
-                quantity = 1,
-                add_on = "sambal bawang"
+                menuId = 1,
+                menuName = "Ayam Bakar",
+                itemDetails = "nasinya dikit aja",
+                menuImage = "https://www.unileverfoodsolutions.co.id/dam/global-ufs/mcos/SEA/calcmenu/recipes/ID-recipes/chicken-&-other-poultry-dishes/crispy-fried-chicken/Ayam%20Goreng%20Krispy1260x700.jpg",
+                menuPrice = 12000.0,
+                addOns = listOf(
+                    AddOn(id = 1, name = "Sambal Bawang"),
+                    AddOn(id = 2, name = "Tempe Goreng")
+                )
             )
         )
     )
 
     MaterialTheme {
         OrderDetailScreen(
-            token = "Bearer $token",
             navController = navHostController,
 //            viewModel = OrderStateViewModel(repository = OrderRepository(api = )),
             order = order,

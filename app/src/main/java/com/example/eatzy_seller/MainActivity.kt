@@ -19,15 +19,15 @@ import com.example.eatzy_seller.ui.screen.orderState.OrderStateViewModel
 import com.example.eatzy_seller.ui.theme.EatzySellerTheme
 
 //tokennya taro sini, kalo apinya butuh authorisasi
-const val token ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJzZWxsZXJAZXhhbXBsZS5jb20iLCJyb2xlIjoiY2FudGVlbiIsImlhdCI6MTc0ODMzOTE4OSwiZXhwIjoxNzYzODkxMTg5fQ.9qdlggSj1R_CMBm0lPNObxbIKXjDCf6fk16un3S480k"
+const val token ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJzZWxsZXJAZXhhbXBsZS5jb20iLCJyb2xlIjoiY2FudGVlbiIsImlhdCI6MTc0OTYyODAxNywiZXhwIjoxNzY1MTgwMDE3fQ.3SmQjLdnAVrwf1vKSNzBe9H9GIkFhl7k03ow8ifIs_8"
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        val database = AppDatabase.getDatabase(applicationContext)
-        val api = RetrofitClient.orderApi
+//        val api = RetrofitClient.orderApi
 //        val dao = database.orderDao()
-        val repository = OrderRepository(api)
-        val viewModel = OrderStateViewModel(repository)
+//        val repository = OrderRepository(api, token)
+        val viewModel = OrderStateViewModel()
 
 //        enableEdgeToEdge()
         setContent {

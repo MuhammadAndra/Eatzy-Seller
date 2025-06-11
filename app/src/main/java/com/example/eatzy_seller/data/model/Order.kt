@@ -1,57 +1,59 @@
 package com.example.eatzy_seller.data.model
 
+import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.Serializable
 
 //ini untuk tampilan detail pesanan
 data class OrderList(
-    val order_id: Int,
-    val order_time: String,
-    val total_price: Double,
-//    val canteen_id: Int,
+    @SerializedName("order_id")
+    val orderId: Int,
+    @SerializedName("order_time")
+    val orderTime: String,
+    @SerializedName("total_price")
+    val totalPrice: Double,
     val items: List<OrderItem>
 )
 //ini untuk di luaran pesanan (dlm card)
 data class OrderState(
-    val order_id: Int,
-    val order_status: String,
-    val order_time: String,
-    val estimation_time: String,
-    val total_price: Double,
+    @SerializedName("order_id")
+    val orderId: Int,
+    @SerializedName("order_status")
+    val orderStatus: String,
+    @SerializedName("order_time")
+    val orderTime: String,
+    @SerializedName("schedule_time")
+    val scheduleTime: String?,
+    @SerializedName("total_price")
+    val totalPrice: Double,
     val items: List<OrderItem>
 )
 
 //ini untuk isi pesanan (dlm card maupun detail pesanan)
 @Serializable
 data class OrderItem(
-    val order_id: Int,
-    val menu_name: String,
-    val item_details: String,
-    val menu_image: String?,
-    val menu_price: Double,
-    val quantity: Int,
-    val add_on: String = ""
-) {
-    //untuk menghitung quantity
-    companion object {
-        fun groupWithQuantity(items: List<OrderItem>): List<OrderItem> {
-            return items
-                .groupBy { it.menu_name to it.add_on }
-                .map { (_, group) ->
-                    val first = group.first()
-                    first.copy(quantity = group.size)
-                }
-        }
-    }
-}
-
-data class UpdateOrderStatusRequest(
-    val order_id: Int,
-    val order_status: String
+    @SerializedName("menu_id")
+    val menuId: Int,
+    @SerializedName("menu_name")
+    val menuName: String,
+    @SerializedName("item_details")
+    val itemDetails: String?,
+    @SerializedName("menu_image")
+    val menuImage: String?,
+    @SerializedName("menu_price")
+    val menuPrice: Double,
+    @SerializedName("add_ons")
+    val addOns: List<AddOn>
 )
 
-//data class newStatus(
-//    val order_id: Int,
-//    val order_status: String
-//)
+@Serializable
+data class AddOn(
+    @SerializedName("addon_id")
+    val id: Int,
+    @SerializedName("addon_name")
+    val name: String
+)
 
-
+data class UpdateOrderStatusRequest(
+    @SerializedName("order_status")
+    val orderStatus: String
+)

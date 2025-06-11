@@ -1,6 +1,10 @@
 package com.example.eatzy_seller.ui.screen.orderState
 
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import com.example.eatzy_seller.data.dummyOrders
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,24 +26,21 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-//import com.bumptech.glide.integration.compose.GlideImage
 import coil.compose.AsyncImage
-import com.example.eatzy_seller.data.dummyOrders
+import com.example.eatzy_seller.R
+import com.example.eatzy_seller.data.model.OrderItem
 import com.example.eatzy_seller.data.model.OrderState
-//import com.example.eatzy_seller.data.dummyOrders
 import com.example.eatzy_seller.token
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
 import java.util.Locale
 
-//aman
 @Composable
 fun TopNavBar(
     title: String,
@@ -58,7 +60,6 @@ fun TopNavBar(
                 tint = Color(0xFF455E84)
             )
         }
-
         Text(
             text = title,
             fontSize = 26.sp,
@@ -67,134 +68,25 @@ fun TopNavBar(
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center
         )
-
         Spacer(modifier = Modifier.size(48.dp))
     }
 }
 
-//state
-//@Composable
-//fun OrderListScreen(
-//    navController: NavHostController,
-//    orders: List<OrderState>,
-//    selectedStatus: String,
-//    onStatusSelected: (String) -> Unit,
-//    onOrderAccepted: (OrderState) -> Unit,
-//    onOrderRejected: (OrderState) -> Unit,
-//    onOrderDetailed: (OrderState) -> Unit
-//) {
-//    //untuk menyesuaikan nama state dgn database
-////    val statusUI = OrderStatusUI.fromDbValue(order.order_status)?.displayName ?: order.order_status
-////    val statusDb = OrderStatusUI.fromDisplayName("Selesai")?.dbValue
-//
-//    Log.d("OrderListScreen", "RAW orders: $orders")
-//    Log.d("OrderListScreen", "Selected status: $selectedStatus")
-//
-//    val statuses = listOf("Semua", "Konfirmasi", "Proses", "Selesai", "Batal")
-//
-//    Scaffold (
-//        containerColor = Color.White,
-//        bottomBar = {
-//            BottomNavBar(navController = navController)
-//        },
-//    ) {
-//            innerPadding ->
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(16.dp)
-//                .padding(bottom = innerPadding.calculateBottomPadding())
-//        ) {
-//            TopNavBar(title = "Pesanan", navController = navController)
-//
-//            // Tab bar status filter
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.SpaceBetween
-//            ) {
-//                //pergantian warna di state status
-//                statuses.forEach { order_status ->
-//                    TextButton(onClick = { onStatusSelected(order_status) }) {
-//                        Text(
-//                            text = order_status,
-//                            color = if (order_status == selectedStatus) Color(0xFFFC9824) else Color.Gray,
-//                            fontWeight = if (order_status == selectedStatus) FontWeight.Bold else FontWeight.Normal,
-//                            fontSize = 14.sp
-//                        )
-//                    }
-//                }
-//            }
-//
-////            val filteredOrders = orders.filter {  order ->
-////                selectedStatus == "Semua" || order.status == selectedStatus
-////            }
-//
-////            val filteredOrders = if (selectedStatus == "Semua") orders else orders.filter { it.order_status == selectedStatus }
-//
-//            val filteredOrders = if (selectedStatus == "Semua") {
-//                orders
-//            } else {
-//                val selectedStatusEnum = OrderStatusUI.fromDisplayName(selectedStatus)
-//                orders.filter { it.order_status == selectedStatusEnum?.dbValue }
-//            }
-//
-//            Log.d("OrderListScreen", "Filtered orders ($selectedStatus): $filteredOrders")
-//
-//            //isi dari setiap pesanan
-//            LazyColumn {
-//                items(filteredOrders) { order ->
-//                    OrderCard(
-//                        order = order,
-//                        onOrderAccepted = { onOrderAccepted(order) },
-//                        onOrderRejected = { onOrderRejected(order) },
-//                        onOrderDetailed = { onOrderDetailed(order) }
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(12.dp))
-//                }
-//            }
-//        }
-//    }
-//}
-
-//perlu dicek
 @Composable
-fun OrderListScreen(
+fun OrderStateScreen(
     navController: NavHostController,
-    orders: List<OrderState>,
-    selectedStatus: OrderStatus,
-    onStatusSelected: (OrderStatus) -> Unit,
-    onOrderAccepted: (OrderState) -> Unit,
-    onOrderRejected: (OrderState) -> Unit,
-    onOrderDetailed: (OrderState) -> Unit
+    viewModel: OrderStateViewModel, // Get the ViewModel instance
 ) {
-    val statuses = OrderStatus.values().toList()
+    // Collect the state flows from the ViewModel
+    val orders by viewModel.orders.collectAsState()
+    val selectedStatus by viewModel.selectedStatus.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
 
-    val filteredOrders = if (selectedStatus == OrderStatus.SEMUA) {
-        orders
-    } else {
-//        val statusEnum = OrderStatus.fromDisplayName(selectedStatus)
-        orders.filter { it.order_status == selectedStatus.dbValue }
-//        orders.filter { it.order_status == statusEnum?.dbValue }
-//        val dbStatus = statusEnum?.dbValue ?: ""  // kalau ga ketemu mapping, pakai string kosong
-//
-//        if (dbStatus.isEmpty()) {
-//            emptyList() // kalau status invalid, jangan tampilkan apapun
-//        } else {
-//            orders.filter { it.order_status == dbStatus }
-//        }
-    }
+    // Log the filtered orders
+    Log.d("OrderListScreen", "Filtered orders ($selectedStatus): $orders")
 
-//    // Filter orders pakai dbValue sesuai selectedStatus
-//    val filteredOrders = if (selectedStatus == "Semua") {
-//        orders
-//    } else {
-//        val statusEnum = OrderStatusUI.fromDisplayName(selectedStatus)
-//        orders.filter { it.order_status == statusEnum?.dbValue }
-//    }
-
-    Log.d("OrderListScreen", "Filtered orders ($selectedStatus): $filteredOrders")
-
+    //isi scaffold ini untuk bottombar sama orderstate di bawah topbar
     Scaffold(
         containerColor = Color.White,
         bottomBar = { BottomNavBar(navController) },
@@ -211,8 +103,8 @@ fun OrderListScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(statuses) { status ->
-                    TextButton(onClick = { onStatusSelected(status) }) {
+                items(OrderStatus.values().toList()) { status ->
+                    TextButton(onClick = { viewModel.updateSelectedStatus(status) }) {
                         Text(
                             text = status.displayName,
                             color = if (status == selectedStatus) Color(0xFFFC9824) else Color.Gray,
@@ -223,26 +115,64 @@ fun OrderListScreen(
                 }
             }
 
+            //tes apakah pesanan bisa masuk, ini nnt dihapus
+//            if (isLoading) {
+//                CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+//            } else if (error != null) {
+//                Text("Error: $error", color = Color.Red, modifier = Modifier.padding(16.dp))
+//            } else {
+//                Text("Total orders: ${orders.size}", modifier = Modifier.padding(8.dp))
+
             LazyColumn {
-                items(filteredOrders) { order ->
-                    OrderCard(
-                        order = order,
-                        onOrderAccepted = onOrderAccepted,
-                        onOrderRejected = onOrderRejected,
-                        onOrderDetailed = onOrderDetailed
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
+                if (orders.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Tidak ada pesanan")
+                        }
+                    }
+                } else {
+                    items(orders) { order ->
+                        OrderCard(
+                            order = order,
+                            onOrderAccepted = {
+                                viewModel.acceptOrder(order)
+                                Log.d("CHECK ACCEPT","$error")
+                            },
+                            onOrderRejected = { viewModel.rejectOrder(order)
+                                Log.d("CHECK REJECT","$error")
+                            },
+                            onOrderDetailed = {
+                                navController.navigate("orderDetail/${order.orderId}")
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
                 }
             }
         }
     }
 }
 
-//aman
 fun formatPrice(price: Double): String {
     val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
     return " Rp ${formatter.format(price)}"
 }
+
+fun formatOrderTime(raw: String): String {
+    return try {
+        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val formatter = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("id", "ID"))
+        formatter.format(parser.parse(raw)!!)
+    } catch (e: Exception) {
+        raw
+    }
+}
+
 
 @Composable
 fun OrderCard(
@@ -251,19 +181,21 @@ fun OrderCard(
     onOrderRejected: (OrderState) -> Unit,
     onOrderDetailed: (OrderState) -> Unit
 ) {
-    // dialog konfirmasi tolak pesanan
     var showRejectDialog by remember { mutableStateOf(false) }
 
-//    val statusEnum = OrderStatus.values().find { it.displayName ==  }
-
-    //aman
-    //dialog konfirmasi tolak pesanan
     if (showRejectDialog) {
         AlertDialog(
             containerColor = Color.White,
             onDismissRequest = { showRejectDialog = false },
-            title = { Text(text ="Konfirmasi Penolakan", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 24.sp) },
-            text = { Text(text ="Yakin ingin tolak pesanan?", color = Color.Black, fontSize = 16.sp) },
+            title = {
+                Text(
+                    "Konfirmasi Penolakan",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                )
+            },
+            text = { Text("Yakin ingin tolak pesanan?", color = Color.Black, fontSize = 16.sp) },
             confirmButton = {
                 TextButton(onClick = {
                     showRejectDialog = false
@@ -280,15 +212,13 @@ fun OrderCard(
         )
     }
 
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(12.dp))
             .clickable {
-//                if (order.order_status == "Proses") onOrderDetailed(order)
-                if (order.order_status == OrderStatus.PROSES.dbValue) onOrderDetailed(order)
+                if (order.orderStatus == OrderStatus.PROSES.dbValue) onOrderDetailed(order)
             }
             .padding(12.dp)
             .background(Color.White)
@@ -297,109 +227,119 @@ fun OrderCard(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Pesanan #${order.order_id}", fontWeight = FontWeight.Bold)
-//            StatusPesanan(statusDbValue = order.order_status)
-            StatusPesanan(order.order_status) // Kirim dbValue
+            Text("Pesanan #${order.orderId}", fontWeight = FontWeight.Bold)
+            StatusPesanan(order.orderStatus) // Komponen status
         }
 
-        Text("Dipesan pada ${order.order_time}", fontSize = 14.sp, color = Color.Gray)
-        Text("Estimasi selesai ${order.estimation_time} menit", fontSize = 14.sp, color = Color.Gray)
+        Text(
+            "Dipesan pada ${formatOrderTime(order.orderTime)}",
+            fontSize = 14.sp,
+            color = Color.Gray
+        )
+
+        //ini hanya tampil klo pilih pesan untuk nanti
+        if (!order.scheduleTime.isNullOrEmpty()) {
+            Text(
+                text = "Dipesan untuk ${formatOrderTime(order.scheduleTime)}",
+                fontSize = 14.sp,
+                color = Color.Gray
+            )
+        }
 
         Divider(modifier = Modifier.padding(vertical = 2.dp))
 
         order.items.forEachIndexed { index, item ->
             Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                AsyncImage(
-                    model = item.menu_image,
-                    contentDescription = "Gambar Menu",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                )
+                if (!item.menuImage.isNullOrBlank()) {
+                    AsyncImage(
+                        model = item.menuImage,
+                        contentDescription = "Gambar Menu",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                    )
+                } else {
+                    // Fallback gambar lokal atau placeholder
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color.LightGray),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = "Gambar Default"
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
-                    ){
-                        Text(item.menu_name, fontWeight = FontWeight.Bold)
-                        Text(formatPrice(item.menu_price), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    ) {
+                        Text(item.menuName, fontWeight = FontWeight.Bold)
+                        Text(
+                            formatPrice(item.menuPrice),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
-//                    Text("Jumlah: ${item.quantity}", fontSize = 14.sp)
-                    Text(
-                        text = if (item.quantity > 1) "Jumlah: ${item.quantity}" else "Jumlah: 1",
-                        fontSize = 14.sp
-                    )
-                    Text(item.add_on, fontSize = 14.sp)
-                    if (item.item_details.isNotBlank()) {
-                        Text("Catatan: ${item.item_details}", fontSize = 14.sp, color = Color.Gray)
+//                    Text(text = "Jumlah: ", fontSize = 4.dp)
+                    Text("Jumlah: ", fontSize = 14.sp)
+                    if (item.addOns.isNotEmpty()) {
+                        Text(
+                            text = "${item.addOns.joinToString(", ") { it.name}}",
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 14.sp
+                        )
                     }
-//                    Text("Catatan: ${item.item_details}", fontSize = 14.sp, color = Color.Gray)
+                    if (!item.itemDetails.isNullOrBlank()) {
+                        Text("Catatan: ${item.itemDetails}", fontSize = 14.sp, color = Color.Gray)
+                    }
+
                 }
             }
-
-            //aman
             if (index == order.items.lastIndex) {
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
-                val total = order.items.sumOf { it.quantity * it.menu_price }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    Text("Total: ${formatPrice(total)}", fontWeight = FontWeight.Bold)
+                    Text("Total: ${formatPrice(order.totalPrice)}", fontWeight = FontWeight.Bold)
                 }
             }
         }
 
-//        if (order.order_status == "Konfirmasi") {
-//            Row(
-//                horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Button(
-//                    onClick = { onOrderAccepted(order) },
-//                    modifier = Modifier.weight(1f),
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFC9824))
-//                ) {
-//                    Text("Terima", color = Color.White)
-//                }
-//                Button(
-//                    onClick = { showRejectDialog = true },
-//                    modifier = Modifier.weight(1f),
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF455E84))
-//                ) {
-//                    Text("Tolak", color = Color.White)
-//                }
-//            }
-//        }
-        if (order.order_status == OrderStatus.KONFIRMASI.dbValue) {
+        //pelajari ini
+        if (order.orderStatus == OrderStatus.KONFIRMASI.dbValue) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(
-                    //ini mungkin perlu di cek
                     onClick = { onOrderAccepted(order) },
-                    //ini ke bawah aman
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFC9824))
                 ) {
                     Text("Terima", color = Color.White)
                 }
+                Spacer(modifier = Modifier.size(15.dp))
                 Button(
                     onClick = { showRejectDialog = true },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF455E84))
                 ) {
-                    Text("Tolak", color = Color.White)
+                    Text("Tolak")
                 }
             }
         }
     }
-}
 
+}
 
 //aman
 @Composable
@@ -436,14 +376,9 @@ fun PreviewOrderListScreen() {
 
     MaterialTheme {
         Surface {
-            OrderListScreen(
+            OrderStateScreen(
                 navController = navController,
-                orders = dummyOrders,
-                selectedStatus = selectedStatus,
-                onStatusSelected = { selectedStatus = it },
-                onOrderAccepted = {},
-                onOrderRejected = {},
-                onOrderDetailed = {}
+                viewModel = viewModel()
             )
         }
     }

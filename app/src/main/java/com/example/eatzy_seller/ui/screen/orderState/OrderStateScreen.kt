@@ -275,14 +275,6 @@ fun OrderCard(
                             contentDescription = "Gambar Default"
                         )
                     }
-//                    Image(
-//                        imageVector = Icons.Default.Image,
-//                        contentDescription = "Gambar Default",
-//                        contentScale = ContentScale.Crop,
-//                        modifier = Modifier
-//                            .size(80.dp)
-//                            .clip(RoundedCornerShape(8.dp)),
-//                    )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {

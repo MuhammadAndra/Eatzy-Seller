@@ -62,11 +62,6 @@ interface MenuApiService {
         @Path("id") id: Int
     ): Response<Menu>
 
-    @GET("menus/categoryList")
-    suspend fun getMenuCategories(
-        @Header("Authorization") token: String
-    ):  Response<List<MenuCategory>>
-
     @GET("menus/categoryAddonList")
     suspend fun getAddonCategories(
         @Header("Authorization") token: String

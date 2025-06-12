@@ -1,6 +1,7 @@
 package com.example.eatzy_seller.ui.screen.menu
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +31,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
+import com.example.eatzy_seller.data.model.AddOnCategory
+import com.example.eatzy_seller.data.model.MenuCategory
 import com.example.eatzy_seller.navigation.navGraph.AddMenu
 import com.example.eatzy_seller.navigation.navGraph.EditCategory
 import com.example.eatzy_seller.ui.components.*
@@ -48,29 +52,29 @@ fun EditMenuScreen(
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     // List kategori yang sudah ada
-    val kategoriList = remember { mutableStateListOf("Makanan", "Minuman", "Dessert") }
-    var selectedKategori by remember { mutableStateOf("Makanan") }
+    LaunchedEffect(Unit) {
+        viewModel.fetchMenus()
+        viewModel.fetchAddons()
+
+    }
+    // List kategori yang sudah ada
+//    val kategoriList = remember { mutableStateListOf("") }
+    val kategoriList by viewModel.menuCategories.collectAsState()
+    Log.d("KategoriList", kategoriList.toString())
+
+    var selectedKategori by remember { mutableStateOf<MenuCategory?>(kategoriList.firstOrNull()) }
+
+
     var isDropdownExpanded by remember { mutableStateOf(false) }
 
     // State for AddOns
     val isAddOnDialogVisible = remember { mutableStateOf(false) }
     val showFormDialog = remember { mutableStateOf(false) }
-    val kategoriAddOnList = remember {
-        mutableStateListOf(
-            Pair("Level Pedas", true),
-            Pair("Topping", false)
-        )
-    }
-    val selectedAddOns = remember { mutableStateListOf("") }
+    val kategoriAddOnList by viewModel.addonCategories.collectAsState()
+    val selectedAddOns = remember { mutableStateListOf<AddOnCategory?>() }
 
     var newKategoriAddOn by remember { mutableStateOf("") }
     var isSingleChoice by remember { mutableStateOf(false) }
-
-    // Load menu data when screen appears (simulated here)
-    LaunchedEffect(menuId) {
-        // In a real app, you would fetch menu data from ViewModel here
-        // For example: viewModel.loadMenuData(menuId)
-    }
 
     Scaffold(
         containerColor = Color.White,
@@ -133,7 +137,7 @@ fun EditMenuScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     OutlinedTextField(
-                        value = selectedKategori,
+                        value = selectedKategori?.categoryName ?: "",
                         onValueChange = {},
                         label = { Text("Pilih Kategori") },
                         readOnly = true,
@@ -162,7 +166,7 @@ fun EditMenuScreen(
                     ) {
                         kategoriList.forEach { kategori ->
                             DropdownMenuItem(
-                                text = { Text(kategori) },
+                                text = { Text(kategori.categoryName) },
                                 onClick = {
                                     selectedKategori = kategori
                                     isDropdownExpanded = false
@@ -224,7 +228,7 @@ fun EditMenuScreen(
                     style = MaterialTheme.typography.bodyMedium
                 )
             } else {
-                kategoriAddOnList.forEachIndexed { index, (nama, isSingle) ->
+                kategoriAddOnList.forEach { addonKategori->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -238,7 +242,7 @@ fun EditMenuScreen(
                                 .padding(horizontal = 16.dp, vertical = 14.dp)
                         ) {
                             Text(
-                                text = "$nama (${if (isSingle) "Pilih satu" else "Bebas pilih"})",
+                                text = "${addonKategori.addOnCategoryName} (${if (addonKategori.addOnCategoryMultiple) "Pilih satu" else "Bebas pilih"})",
                                 fontSize = 16.sp,
                                 color = Color.Black
                             )
@@ -248,8 +252,7 @@ fun EditMenuScreen(
 
                         IconButton(
                             onClick = {
-                                kategoriAddOnList.removeAt(index)
-                                selectedAddOns.remove(nama)
+                                selectedAddOns.remove(addonKategori)
                             }
                         ) {
                             Icon(
@@ -306,15 +309,15 @@ fun EditMenuScreen(
             isSingleChoice = isSingleChoice,
             onSingleChoiceChange = { isSingleChoice = it },
             onSave = {
-                if (newKategoriAddOn.isNotBlank() &&
-                    !kategoriAddOnList.any { it.first == newKategoriAddOn }
-                ) {
-                    kategoriAddOnList.add(Pair(newKategoriAddOn, isSingleChoice))
-                    newKategoriAddOn = ""
-                    isSingleChoice = false
-                }
-                showFormDialog.value = false
-                isAddOnDialogVisible.value = true
+//                if (newKategoriAddOn.isNotBlank() &&
+//                    !kategoriAddOnList.any { it.first == newKategoriAddOn }
+//                ) {
+//                    kategoriAddOnList.add(Pair(newKategoriAddOn, isSingleChoice))
+//                    newKategoriAddOn = ""
+//                    isSingleChoice = false
+//                }
+//                showFormDialog.value = false
+//                isAddOnDialogVisible.value = true
             },
             onDismiss = {
                 showFormDialog.value = false

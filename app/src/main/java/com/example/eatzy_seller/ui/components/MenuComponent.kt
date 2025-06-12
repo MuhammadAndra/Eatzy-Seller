@@ -41,6 +41,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.eatzy_seller.data.model.AddOn
+import com.example.eatzy_seller.data.model.AddOnCategory
+import com.example.eatzy_seller.data.model.dummyAddOnCategories
+import com.example.eatzy_seller.data.model.dummyAddOns1
 import com.example.eatzy_seller.navigation.navGraph.Home
 import com.example.eatzy_seller.ui.theme.PrimaryColor
 import com.example.eatzy_seller.ui.theme.SecondColor
@@ -239,8 +243,8 @@ fun AddKategoriAddOnDialog(
 
 @Composable
 fun PilihKategoriAddOnDialog(
-    kategoriAddOnList: List<Pair<String, Boolean>>,
-    selectedAddOns: SnapshotStateList<String>,
+    kategoriAddOnList: List<AddOnCategory>,
+    selectedAddOns: SnapshotStateList<AddOnCategory?>,
     onDismiss: () -> Unit,
     onTambahKategoriClick: () -> Unit
 ) {
@@ -249,11 +253,11 @@ fun PilihKategoriAddOnDialog(
         title = { Text("Pilih Kategori Add-On") },
         text = {
             Column {
-                kategoriAddOnList.forEach { (nama, _) ->
+                kategoriAddOnList.forEach { addonCategory ->
                     OutlinedButton(
                         onClick = {
-                            if (nama !in selectedAddOns) {
-                                selectedAddOns.add(nama)
+                            if (addonCategory !in selectedAddOns) {
+                                selectedAddOns.add(addonCategory)
                             }
                             onDismiss()
                         },
@@ -263,7 +267,7 @@ fun PilihKategoriAddOnDialog(
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
                     ) {
-                        Text(nama)
+                        Text(addonCategory.addOnCategoryName)
                     }
                 }
 
@@ -274,8 +278,7 @@ fun PilihKategoriAddOnDialog(
                     onClick = {
                         onDismiss()
                         onTambahKategoriClick()
-                    },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    }
                 ) {
                     Text("+ Tambah Kategori")
                 }
@@ -403,15 +406,10 @@ fun AddKategoriAddOnDialogPreview() {
 @Preview(showBackground = true)
 @Composable
 fun PilihKategoriAddOnDialogPreview() {
-    val dummyKategori = listOf(
-        "Makanan" to true,
-        "Minuman" to false,
-        "Cemilan" to true
-    )
-    val selectedAddOns = remember { mutableStateListOf<String>() }
+    val selectedAddOns = remember { mutableStateListOf<AddOnCategory?>() }
 
     PilihKategoriAddOnDialog(
-        kategoriAddOnList = dummyKategori,
+        kategoriAddOnList = dummyAddOnCategories,
         selectedAddOns = selectedAddOns,
         onDismiss = {},
         onTambahKategoriClick = {}

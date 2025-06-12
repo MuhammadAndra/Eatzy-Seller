@@ -27,6 +27,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,8 +39,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.eatzy_seller.data.model.MenuCategory
 import com.example.eatzy_seller.ui.components.AddCategoryDialog
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import com.example.eatzy_seller.ui.components.DeleteDialog
@@ -50,9 +54,14 @@ import com.example.eatzy_seller.ui.theme.SecondColor
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryScreen(
-    navController: NavController = rememberNavController()
+    navController: NavController = rememberNavController(),
+    viewModel: MenuViewModel = viewModel()
 ) {
-    val kategoriList = remember { mutableStateListOf("Makanan", "Minuman", "Dessert") }
+    LaunchedEffect(Unit) {
+        viewModel.fetchMenus()
+
+    }
+    val kategoriList by viewModel.menuCategories.collectAsState()
     var isDialogVisible by remember { mutableStateOf(false) }
     var newKategori by remember { mutableStateOf("") }
 
@@ -64,12 +73,12 @@ fun CategoryScreen(
             initialName = currentKategori,
             onDismiss = { kategoriToEdit = null },
             onSave = { editedName ->
-                if (editedName.isNotBlank() && editedName != currentKategori && !kategoriList.contains(editedName)) {
-                    val index = kategoriList.indexOf(currentKategori)
-                    if (index != -1) {
-                        kategoriList[index] = editedName
-                    }
-                }
+//                if (editedName.isNotBlank() && editedName != currentKategori && !kategoriList.contains(editedName)) {
+//                    val index = kategoriList.indexOf(currentKategori)
+//                    if (index != -1) {
+//                        kategoriList[index] = editedName
+//                    }
+//                }
                 kategoriToEdit = null
             }
         )
@@ -79,7 +88,7 @@ fun CategoryScreen(
             objek = "Kategori",
             title = kategori,
             onConfirmDelete = {
-                kategoriList.remove(kategori)
+                //kategoriList.remove(kategori)
             },
             onDismiss = { kategoriToDelete = null }
         )
@@ -132,8 +141,8 @@ fun CategoryScreen(
                     itemsIndexed(kategoriList) { index, kategori ->
                         CategoryItem(
                             kategori = kategori,
-                            onEditClick = { kategoriToEdit = kategori },
-                            onDeleteClick = { kategoriToDelete = kategori },
+                            onEditClick = { kategoriToEdit = kategori.categoryName },
+                            onDeleteClick = { kategoriToDelete = kategori.categoryName },
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
@@ -147,10 +156,10 @@ fun CategoryScreen(
             newKategori = newKategori,
             onKategoriChange = { newKategori = it },
             onConfirm = {
-                if (newKategori.isNotBlank() && !kategoriList.contains(newKategori)) {
-                    kategoriList.add(newKategori)
-                    newKategori = ""
-                }
+//                if (newKategori.isNotBlank() && !kategoriList.contains(newKategori)) {
+//                    kategoriList.add(newKategori)
+//                    newKategori = ""
+//                }
                 isDialogVisible = false
             },
             onDismiss = { isDialogVisible = false }
@@ -160,7 +169,7 @@ fun CategoryScreen(
 
 @Composable
 private fun CategoryItem(
-    kategori: String,
+    kategori: MenuCategory,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -182,7 +191,7 @@ private fun CategoryItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = kategori,
+                text = kategori.categoryName,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f)
             )

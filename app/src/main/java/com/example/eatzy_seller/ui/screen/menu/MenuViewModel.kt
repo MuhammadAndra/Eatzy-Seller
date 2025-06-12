@@ -30,6 +30,7 @@ class MenuViewModel : ViewModel() {
     private val _addonCategories = MutableStateFlow<List<AddOnCategory>>(emptyList())
     val addonCategories: StateFlow<List<AddOnCategory>> = _addonCategories
 
+
     //buat erro tapi belum dipake
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
@@ -134,6 +135,9 @@ class MenuViewModel : ViewModel() {
             }
         }
     }
+
+
+
 
 
 

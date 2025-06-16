@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 
 class MenuViewModel : ViewModel() {
 
+
     //nyambung ke repository
     private val repository = MenuRepository(RetrofitClient.menuApi)
 

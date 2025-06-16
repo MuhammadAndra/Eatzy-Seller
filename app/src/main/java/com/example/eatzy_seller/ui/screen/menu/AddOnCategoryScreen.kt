@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.eatzy_seller.data.model.AddOn
@@ -35,12 +36,14 @@ import com.example.eatzy_seller.ui.theme.SecondColor
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
+import kotlin.collections.orEmpty
 
 @Composable
 fun AddOnCategoryScreen(
     navController: NavController,
     mode: AddOnMode = AddOnMode.ADD,
-    categoryId: Int? = null
+    categoryId: Int? = null,
+    viewModel: MenuViewModel = viewModel()
 ) {
     // Untuk snackbar
     val snackbarHostState = remember { SnackbarHostState() }
@@ -48,7 +51,7 @@ fun AddOnCategoryScreen(
 
     var isDialogVisible by remember { mutableStateOf(false) }
     var newNamaAddOn by remember { mutableStateOf("") }
-    var newHargaAddOn by remember { mutableStateOf(0.0) }
+    var newHargaAddOn by remember { mutableStateOf("0.0") }
 
     var categoryName by remember { mutableStateOf("") }
     var isSingleChoice by remember { mutableStateOf(false) }
@@ -57,17 +60,24 @@ fun AddOnCategoryScreen(
     var showDeleteAddOnCategoryDialog by remember { mutableStateOf(false) }
     var addOnCategoryToDelete by remember { mutableStateOf<AddOn?>(null) }
 
+    val addonCategories by viewModel.addonCategories.collectAsState()
 
-    // Simulasi ambil data jika mode edit
-    LaunchedEffect(categoryId) {
-        if (mode == AddOnMode.EDIT && categoryId != null) {
-            val fetched = fetchCategoryById(categoryId)
-            categoryName = fetched.addOnCategoryName
-            isSingleChoice = fetched.addOnCategoryMultiple
+    val category = remember(addonCategories, categoryId) {
+        addonCategories.find { it.addOnCategoryId == categoryId }
+    }
+
+    LaunchedEffect(mode, category) {
+        viewModel.fetchAddons()
+
+        if (mode == AddOnMode.EDIT && category != null) {
+            categoryName = category.addOnCategoryName
+            isSingleChoice = category.addOnCategoryMultiple
             addOnList.clear()
-            addOnList.addAll(fetched.addOns)
+            addOnList.addAll(category.addOns)
         }
     }
+
+
 
     Scaffold(
         containerColor = Color.White,
@@ -200,7 +210,7 @@ fun AddOnCategoryScreen(
                         IconButton(
                             onClick = {
                                 newNamaAddOn = addOn.AddOnName
-                                newHargaAddOn = addOn.AddOnPrice
+                                newHargaAddOn = addOn.AddOnPrice.toString()
                                 isDialogVisible = true
                             }
                         ) {
@@ -263,28 +273,28 @@ fun AddOnCategoryScreen(
         if (isDialogVisible) {
             Add_AddOnDialog(
                 newAddOn = newNamaAddOn,
-                harga = newHargaAddOn,
+                harga = newHargaAddOn.toDouble(),
                 AddOnNamaChange = { newNamaAddOn = it },
-                AddOnHargaChange = { newHargaAddOn = it.toDouble() },
+                AddOnHargaChange = { newHargaAddOn = it },
                 onConfirm = {
                     if (newNamaAddOn.isNotBlank() && newHargaAddOn != null) {
                         addOnList.add(
                             AddOn(
                                 AddOnId = addOnList.size + 1,
                                 AddOnName = newNamaAddOn,
-                                AddOnPrice = newHargaAddOn,
+                                AddOnPrice = newHargaAddOn.toDouble(),
                                 AddOnAvailable = true
                             )
                         )
                         newNamaAddOn = ""
-                        newHargaAddOn = 0.0
+                        newHargaAddOn = ""
                         isDialogVisible = false
                     }
                 },
                 onDismiss = {
                     isDialogVisible = false
                     newNamaAddOn = ""
-                    newHargaAddOn = 0.0
+                    newHargaAddOn = ""
                 }
             )
 

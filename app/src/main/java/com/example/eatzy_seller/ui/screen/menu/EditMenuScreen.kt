@@ -46,15 +46,17 @@ fun EditMenuScreen(
     viewModel: MenuViewModel = viewModel()
 ) {
     LaunchedEffect(menuId) {
-        viewModel.fetchMenuItem(menuId)
         viewModel.fetchMenus()
         viewModel.fetchAddons()
     }
 
     // Observe data from ViewModel
-    val menu by viewModel.selectedMenu.collectAsState()
     val kategoriList by viewModel.menuCategories.collectAsState()
     val kategoriAddOnList by viewModel.addonCategories.collectAsState()
+    val menu = remember(kategoriList) {
+        kategoriList.flatMap { it.menus.orEmpty() }
+            .find { it.menuId == menuId }
+    }
 
     // Initialize states
     var namaMenu by remember { mutableStateOf("") }
@@ -71,20 +73,28 @@ fun EditMenuScreen(
     var newKategoriAddOn by remember { mutableStateOf("") }
     var isSingleChoice by remember { mutableStateOf(false) }
 
-    LaunchedEffect(menu) {
-        menu?.let {
-            Log.d("DEBUG", "Menu received: $it")
-            namaMenu = it.menuName
-            harga = it.menuPrice.toString()
-            estimasi = it.menuPreparationTime.toString()
-
+    LaunchedEffect(kategoriList, menu) {
+        if (menu != null && selectedKategori == null) {
+            // Cari kategori yang mengandung menu ini
             selectedKategori = kategoriList.find { category ->
-                category.menus?.any { m -> m.menuId == it.menuId } == true
+                category.menus?.any { it.menuId == menu.menuId } == true
             }
         }
-
+        menu?.listCategoryAddOn?.let { addons ->
+            selectedAddOns.clear()
+            selectedAddOns.addAll(addons)
+        }
     }
 
+    if (menu == null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Menu tidak ditemukan") // atau Text("Menu tidak ditemukan")
+        }
+        return
+    }
     Scaffold(
         containerColor = Color.White,
         topBar = { TopBarMenu(title = "Edit Menu", navController = navController)},
@@ -107,7 +117,7 @@ fun EditMenuScreen(
             )
 
             OutlinedTextField(
-                value = namaMenu,
+                value = menu.menuName,
                 onValueChange = { namaMenu = it },
                 label = { Text("Nama Menu") },
                 modifier = Modifier.fillMaxWidth(),
@@ -117,7 +127,7 @@ fun EditMenuScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = harga,
+                value = menu.menuPrice.toInt().toString(),
                 onValueChange = { harga = it },
                 label = { Text("Harga") },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
@@ -128,7 +138,7 @@ fun EditMenuScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = estimasi,
+                value = menu.menuPreparationTime.toString(),
                 onValueChange = { estimasi = it },
                 label = { Text("Estimasi Pembuatan (Menit)") },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),

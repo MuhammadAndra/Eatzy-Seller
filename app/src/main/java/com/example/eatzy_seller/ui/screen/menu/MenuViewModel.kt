@@ -1,24 +1,26 @@
 package com.example.eatzy_seller.ui.screen.menu
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eatzy_seller.data.model.AddOnCategory
+import com.example.eatzy_seller.data.model.Menu
 import com.example.eatzy_seller.data.model.MenuCategory
 import com.example.eatzy_seller.data.model.UpdateAddonRequest
 import com.example.eatzy_seller.data.model.UpdateMenuRequest
 import com.example.eatzy_seller.data.network.RetrofitClient
 import com.example.eatzy_seller.data.repository.MenuRepository
+import com.example.eatzy_seller.token
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 // token
-const val token = "bearer " +
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJidWtyaXNAZXhhbXBsZS5jb20iLCJyb2xlIjoiY2FudGVlbiIsImlhdCI6MTc0ODU2NDc4MSwiZXhwIjoxNzY0MTE2NzgxfQ.UVXsenWc8EouRLgKZ9O8kpm_Ae2RP89jomX5-FWLYOQ"
 
 class MenuViewModel : ViewModel() {
+
     //nyambung ke repository
     private val repository = MenuRepository(RetrofitClient.menuApi)
 
@@ -30,6 +32,10 @@ class MenuViewModel : ViewModel() {
     private val _addonCategories = MutableStateFlow<List<AddOnCategory>>(emptyList())
     val addonCategories: StateFlow<List<AddOnCategory>> = _addonCategories
 
+    val tokenUser = "Bearer "+ token
+
+    private val _selectedMenu = MutableStateFlow<Menu?>(null)
+    val selectedMenu: StateFlow<Menu?> = _selectedMenu
 
     //buat erro tapi belum dipake
     private val _error = MutableStateFlow<String?>(null)
@@ -39,7 +45,7 @@ class MenuViewModel : ViewModel() {
     fun fetchMenus() {
         viewModelScope.launch {
             try {
-                val response = repository.getMenus(token)
+                val response = repository.getMenus(tokenUser)
                 if (response.isSuccessful) {
                     val body = response.body()
                     println("Response body: $body") // Log raw data
@@ -57,7 +63,7 @@ class MenuViewModel : ViewModel() {
     fun updateCategoryName(categoryId: Int, newCategoryName: String) {
         viewModelScope.launch {
             Log.d("UpdateCategory", "New name: $newCategoryName")
-            val success = repository.updateCategoryName(token, categoryId, newCategoryName)
+            val success = repository.updateCategoryName(tokenUser, categoryId, newCategoryName)
             if (success) {
                 _menuCategories.update { list ->
                     list.map {
@@ -72,7 +78,7 @@ class MenuViewModel : ViewModel() {
 
     fun deleteCategory(categoryId: Int) {
         viewModelScope.launch {
-            val success = repository.deleteCategory(token, categoryId)
+            val success = repository.deleteCategory(tokenUser, categoryId)
             Log.d("id","$categoryId")
             if (success) {
                 _menuCategories.update { list ->
@@ -84,7 +90,7 @@ class MenuViewModel : ViewModel() {
 
     fun deleteMenu(menuId: Int) {
         viewModelScope.launch {
-            val success = repository.deleteMenu(token, menuId)
+            val success = repository.deleteMenu(tokenUser, menuId)
             if (success) {
                 _menuCategories.update { list ->
                     list.map { category ->
@@ -98,7 +104,7 @@ class MenuViewModel : ViewModel() {
 
     fun toggleMenuAvailability(menuId: Int, isAvailable: Boolean) {
         viewModelScope.launch {
-            val success = repository.toggleMenuAvailability(token, menuId, isAvailable)
+            val success = repository.toggleMenuAvailability(tokenUser, menuId, isAvailable)
             if (success) {
                 _menuCategories.update { list ->
                     list.map { category ->
@@ -116,7 +122,7 @@ class MenuViewModel : ViewModel() {
 
     fun updateMenu(menuId: Int, updatedMenu: UpdateMenuRequest) {
         viewModelScope.launch {
-            val success = repository.updateMenu(token, menuId, updatedMenu)
+            val success = repository.updateMenu(tokenUser, menuId, updatedMenu)
             if (success) {
                 fetchMenus()
             } else {
@@ -127,21 +133,21 @@ class MenuViewModel : ViewModel() {
 
     fun fetchMenuItem(menuId: Int){
         viewModelScope.launch {
-            val success = repository.getMenuItem(token, menuId)
-            if (success) {
-                fetchMenus()
-            } else {
-                _error.value = "Gagal mengambil menu."
+            try {
+                val response = repository.getMenuItem(tokenUser, menuId)
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    println("Response body: $body")
+                    _selectedMenu.value = response.body()
+                    println(_selectedMenu)
+                } else {
+                    _error.value = "Gagal mengambil data menu: ${response.code()}"
+                }
+            } catch (e: Exception) {
+                _error.value = "Terjadi kesalahan: ${e.message}"
             }
         }
     }
-
-
-
-
-
-
-
 
 
     //===================Addon===================
@@ -149,7 +155,7 @@ class MenuViewModel : ViewModel() {
     fun fetchAddons() {
         viewModelScope.launch {
             try {
-                val response = repository.getAddons(token)
+                val response = repository.getAddons(tokenUser)
                 if (response.isSuccessful) {
                     val body = response.body()
                     println("Response body: $body") // Log raw data
@@ -165,7 +171,7 @@ class MenuViewModel : ViewModel() {
 
     fun deleteAddonCategory(categoryId: Int) {
         viewModelScope.launch {
-            val success = repository.deleteAddonCategory(token, categoryId)
+            val success = repository.deleteAddonCategory(tokenUser, categoryId)
             Log.d("id","$categoryId")
             if (success) {
                 _addonCategories.update { list ->
@@ -177,7 +183,7 @@ class MenuViewModel : ViewModel() {
 
     fun deleteAddon(addonId: Int) {
         viewModelScope.launch {
-            val success = repository.deleteAddon(token, addonId)
+            val success = repository.deleteAddon(tokenUser, addonId)
             if (success) {
                 _addonCategories.update { list ->
                     list.map { category ->
@@ -191,7 +197,7 @@ class MenuViewModel : ViewModel() {
 
     fun toggleAddonAvailability(addonId: Int, isAvailable: Boolean) {
         viewModelScope.launch {
-            val success = repository.toggleAddonAvailability(token, addonId, isAvailable)
+            val success = repository.toggleAddonAvailability(tokenUser, addonId, isAvailable)
             if (success) {
                 _addonCategories.update { list ->
                     list.map { category ->
@@ -209,7 +215,7 @@ class MenuViewModel : ViewModel() {
 
     fun updateAddon(menuId: Int, updatedAddon: UpdateAddonRequest) {
         viewModelScope.launch {
-            val success = repository.updateAddonItem(token, menuId, updatedAddon)
+            val success = repository.updateAddonItem(tokenUser, menuId, updatedAddon)
             if (success) {
                 fetchAddons()
             } else {

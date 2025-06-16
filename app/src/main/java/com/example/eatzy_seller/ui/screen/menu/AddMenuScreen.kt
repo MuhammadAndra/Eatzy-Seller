@@ -109,7 +109,7 @@ fun AddMenuScreen(
     val kategoriList by viewModel.menuCategories.collectAsState()
     Log.d("KategoriList", kategoriList.toString())
 
-    var selectedKategori by remember { mutableStateOf<MenuCategory?>(kategoriList.firstOrNull()) }
+    var selectedKategori by remember { mutableStateOf<MenuCategory?>(null) }
     //var newKategori by remember { mutableStateOf("") }
 
     // State untuk dialogkategori
@@ -120,7 +120,7 @@ fun AddMenuScreen(
     val showFormDialog = remember { mutableStateOf(false) }
 
     val kategoriAddOnList by viewModel.addonCategories.collectAsState()
-    val selectedAddOns = remember { mutableStateListOf<AddOnCategory?>() }
+    val selectedAddOns = remember { mutableStateListOf<AddOnCategory>() }
 
     var newKategoriAddOn by remember { mutableStateOf("") }
     var isSingleChoice by remember { mutableStateOf(false) }
@@ -274,7 +274,7 @@ fun AddMenuScreen(
             }
 
 
-            if (kategoriAddOnList.isEmpty()) {
+            if (selectedAddOns.isEmpty()) {
                 Text(
                     text = "Belum ada Add-On",
                     modifier = Modifier
@@ -285,7 +285,7 @@ fun AddMenuScreen(
                 )
             } else {
                 // Tampilkan daftar kategori add-on yang sudah ditambahkan dalam bentuk Row mirip TextField
-                kategoriAddOnList.forEach { addonKategori ->
+                selectedAddOns.forEach { addonKategori ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -352,7 +352,7 @@ fun AddMenuScreen(
     if (isAddOnDialogVisible.value) {
         PilihKategoriAddOnDialog(
             kategoriAddOnList = kategoriAddOnList,
-            selectedAddOns = selectedAddOns,
+            selectedAddOns = selectedAddOns ,
             onDismiss = { isAddOnDialogVisible.value = false },
             onTambahKategoriClick = {
                 showFormDialog.value = true

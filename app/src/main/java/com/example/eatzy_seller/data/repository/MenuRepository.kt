@@ -2,6 +2,7 @@ package com.example.eatzy_seller.data.repository
 
 //import com.example.eatzy_seller.data.local.MenuDao
 import com.example.eatzy_seller.data.model.AddOnCategory
+import com.example.eatzy_seller.data.model.Menu
 import com.example.eatzy_seller.data.model.MenuCategory
 import com.example.eatzy_seller.data.model.UpdateAddonRequest
 import com.example.eatzy_seller.data.model.UpdateMenuRequest
@@ -60,13 +61,8 @@ class MenuRepository(private val apiService: MenuApiService) {
         }
     }
 
-    suspend fun getMenuItem(token: String, id: Int): Boolean {
-        return try {
-            val response = apiService.getMenuItem(token, id)
-            response.isSuccessful
-        } catch (e: Exception) {
-            false
-        }
+    suspend fun getMenuItem(token: String, id: Int): Response<Menu> {
+        return apiService.getMenuItem(token, id)
     }
 
 

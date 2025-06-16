@@ -42,39 +42,48 @@ import com.example.eatzy_seller.ui.theme.*
 @Composable
 fun EditMenuScreen(
     navController: NavController,
-    menuId: Int, // Pass the menu ID from navigation
+    menuId: Int,
     viewModel: MenuViewModel = viewModel()
 ) {
-    // State for menu data (would normally be loaded from ViewModel)
-    var namaMenu by remember { mutableStateOf("Nasi Goreng Spesial") }
-    var harga by remember { mutableStateOf("25000") }
-    var estimasi by remember { mutableStateOf("15") }
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-
-    // List kategori yang sudah ada
-    LaunchedEffect(Unit) {
+    LaunchedEffect(menuId) {
+        viewModel.fetchMenuItem(menuId)
         viewModel.fetchMenus()
         viewModel.fetchAddons()
-
     }
-    // List kategori yang sudah ada
-//    val kategoriList = remember { mutableStateListOf("") }
+
+    // Observe data from ViewModel
+    val menu by viewModel.selectedMenu.collectAsState()
     val kategoriList by viewModel.menuCategories.collectAsState()
-    Log.d("KategoriList", kategoriList.toString())
+    val kategoriAddOnList by viewModel.addonCategories.collectAsState()
 
-    var selectedKategori by remember { mutableStateOf<MenuCategory?>(kategoriList.firstOrNull()) }
+    // Initialize states
+    var namaMenu by remember { mutableStateOf("") }
+    var harga by remember { mutableStateOf("") }
+    var estimasi by remember { mutableStateOf("") }
+    var selectedKategori by remember { mutableStateOf<MenuCategory?>(null) }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val selectedAddOns = remember { mutableStateListOf<AddOnCategory>() }
 
-
+    // State untuk UI
     var isDropdownExpanded by remember { mutableStateOf(false) }
-
-    // State for AddOns
     val isAddOnDialogVisible = remember { mutableStateOf(false) }
     val showFormDialog = remember { mutableStateOf(false) }
-    val kategoriAddOnList by viewModel.addonCategories.collectAsState()
-    val selectedAddOns = remember { mutableStateListOf<AddOnCategory?>() }
-
     var newKategoriAddOn by remember { mutableStateOf("") }
     var isSingleChoice by remember { mutableStateOf(false) }
+
+    LaunchedEffect(menu) {
+        menu?.let {
+            Log.d("DEBUG", "Menu received: $it")
+            namaMenu = it.menuName
+            harga = it.menuPrice.toString()
+            estimasi = it.menuPreparationTime.toString()
+
+            selectedKategori = kategoriList.find { category ->
+                category.menus?.any { m -> m.menuId == it.menuId } == true
+            }
+        }
+
+    }
 
     Scaffold(
         containerColor = Color.White,
@@ -218,7 +227,7 @@ fun EditMenuScreen(
                 }
             }
 
-            if (kategoriAddOnList.isEmpty()) {
+            if (selectedAddOns.isEmpty()) {
                 Text(
                     text = "Belum ada Add-On",
                     modifier = Modifier
@@ -228,7 +237,7 @@ fun EditMenuScreen(
                     style = MaterialTheme.typography.bodyMedium
                 )
             } else {
-                kategoriAddOnList.forEach { addonKategori->
+                selectedAddOns.forEach { addonKategori->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier

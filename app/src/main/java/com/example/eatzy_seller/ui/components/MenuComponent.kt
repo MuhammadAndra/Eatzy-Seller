@@ -244,7 +244,7 @@ fun AddKategoriAddOnDialog(
 @Composable
 fun PilihKategoriAddOnDialog(
     kategoriAddOnList: List<AddOnCategory>,
-    selectedAddOns: SnapshotStateList<AddOnCategory?>,
+    selectedAddOns: SnapshotStateList<AddOnCategory>,
     onDismiss: () -> Unit,
     onTambahKategoriClick: () -> Unit
 ) {
@@ -406,7 +406,7 @@ fun AddKategoriAddOnDialogPreview() {
 @Preview(showBackground = true)
 @Composable
 fun PilihKategoriAddOnDialogPreview() {
-    val selectedAddOns = remember { mutableStateListOf<AddOnCategory?>() }
+    val selectedAddOns = remember { mutableStateListOf<AddOnCategory>() }
 
     PilihKategoriAddOnDialog(
         kategoriAddOnList = dummyAddOnCategories,

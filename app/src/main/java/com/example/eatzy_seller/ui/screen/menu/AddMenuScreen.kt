@@ -80,6 +80,7 @@ import coil.compose.rememberImagePainter
 import com.example.eatzy_seller.data.model.AddOn
 import com.example.eatzy_seller.data.model.AddOnCategory
 import com.example.eatzy_seller.data.model.MenuCategory
+import com.example.eatzy_seller.data.model.RequestAddOnCategory
 import com.example.eatzy_seller.navigation.navGraph.EditCategory
 import com.example.eatzy_seller.ui.components.AddKategoriAddOnDialog
 import com.example.eatzy_seller.ui.components.PilihKategoriAddOnDialog
@@ -367,15 +368,21 @@ fun AddMenuScreen(
             isSingleChoice = isSingleChoice,
             onSingleChoiceChange = { isSingleChoice = it },
             onSave = {
-//                if (newKategoriAddOn.isNotBlank() &&
-//                    !kategoriAddOnList.any { it.first == newKategoriAddOn }
-//                ) {
-//                    kategoriAddOnList.add(Pair(newKategoriAddOn, isSingleChoice))
-//                    newKategoriAddOn = ""
-//                    isSingleChoice = false
-//                }
-//                showFormDialog.value = false
-//                isAddOnDialogVisible.value = true // kembali ke dialog pilih kategori
+                if (newKategoriAddOn.isNotBlank()) {
+                val request = RequestAddOnCategory(
+                    addOnCategoryName = newKategoriAddOn,
+                    addOnCategoryMultiple = isSingleChoice, // diasumsikan toggle "Single = false → Multiple = true"
+                    addOns = emptyList() // kosong dulu, nanti user isi AddOn-nya
+                )
+
+                viewModel.createAddonCategory(request)
+
+                // Reset UI state
+                newKategoriAddOn = ""
+                isSingleChoice = false
+                showFormDialog.value = false
+                isAddOnDialogVisible.value = true
+                }
             },
             onDismiss = {
                 showFormDialog.value = false

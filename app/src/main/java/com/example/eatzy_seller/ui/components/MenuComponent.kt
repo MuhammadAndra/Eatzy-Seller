@@ -1,12 +1,14 @@
 package com.example.eatzy_seller.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -48,6 +50,7 @@ import com.example.eatzy_seller.data.model.dummyAddOns1
 import com.example.eatzy_seller.navigation.navGraph.Home
 import com.example.eatzy_seller.ui.theme.PrimaryColor
 import com.example.eatzy_seller.ui.theme.SecondColor
+import org.intellij.lang.annotations.JdkConstants
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -252,7 +255,7 @@ fun PilihKategoriAddOnDialog(
         onDismissRequest = onDismiss,
         title = { Text("Pilih Kategori Add-On") },
         text = {
-            Column {
+            Column (modifier = Modifier){
                 kategoriAddOnList.forEach { addonCategory ->
                     OutlinedButton(
                         onClick = {
@@ -278,9 +281,12 @@ fun PilihKategoriAddOnDialog(
                     onClick = {
                         onDismiss()
                         onTambahKategoriClick()
-                    }
+                    },
+                    Modifier.align(Alignment.CenterHorizontally)
+                        .fillMaxWidth()
+
                 ) {
-                    Text("+ Tambah Kategori")
+                    Text("Tambah Kategori")
                 }
             }
         },

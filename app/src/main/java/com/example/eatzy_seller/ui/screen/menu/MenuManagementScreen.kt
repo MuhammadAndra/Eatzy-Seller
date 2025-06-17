@@ -133,7 +133,6 @@ fun MenuListScreen(
 
     LaunchedEffect(Unit) {
         viewModel.fetchMenus()
-
     }
 
     Scaffold(
@@ -205,7 +204,8 @@ fun MenuListScreen(
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
 
-                        if (category.menus.isNullOrEmpty()) {
+                        val menus = category.menus ?: emptyList()
+                        if (menus.isEmpty()) {
                             Text(
                                 text = "Menu kosong",
                                 style = MaterialTheme.typography.bodyMedium,
@@ -213,7 +213,7 @@ fun MenuListScreen(
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                         } else {
-                            category.menus.forEachIndexed { index, menu ->
+                            menus.forEachIndexed { index, menu ->
                                 //===========Masuk ke Item Menu===========//
                                 MenuItem(
                                     menu = menu,
@@ -528,7 +528,8 @@ fun AddOnListScreen(
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
 
-                        if (category.addOns.isEmpty()) {
+                        val addOns = category.addOns ?: emptyList()
+                        if (addOns.isEmpty()) {
                             Text(
                                 text = "Add-on kosong",
                                 style = MaterialTheme.typography.bodyMedium,
@@ -537,7 +538,7 @@ fun AddOnListScreen(
                             )
                         } else {
                             //===========Loop Kategori Add On===========//
-                            category.addOns.forEachIndexed { index, addOn ->
+                            addOns.forEachIndexed { index, addOn ->
                                 //masuk fun item add on
                                 AddOnItem(
                                     addOn = addOn,

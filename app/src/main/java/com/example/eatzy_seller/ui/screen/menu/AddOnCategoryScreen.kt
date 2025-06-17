@@ -25,6 +25,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.eatzy_seller.data.model.AddOn
+import com.example.eatzy_seller.data.model.RequestAddOnCategory
+import com.example.eatzy_seller.data.model.UpdateAddonRequest
 import com.example.eatzy_seller.data.model.dummyAddOnCategories
 import com.example.eatzy_seller.data.model.fetchCategoryById
 import com.example.eatzy_seller.ui.components.Add_AddOnDialog
@@ -66,6 +68,9 @@ fun AddOnCategoryScreen(
         addonCategories.find { it.addOnCategoryId == categoryId }
     }
 
+    var selectedAddOnToEdit by remember { mutableStateOf<AddOn?>(null) }
+
+
     LaunchedEffect(mode, category) {
         viewModel.fetchAddons()
 
@@ -73,19 +78,19 @@ fun AddOnCategoryScreen(
             categoryName = category.addOnCategoryName
             isSingleChoice = category.addOnCategoryMultiple
             addOnList.clear()
-            addOnList.addAll(category.addOns)
+            category.addOns?.let {
+                addOnList.addAll(it)
+            }
         }
     }
-
-
 
     Scaffold(
         containerColor = Color.White,
         topBar = {
             TopBarMenu(
                 title = when (mode) {
-                    AddOnMode.ADD -> if (categoryName.isBlank()) "Tambah Kategori Add-On" else "Kategori ${categoryName}"
-                    AddOnMode.EDIT -> "Edit Kategori ${categoryName}"
+                    AddOnMode.ADD -> "Tambah Kategori Add-On"
+                    AddOnMode.EDIT -> "Edit Kategori Add-On"
                 },
                 navController = navController
             )
@@ -209,6 +214,7 @@ fun AddOnCategoryScreen(
 
                         IconButton(
                             onClick = {
+                                selectedAddOnToEdit = addOn
                                 newNamaAddOn = addOn.AddOnName
                                 newHargaAddOn = addOn.AddOnPrice.toString()
                                 isDialogVisible = true
@@ -244,10 +250,31 @@ fun AddOnCategoryScreen(
                     when (mode) {
                         AddOnMode.ADD -> {
                             // Simpan ke DB atau repo
+                            if (categoryName.isNotBlank()) {
+                                val request = RequestAddOnCategory(
+                                    addOnCategoryName = categoryName,
+                                    addOnCategoryMultiple = isSingleChoice,
+                                    addOns = addOnList
+                                )
+
+                                viewModel.createAddonCategory(request)
+
+                            }
                         }
 
                         AddOnMode.EDIT -> {
                             // Update ke DB atau repo
+                            // Simpan ke DB atau repo
+                            if (categoryName.isNotBlank()) {
+                                val request = RequestAddOnCategory(
+                                    addOnCategoryName = categoryName,
+                                    addOnCategoryMultiple = isSingleChoice,
+                                    addOns = addOnList
+                                )
+
+                                viewModel.updateAddonCategory(categoryId,request)
+
+                            }
                         }
                     }
                     navController.popBackStack()
@@ -255,7 +282,7 @@ fun AddOnCategoryScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = categoryName.isNotBlank()&&addOnList.isNotEmpty(),
+                enabled = categoryName.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(containerColor = SecondColor),
                 shape = MaterialTheme.shapes.large.copy(all = CornerSize(50))
             ) {
@@ -271,30 +298,57 @@ fun AddOnCategoryScreen(
         }
 
         if (isDialogVisible) {
+            //edit addon item
             Add_AddOnDialog(
                 newAddOn = newNamaAddOn,
-                harga = newHargaAddOn.toDouble(),
+                harga = newHargaAddOn.toDoubleOrNull() ?: 0.0,
                 AddOnNamaChange = { newNamaAddOn = it },
                 AddOnHargaChange = { newHargaAddOn = it },
                 onConfirm = {
-                    if (newNamaAddOn.isNotBlank() && newHargaAddOn != null) {
-                        addOnList.add(
-                            AddOn(
-                                AddOnId = addOnList.size + 1,
-                                AddOnName = newNamaAddOn,
-                                AddOnPrice = newHargaAddOn.toDouble(),
-                                AddOnAvailable = true
-                            )
-                        )
-                        newNamaAddOn = ""
-                        newHargaAddOn = ""
-                        isDialogVisible = false
+                    if (newNamaAddOn.isNotBlank() && newHargaAddOn.isNotBlank()) {
+                        val parsedPrice = newHargaAddOn.toDoubleOrNull()
+                        if (parsedPrice != null) {
+                            if (selectedAddOnToEdit != null) {
+                                // Mode edit (lokal + update ke ViewModel jika perlu)
+                                val index = addOnList.indexOfFirst { it.AddOnId == selectedAddOnToEdit!!.AddOnId }
+                                if (index != -1) {
+                                    addOnList[index] = selectedAddOnToEdit!!.copy(
+                                        AddOnName = newNamaAddOn,
+                                        AddOnPrice = parsedPrice
+                                    )
+                                }
+
+                                viewModel.updateAddon(
+                                    selectedAddOnToEdit!!.AddOnId,
+                                    UpdateAddonRequest(
+                                        AddOnName = newNamaAddOn,
+                                        AddOnPrice = parsedPrice
+                                    )
+                                )
+                            } else {
+                                // mode tambah
+                                addOnList.add(
+                                    AddOn(
+                                        AddOnId = (addOnList.maxOfOrNull { it.AddOnId } ?: 0) + 1,
+                                        AddOnName = newNamaAddOn,
+                                        AddOnPrice = parsedPrice,
+                                        AddOnAvailable = true
+                                    )
+                                )
+                            }
+
+                            newNamaAddOn = ""
+                            newHargaAddOn = ""
+                            selectedAddOnToEdit = null
+                            isDialogVisible = false
+                        }
                     }
                 },
                 onDismiss = {
                     isDialogVisible = false
                     newNamaAddOn = ""
                     newHargaAddOn = ""
+                    selectedAddOnToEdit = null
                 }
             )
 

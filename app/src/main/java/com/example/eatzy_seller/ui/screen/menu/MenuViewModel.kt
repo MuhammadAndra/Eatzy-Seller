@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.eatzy_seller.data.model.AddOnCategory
 import com.example.eatzy_seller.data.model.Menu
 import com.example.eatzy_seller.data.model.MenuCategory
+import com.example.eatzy_seller.data.model.RequestAddOnCategory
 import com.example.eatzy_seller.data.model.UpdateAddonRequest
 import com.example.eatzy_seller.data.model.UpdateMenuRequest
 import com.example.eatzy_seller.data.network.RetrofitClient
@@ -34,9 +35,6 @@ class MenuViewModel : ViewModel() {
     val addonCategories: StateFlow<List<AddOnCategory>> = _addonCategories
 
     val tokenUser = "Bearer "+ token
-
-    private val _selectedMenu = MutableStateFlow<Menu?>(null)
-    val selectedMenu: StateFlow<Menu?> = _selectedMenu
 
     //buat erro tapi belum dipake
     private val _error = MutableStateFlow<String?>(null)
@@ -121,31 +119,13 @@ class MenuViewModel : ViewModel() {
         }
     }
 
-    fun updateMenu(menuId: Int, updatedMenu: UpdateMenuRequest) {
+    fun createCategory( newCategoryName: String) {
         viewModelScope.launch {
-            val success = repository.updateMenu(tokenUser, menuId, updatedMenu)
+            Log.d("CreateCategory", "New name: $newCategoryName")
+            val success = repository.createCategory(tokenUser, newCategoryName)
             if (success) {
-                fetchMenus()
-            } else {
-                _error.value = "Gagal mengupdate menu."
-            }
-        }
-    }
-
-    fun fetchMenuItem(menuId: Int){
-        viewModelScope.launch {
-            try {
-                val response = repository.getMenuItem(tokenUser, menuId)
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    println("Response body: $body")
-                    _selectedMenu.value = response.body()
-                    println(_selectedMenu)
-                } else {
-                    _error.value = "Gagal mengambil data menu: ${response.code()}"
-                }
-            } catch (e: Exception) {
-                _error.value = "Terjadi kesalahan: ${e.message}"
+               fetchMenus()
+                //Log.d("CreateCategory", "New name: $newCategoryName")
             }
         }
     }
@@ -225,6 +205,29 @@ class MenuViewModel : ViewModel() {
         }
     }
 
+    fun createAddonCategory(request: RequestAddOnCategory) {
+        viewModelScope.launch {
+            try {
+                val response = repository.createAddonCategory(tokenUser, request)
+                if (response.isSuccessful ) {
+                    fetchAddons() // Refresh data setelah tambah
+                } else {
+                    _error.value = "Gagal membuat kategori add-on"
+                }
+            } catch (e: Exception) {
+            }
+        }
+    }
 
+    fun updateAddonCategory(menuId: Int?, updatedAddon: RequestAddOnCategory) {
+        viewModelScope.launch {
+            val success = repository.updateAddonCategory(tokenUser, menuId, updatedAddon)
+            if (success) {
+                fetchAddons()
+            } else {
+                _error.value = "Gagal mengupdate menu."
+            }
+        }
+    }
 
 }

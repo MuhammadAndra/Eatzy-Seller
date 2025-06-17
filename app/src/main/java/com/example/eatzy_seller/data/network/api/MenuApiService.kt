@@ -3,6 +3,7 @@ package com.example.eatzy_seller.data.network.api
 import com.example.eatzy_seller.data.model.AddOnCategory
 import com.example.eatzy_seller.data.model.Menu
 import com.example.eatzy_seller.data.model.MenuCategory
+import com.example.eatzy_seller.data.model.RequestAddOnCategory
 import com.example.eatzy_seller.data.model.UpdateAddonRequest
 import com.example.eatzy_seller.data.model.UpdateMenuRequest
 import okhttp3.RequestBody
@@ -12,6 +13,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.PATCH
+import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
@@ -62,10 +64,12 @@ interface MenuApiService {
         @Path("id") id: Int
     ): Response<Menu>
 
-    @GET("menus/categoryAddonList")
-    suspend fun getAddonCategories(
-        @Header("Authorization") token: String
-    ):  Response<List<AddOnCategory>>
+    @POST("menus/createMenuCategory")
+    suspend fun createCategoryName(
+        @Header("Authorization") token: String,
+        @Body body: Map<String, String>
+    ): Response<Unit>
+
 
 
 
@@ -100,6 +104,19 @@ interface MenuApiService {
         @Header("Authorization") token: String,
         @Path("id") id: Int,
         @Body body: UpdateAddonRequest
+    ): Response<Unit>
+
+    @POST("menus/addon")
+    suspend fun createAddonCategory(
+        @Header("Authorization") token: String,
+        @Body body: RequestAddOnCategory
+    ): Response<Unit>
+
+    @PUT("menus/addon/{id}")
+    suspend fun updateAddon(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int?,
+        @Body body: RequestAddOnCategory
     ): Response<Unit>
 }
 

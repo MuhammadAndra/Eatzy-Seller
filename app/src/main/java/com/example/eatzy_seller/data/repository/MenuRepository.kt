@@ -4,6 +4,7 @@ package com.example.eatzy_seller.data.repository
 import com.example.eatzy_seller.data.model.AddOnCategory
 import com.example.eatzy_seller.data.model.Menu
 import com.example.eatzy_seller.data.model.MenuCategory
+import com.example.eatzy_seller.data.model.RequestAddOnCategory
 import com.example.eatzy_seller.data.model.UpdateAddonRequest
 import com.example.eatzy_seller.data.model.UpdateMenuRequest
 import com.example.eatzy_seller.data.network.api.MenuApiService
@@ -65,9 +66,16 @@ class MenuRepository(private val apiService: MenuApiService) {
         return apiService.getMenuItem(token, id)
     }
 
-
-
-
+    suspend fun createCategory(token: String, newName: String): Boolean {
+        return try {
+            val response = apiService.createCategoryName(token,
+                mapOf("menu_category_name" to newName)
+            )
+            response.isSuccessful
+        } catch (e: Exception) {
+            false
+        }
+    }
 
     //===================Addon===================
     suspend fun getAddons(token: String): Response<List<AddOnCategory>> {
@@ -94,7 +102,7 @@ class MenuRepository(private val apiService: MenuApiService) {
 
     suspend fun toggleAddonAvailability(token: String, id: Int, isAvailable: Boolean): Boolean {
         return try {
-            val response = apiService.toggleAddonAvailability(token,id, mapOf("menuAvailable" to isAvailable))
+            val response = apiService.toggleAddonAvailability(token,id, mapOf("AddonAvailable" to isAvailable))
             response.isSuccessful
         } catch (e: Exception) {
             false
@@ -109,4 +117,18 @@ class MenuRepository(private val apiService: MenuApiService) {
             false
         }
     }
+
+    suspend fun createAddonCategory(token: String, request: RequestAddOnCategory): Response<Unit> {
+        return apiService.createAddonCategory(token, request)
+    }
+
+    suspend fun updateAddonCategory(token: String, id: Int?, addon: RequestAddOnCategory): Boolean {
+        return try {
+            val response = apiService.updateAddon(token, id, addon)
+            response.isSuccessful
+        } catch (e: Exception) {
+            false
+        }
+    }
+
 }

@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.0.21"
+    id("kotlin-kapt")
 }
 
 android {
@@ -72,6 +73,15 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose-android:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose-android:2.8.7")
     implementation("androidx.compose.material:material-icons-extended-android:1.7.8")
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation ("androidx.compose.material3:material3:1.2.0")
+    implementation(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.common.jvm)
+    implementation("androidx.room:room-runtime:2.7.1")
+    implementation("androidx.room:room-ktx:2.7.1")
+
+    kapt("androidx.room:room-compiler:2.7.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -80,4 +90,11 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+configurations.all {
+    resolutionStrategy {
+        force("org.jetbrains:annotations:23.0.0")
+    }
+    exclude(group = "com.intellij", module = "annotations")
 }

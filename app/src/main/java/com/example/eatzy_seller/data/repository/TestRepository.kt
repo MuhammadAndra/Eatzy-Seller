@@ -6,9 +6,9 @@ import retrofit2.Response
 
 class TestRepository {
 
-    suspend fun getUsersResponse(token: String): Response<List<User>> {
-        return RetrofitClient.testApi.getUsersResponse(token = "Bearer $token")
-    }
+//    suspend fun getUsersResponse(token: String): Response<List<User>> {
+//        return RetrofitClient.testApi.getUsersResponse(token = "Bearer $token")
+//    }
 //    ini fungsi ambil data dari pak aryo
 //    fun getUsers(
 //        token: String,

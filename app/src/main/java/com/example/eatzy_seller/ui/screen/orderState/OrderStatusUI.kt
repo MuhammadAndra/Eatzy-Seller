@@ -12,7 +12,7 @@ enum class OrderStatus(val dbValue: String, val displayName: String) {
         fun fromDbValue(value: String): OrderStatus? =
             values().find { it.dbValue == value }
 
-        fun fromDisplayName(name: String): OrderStatus? =
-            values().find { it.displayName == name }
+//        fun fromDisplayName(name: String): OrderStatus? =
+//            values().find { it.displayName == name }
     }
 }

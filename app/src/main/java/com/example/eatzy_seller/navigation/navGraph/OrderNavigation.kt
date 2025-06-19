@@ -37,13 +37,11 @@ fun NavGraphBuilder.orderGraph(
         viewModel.setAuth(token)
         //viewModel.selectedStatus: flow / stateflow untuk menyimpan status pesanan yg sdg dipilih
         //collectAsState(): untuk konversi flow / state menjadi state compose yg bisa di-observe secara reaktif oleh compose UI
-        val selectedStatus by viewModel.selectedStatus.collectAsState(initial = OrderStatus.SEMUA) //status awal apk berjalan: semua
+//        val selectedStatus by viewModel.selectedStatus.collectAsState(initial = OrderStatus.SEMUA) //status awal apk berjalan: semua
 //        val orders by viewModel.orders.collectAsStateWithLifecycle()
 
         LaunchedEffect(Unit){
-//        viewModel.setAuth(token)
             viewModel.fetchOrders()
-//            Log.d("TEST ORDERS",orders.toString())
         }
 
         OrderStateScreen(

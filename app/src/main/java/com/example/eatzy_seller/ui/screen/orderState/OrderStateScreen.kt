@@ -4,7 +4,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.eatzy_seller.data.dummyOrders
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,10 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.example.eatzy_seller.R
-import com.example.eatzy_seller.data.model.OrderItem
 import com.example.eatzy_seller.data.model.OrderState
-import com.example.eatzy_seller.token
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -75,15 +70,12 @@ fun TopNavBar(
 @Composable
 fun OrderStateScreen(
     navController: NavHostController,
-    viewModel: OrderStateViewModel, // Get the ViewModel instance
+    viewModel: OrderStateViewModel,
 ) {
-    // Collect the state flows from the ViewModel
     val orders by viewModel.orders.collectAsState()
     val selectedStatus by viewModel.selectedStatus.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    // Log the filtered orders
     Log.d("OrderListScreen", "Filtered orders ($selectedStatus): $orders")
 
     //isi scaffold ini untuk bottombar sama orderstate di bawah topbar
@@ -114,14 +106,6 @@ fun OrderStateScreen(
                     }
                 }
             }
-
-            //tes apakah pesanan bisa masuk, ini nnt dihapus
-//            if (isLoading) {
-//                CircularProgressIndicator(modifier = Modifier.padding(16.dp))
-//            } else if (error != null) {
-//                Text("Error: $error", color = Color.Red, modifier = Modifier.padding(16.dp))
-//            } else {
-//                Text("Total orders: ${orders.size}", modifier = Modifier.padding(8.dp))
 
             LazyColumn {
                 if (orders.isEmpty()) {
@@ -172,7 +156,6 @@ fun formatOrderTime(raw: String): String {
         raw
     }
 }
-
 
 @Composable
 fun OrderCard(
@@ -370,9 +353,6 @@ fun StatusPesanan(statusDbValue: String) {
 @Composable
 fun PreviewOrderListScreen() {
     val navController = rememberNavController()
-    var selectedStatus by remember { mutableStateOf(OrderStatus.SEMUA) }
-    val dummyOrders = dummyOrders // dari file OrderDummyData.kt
-//    val viewModel = OrderStateViewModel()
 
     MaterialTheme {
         Surface {

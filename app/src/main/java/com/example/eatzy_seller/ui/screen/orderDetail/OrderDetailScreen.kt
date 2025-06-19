@@ -3,7 +3,6 @@ package com.example.eatzy_seller.ui.screen.orderDetail
 import android.icu.text.NumberFormat
 import android.util.Log
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,26 +20,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.eatzy_seller.data.model.OrderList
 import com.example.eatzy_seller.data.model.OrderItem
-import com.bumptech.glide.integration.compose.GlideImage
 import java.util.Locale
 import coil.compose.AsyncImage
 import com.example.eatzy_seller.ui.components.BottomNavBar
 import androidx.navigation.compose.rememberNavController
 import com.example.eatzy_seller.data.model.AddOn
-import com.example.eatzy_seller.data.network.api.OrderApiService
+import com.example.eatzy_seller.data.network.RetrofitClient
 import com.example.eatzy_seller.data.repository.OrderRepository
 import com.example.eatzy_seller.navigation.navGraph.Order
 import com.example.eatzy_seller.token
-import com.example.eatzy_seller.ui.screen.orderState.OrderStateViewModel
-import com.example.eatzy_seller.ui.screen.orderState.OrderStatus
 import java.text.SimpleDateFormat
 
-//aman
 @Composable
 fun TopNavBar(
     title: String,
@@ -74,10 +71,18 @@ fun TopNavBar(
     }
 }
 
-//kalau di order detail pakai orderList
 @Composable
 fun OrderDetailScreen(navController: NavHostController, order: OrderList, onNavigateToOrderFinished: () -> Unit) {
-    val viewModel: OrderStateViewModel = viewModel()
+    val viewModel: OrderDetailViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val api = RetrofitClient.orderApi
+                val token = "Bearer $token"
+                val repo = OrderRepository(api, token)
+                return OrderDetailViewModel(repo) as T
+            }
+        }
+    )
 
     Scaffold(
         containerColor = Color.White,
@@ -109,7 +114,7 @@ fun OrderDetailScreen(navController: NavHostController, order: OrderList, onNavi
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text("Tanggal Pemesanan", fontWeight = FontWeight.Medium, fontSize = 14.sp)
-                    Text("${com.example.eatzy_seller.ui.screen.orderState.formatOrderTime(order.orderTime)}", fontWeight = FontWeight.Medium, fontSize = 14.sp)
+                    Text("${formatOrderTime(order.orderTime)}", fontWeight = FontWeight.Medium, fontSize = 14.sp)
                 }
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
             }
@@ -134,21 +139,26 @@ fun OrderDetailScreen(navController: NavHostController, order: OrderList, onNavi
 //                    viewModel.updateOrderStatus(order.order_id, "Selesai") {
 //                        onNavigateToOrderFinished()
 //                    }
-                    viewModel.updateOrderStatus(
-                        orderId = order.orderId,
-                        newStatus = OrderStatus.SELESAI.dbValue,
-                        onSuccess = {
-                            viewModel.updateSelectedStatus(OrderStatus.SELESAI)
-                            navController.navigate(Order.route) {
-                                popUpTo(Order.route) { inclusive = false }
-                            }
-                            // aksi jika berhasil, misal tampilkan snackbar atau navigasi
-                        },
-                        onError = { errorMessage ->
-                            // aksi jika gagal, misal tampilkan Toast atau Log
-                            Log.e("UpdateOrder", "Gagal update: $errorMessage")
-                        }
-                    )
+                    viewModel.finishOrder(order)
+                    navController.navigate(Order.route) {
+                        popUpTo(Order.route) { inclusive = false }
+                    }
+//                    viewModel.updateOrderStatus(
+//                        orderId = order.orderId,
+//                        newStatus = OrderStatus.SELESAI.dbValue,
+//                        onSuccess = {
+////                            viewModel.updateSelectedStatus(OrderStatus.SELESAI)
+//                            viewModel.finishOrder(order)
+//                            navController.navigate(Order.route) {
+//                                popUpTo(Order.route) { inclusive = false }
+//                            }
+//                            // aksi jika berhasil, misal tampilkan snackbar atau navigasi
+//                        },
+//                        onError = { errorMessage ->
+//                            // aksi jika gagal, misal tampilkan Toast atau Log
+//                            Log.e("UpdateOrder", "Gagal update: $errorMessage")
+//                        }
+//                    )
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFC9824)),
                 modifier = Modifier
@@ -162,7 +172,6 @@ fun OrderDetailScreen(navController: NavHostController, order: OrderList, onNavi
     }
 }
 
-//aman
 fun formatPrice(price: Double): String {
     val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
     return "Rp ${formatter.format(price)}"
@@ -178,7 +187,6 @@ fun formatOrderTime(raw: String): String {
     }
 }
 
-//aman
 @Composable
 fun OrderDetailRow(label: String, value: String) {
     Row(
@@ -190,7 +198,6 @@ fun OrderDetailRow(label: String, value: String) {
     }
 }
 
-//aman
 @Composable
 fun OrderItemCard(item: OrderItem) {
     Row(
@@ -224,14 +231,6 @@ fun OrderItemCard(item: OrderItem) {
 
         Log.d("IMAGE_URL", "Image URL: ${item.menuImage}")
 
-//        AsyncImage(
-//            model = item.menu_image,
-//            contentDescription = null,
-//            contentScale = ContentScale.Crop,
-//            modifier = Modifier
-//                .size(80.dp)
-//                .clip(RoundedCornerShape(8.dp))
-//        )
         Spacer(modifier = Modifier.width(12.dp))
         Column {
             Row(

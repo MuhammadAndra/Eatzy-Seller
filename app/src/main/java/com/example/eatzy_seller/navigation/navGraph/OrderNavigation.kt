@@ -43,21 +43,36 @@ fun NavGraphBuilder.orderGraph(
         val orders by viewModel.orders.collectAsStateWithLifecycle()
 
         LaunchedEffect(Unit) {
-            viewModel.fetchOrders()
-            Log.d("TEST ORDERS",orders.toString())
+            viewModel.fetchOrders(token)
+            Log.d("TEST ORDERS", orders.toString())
         }
 
         OrderListScreen(
             navController = navController,
             orders = orders,
             selectedStatus = selectedStatus,
-            onStatusSelected = { newStatus -> viewModel.updateSelectedStatus(newStatus, token) },
+            onStatusSelected = { newStatus ->
+                viewModel.updateSelectedStatus(
+                    newStatus,
+                    token
+                )
+            },
             onOrderAccepted = { acceptedOrder ->
-                viewModel.updateOrderStatus(token, acceptedOrder.order_id, OrderStatus.PROSES.dbValue, onSuccess = {}, onError = {})
+                viewModel.updateOrderStatus(
+                    token,
+                    acceptedOrder.order_id,
+                    OrderStatus.PROSES.dbValue,
+                    onSuccess = {},
+                    onError = {})
                 viewModel.updateSelectedStatus(OrderStatus.PROSES, token)
             },
             onOrderRejected = { rejectedOrder ->
-                viewModel.updateOrderStatus(token, rejectedOrder.order_id, OrderStatus.BATAL.dbValue, onSuccess = {}, onError = {})
+                viewModel.updateOrderStatus(
+                    token,
+                    rejectedOrder.order_id,
+                    OrderStatus.BATAL.dbValue,
+                    onSuccess = {},
+                    onError = {})
                 viewModel.updateSelectedStatus(OrderStatus.BATAL, token)
             },
             onOrderDetailed = { selectedOrder ->
@@ -95,10 +110,11 @@ fun NavGraphBuilder.orderDetailGraph(
         //konversi dari orderState ke orderList untuk tampilan detail
         val order = OrderList(
             order_id = selectedOrderState.order_id,
-            order_time = selectedOrderState.order_time,
+            order_time = "${selectedOrderState.order_time}",
             items = selectedOrderState.items,
 //            canteen_id = canteenId,
-            total_price = selectedOrderState.items.sumOf { it.menu_price * it.quantity }
+//            total_price = selectedOrderState.items.sumOf { it.menu_price * it.quantity }
+            total_price = selectedOrderState.total_price
         )
 
         //menampilkan orderDetailScreen
@@ -114,9 +130,14 @@ fun NavGraphBuilder.orderDetailGraph(
                     newStatus = OrderStatus.SELESAI.dbValue, //ubah status ke selesai
 //                    canteenId = canteenId,
                     onSuccess = {
-                        viewModel.updateSelectedStatus(OrderStatus.SELESAI, token)
+                        viewModel.updateSelectedStatus(
+                            OrderStatus.SELESAI,
+                            token
+                        )
                         navController.navigate(Order.route) {
-                            popUpTo(Order.route) { inclusive = true } //kembali ke layar daftar pesanan (OrderStateScreen)
+                            popUpTo(Order.route) {
+                                inclusive = true
+                            } //kembali ke layar daftar pesanan (OrderStateScreen)
                         }
                     },
                     onError = { Log.e("ORDER_ERROR", it) }
@@ -125,7 +146,6 @@ fun NavGraphBuilder.orderDetailGraph(
         )
     }
 }
-
 
 
 //class OrderViewModel : ViewModel() {

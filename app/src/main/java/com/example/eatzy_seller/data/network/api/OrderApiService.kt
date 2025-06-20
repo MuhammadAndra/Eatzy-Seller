@@ -22,14 +22,14 @@ import retrofit2.http.*
 interface OrderApiService {
 
     //arahin ke endpoint "orders"
-    @GET("orders")
+    @GET("orders/canteen")
     suspend fun getOrders(
         @Header("Authorization") token: String,
-        @Header("user_id") user_id: Int //mengirimkan userID di url
+//        @Header("user_id") user_id: Int //mengirimkan userID di url
 //        @Query("status") status: String
     ): Response<List<OrderState>> //mengembalikan list dari OrderState
 
-    @PUT("orders/{order_id}")
+    @PUT("orders/canteen/{order_id}")
     suspend fun updateOrderStatus(
         @Header("Authorization") token: String,
         @Path("order_id") orderId: Int,

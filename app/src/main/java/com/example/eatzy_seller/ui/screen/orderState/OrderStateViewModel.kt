@@ -26,15 +26,15 @@ import retrofit2.HttpException
 import kotlin.collections.emptyList
 
 class OrderStateViewModel(
-    private val repository: OrderRepository
-//    private val token: String
+    private val repository: OrderRepository,
+    private val token: String
 ) : ViewModel() {
 
     private val _orders = MutableStateFlow<List<OrderState>>(emptyList())
     val orders: StateFlow<List<OrderState>> = _orders.asStateFlow()
 
     init {
-        fetchOrders()
+        fetchOrders(token)
     }
 
     private val _selectedStatus = MutableStateFlow(OrderStatus.SEMUA)
@@ -49,22 +49,24 @@ class OrderStateViewModel(
     private var currentToken: String? = null
     private var currentCanteenId: Int? = null
 
-    fun setUser(token: String, canteenId: Int) {
-        currentToken = token
-        currentCanteenId = canteenId
-        fetchOrders()
-    }
+//    fun setUser(token: String, canteenId: Int) {
+//        currentToken = token
+//        currentCanteenId = canteenId
+//        fetchOrders()
+//    }
 
-    fun fetchOrders() {
+    fun fetchOrders(token: String) {
         Log.d("OrderViewModel", "Token used: $token")
-        val token = currentToken ?: return
+//        val token = currentToken ?: return
 //        Log.d("TokenCheck", "currentToken = $currentToken")
-        val canteenId = currentCanteenId ?: return
-        val status = _selectedStatus.value.dbValue
+//        val canteenId = currentCanteenId ?: return
+//        val status = _selectedStatus.value.dbValue
 
+        Log.d("OrderViewModel", "WOWWW")
         viewModelScope.launch {
-            _isLoading.value = true
-            val result = repository.getOrders(token, canteenId, status)
+//            _isLoading.value = true
+//            Log.d("OrderViewModel", "Token used: $token")
+            val result = repository.getOrders(token)
             if (result != null) {
                 _orders.value = result
                 _error.value = null
@@ -108,7 +110,7 @@ class OrderStateViewModel(
     //mengubah status filter
     fun updateSelectedStatus(status: OrderStatus, token: String) {
         _selectedStatus.value = status
-        fetchOrders()
+        fetchOrders(token = token)
     }
 
 //    // Fungsi untuk menerima pesanan (pindah ke state "proses")
@@ -149,7 +151,7 @@ class OrderStateViewModel(
                 UpdateOrderStatusRequest(orderId, statusEnum.dbValue)
             )
             if (success) {
-                fetchOrders()
+                fetchOrders(token = token)
                 onSuccess()
             } else {
                 onError("Gagal mengubah status pesanan")

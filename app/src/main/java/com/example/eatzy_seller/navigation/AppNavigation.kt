@@ -14,7 +14,7 @@ import com.example.eatzy_seller.navigation.navGraph.homeGraph
 import com.example.eatzy_seller.navigation.navGraph.menuGraph
 import com.example.eatzy_seller.navigation.navGraph.orderGraph
 //import com.example.eatzy_seller.navigation.navGraph.testGraph
-import com.example.eatzy_seller.navigation.navGraph.testGraph
+//import com.example.eatzy_seller.navigation.navGraph.testGraph
 import com.example.eatzy_seller.navigation.navGraph.orderDetailGraph
 import com.example.eatzy_seller.token
 import com.example.eatzy_seller.ui.screen.orderState.OrderStateViewModel
@@ -27,10 +27,10 @@ fun AppNavigation(viewModel: OrderStateViewModel) {
         authGraph(navController)
         homeGraph(navController)
 //        testGraph(navController)
-        orderGraph(navController)
+        orderGraph(navController, token = token, viewModel = viewModel)
         menuGraph(navController)
 //        testGraph(navController)
-        orderGraph(navController, "Bearer $token", viewModel)
+        orderGraph(navController, "$token", viewModel)
         orderDetailGraph(navController, "Bearer $token", viewModel)
     }
 }

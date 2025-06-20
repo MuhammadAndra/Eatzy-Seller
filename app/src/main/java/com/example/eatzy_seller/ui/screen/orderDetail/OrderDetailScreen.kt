@@ -263,7 +263,7 @@ fun PreviewOrderDetailScreen() {
 
     MaterialTheme {
         OrderDetailScreen(
-            token = "Bearer $token",
+            token = "$token",
             navController = navHostController,
 //            viewModel = OrderStateViewModel(repository = OrderRepository(api = )),
             order = order,

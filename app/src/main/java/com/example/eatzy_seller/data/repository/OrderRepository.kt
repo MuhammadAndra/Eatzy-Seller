@@ -10,9 +10,12 @@ class OrderRepository(
 //    private val dao: OrderDao
 ) {
 
-    suspend fun getOrders(token: String, canteenId: Int, status: String): List<OrderState>? {
-        return try {
-            val response = api.getOrders("Bearer $token", canteenId, status)
+//    suspend fun getOrders(token: String, canteenId: Int, status: String): List<OrderState>? {
+suspend fun getOrders(token: String): List<OrderState>? {
+
+    return try {
+//            val response = api.getOrders("Bearer $token", canteenId, status)
+            val response = api.getOrders("Bearer $token")
             Log.d("OrderRepository", "getOrders response: code=${response.code()}, message=${response.message()}")
             if (response.isSuccessful) response.body() else null // bisa ditambahkan log error
         } catch (e:Exception) {

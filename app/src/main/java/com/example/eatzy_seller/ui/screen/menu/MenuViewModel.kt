@@ -138,16 +138,16 @@ class MenuViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun fetchMenuItem(menuId: Int){
-        viewModelScope.launch {
-            val success = repository.getMenuItem(token, menuId)
-            if (success) {
-                fetchMenus()
-            } else {
-                _error.value = "Gagal mengambil menu."
-            }
-        }
-    }
+//    fun fetchMenuItem(menuId: Int){
+//        viewModelScope.launch {
+//            val success = repository.getMenuItem(token, menuId)
+//            if (success) {
+//                fetchMenus()
+//            } else {
+//                _error.value = "Gagal mengambil menu."
+//            }
+//        }
+//    }
 
 
 

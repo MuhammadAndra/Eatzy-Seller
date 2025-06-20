@@ -21,9 +21,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.eatzy_seller.data.model.AddOn
+import com.example.eatzy_seller.data.model.RequestAddOnCategory
+import com.example.eatzy_seller.data.model.UpdateAddonRequest
 import com.example.eatzy_seller.data.model.dummyAddOnCategories
 import com.example.eatzy_seller.data.model.fetchCategoryById
 import com.example.eatzy_seller.ui.components.Add_AddOnDialog
@@ -35,12 +38,14 @@ import com.example.eatzy_seller.ui.theme.SecondColor
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
+import kotlin.collections.orEmpty
 
 @Composable
 fun AddOnCategoryScreen(
     navController: NavController,
     mode: AddOnMode = AddOnMode.ADD,
-    categoryId: Int? = null
+    categoryId: Int? = null,
+    viewModel: MenuViewModel = viewModel()
 ) {
     // Untuk snackbar
     val snackbarHostState = remember { SnackbarHostState() }
@@ -48,7 +53,7 @@ fun AddOnCategoryScreen(
 
     var isDialogVisible by remember { mutableStateOf(false) }
     var newNamaAddOn by remember { mutableStateOf("") }
-    var newHargaAddOn by remember { mutableStateOf(0.0) }
+    var newHargaAddOn by remember { mutableStateOf("0.0") }
 
     var categoryName by remember { mutableStateOf("") }
     var isSingleChoice by remember { mutableStateOf(false) }
@@ -57,15 +62,25 @@ fun AddOnCategoryScreen(
     var showDeleteAddOnCategoryDialog by remember { mutableStateOf(false) }
     var addOnCategoryToDelete by remember { mutableStateOf<AddOn?>(null) }
 
+    val addonCategories by viewModel.addonCategories.collectAsState()
 
-    // Simulasi ambil data jika mode edit
-    LaunchedEffect(categoryId) {
-        if (mode == AddOnMode.EDIT && categoryId != null) {
-            val fetched = fetchCategoryById(categoryId)
-            categoryName = fetched.addOnCategoryName
-            isSingleChoice = fetched.addOnCategoryMultiple
+    val category = remember(addonCategories, categoryId) {
+        addonCategories.find { it.addOnCategoryId == categoryId }
+    }
+
+    var selectedAddOnToEdit by remember { mutableStateOf<AddOn?>(null) }
+
+
+    LaunchedEffect(mode, category) {
+        viewModel.fetchAddons()
+
+        if (mode == AddOnMode.EDIT && category != null) {
+            categoryName = category.addOnCategoryName
+            isSingleChoice = category.addOnCategoryMultiple
             addOnList.clear()
-            addOnList.addAll(fetched.addOns)
+            category.addOns?.let {
+                addOnList.addAll(it)
+            }
         }
     }
 
@@ -74,8 +89,8 @@ fun AddOnCategoryScreen(
         topBar = {
             TopBarMenu(
                 title = when (mode) {
-                    AddOnMode.ADD -> if (categoryName.isBlank()) "Tambah Kategori Add-On" else "Kategori ${categoryName}"
-                    AddOnMode.EDIT -> "Edit Kategori ${categoryName}"
+                    AddOnMode.ADD -> "Tambah Kategori Add-On"
+                    AddOnMode.EDIT -> "Edit Kategori Add-On"
                 },
                 navController = navController
             )
@@ -199,8 +214,9 @@ fun AddOnCategoryScreen(
 
                         IconButton(
                             onClick = {
+                                selectedAddOnToEdit = addOn
                                 newNamaAddOn = addOn.AddOnName
-                                newHargaAddOn = addOn.AddOnPrice
+                                newHargaAddOn = addOn.AddOnPrice.toString()
                                 isDialogVisible = true
                             }
                         ) {
@@ -234,10 +250,31 @@ fun AddOnCategoryScreen(
                     when (mode) {
                         AddOnMode.ADD -> {
                             // Simpan ke DB atau repo
+                            if (categoryName.isNotBlank()) {
+                                val request = RequestAddOnCategory(
+                                    addOnCategoryName = categoryName,
+                                    addOnCategoryMultiple = isSingleChoice,
+                                    addOns = addOnList
+                                )
+
+                                viewModel.createAddonCategory(request)
+
+                            }
                         }
 
                         AddOnMode.EDIT -> {
                             // Update ke DB atau repo
+                            // Simpan ke DB atau repo
+                            if (categoryName.isNotBlank()) {
+                                val request = RequestAddOnCategory(
+                                    addOnCategoryName = categoryName,
+                                    addOnCategoryMultiple = isSingleChoice,
+                                    addOns = addOnList
+                                )
+
+                                viewModel.updateAddonCategory(categoryId,request)
+
+                            }
                         }
                     }
                     navController.popBackStack()
@@ -245,7 +282,7 @@ fun AddOnCategoryScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = categoryName.isNotBlank()&&addOnList.isNotEmpty(),
+                enabled = categoryName.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(containerColor = SecondColor),
                 shape = MaterialTheme.shapes.large.copy(all = CornerSize(50))
             ) {
@@ -261,30 +298,57 @@ fun AddOnCategoryScreen(
         }
 
         if (isDialogVisible) {
+            //edit addon item
             Add_AddOnDialog(
                 newAddOn = newNamaAddOn,
-                harga = newHargaAddOn,
+                harga = newHargaAddOn.toDoubleOrNull() ?: 0.0,
                 AddOnNamaChange = { newNamaAddOn = it },
-                AddOnHargaChange = { newHargaAddOn = it.toDouble() },
+                AddOnHargaChange = { newHargaAddOn = it },
                 onConfirm = {
-                    if (newNamaAddOn.isNotBlank() && newHargaAddOn != null) {
-                        addOnList.add(
-                            AddOn(
-                                AddOnId = addOnList.size + 1,
-                                AddOnName = newNamaAddOn,
-                                AddOnPrice = newHargaAddOn,
-                                AddOnAvailable = true
-                            )
-                        )
-                        newNamaAddOn = ""
-                        newHargaAddOn = 0.0
-                        isDialogVisible = false
+                    if (newNamaAddOn.isNotBlank() && newHargaAddOn.isNotBlank()) {
+                        val parsedPrice = newHargaAddOn.toDoubleOrNull()
+                        if (parsedPrice != null) {
+                            if (selectedAddOnToEdit != null) {
+                                // Mode edit (lokal + update ke ViewModel jika perlu)
+                                val index = addOnList.indexOfFirst { it.AddOnId == selectedAddOnToEdit!!.AddOnId }
+                                if (index != -1) {
+                                    addOnList[index] = selectedAddOnToEdit!!.copy(
+                                        AddOnName = newNamaAddOn,
+                                        AddOnPrice = parsedPrice
+                                    )
+                                }
+
+                                viewModel.updateAddon(
+                                    selectedAddOnToEdit!!.AddOnId,
+                                    UpdateAddonRequest(
+                                        AddOnName = newNamaAddOn,
+                                        AddOnPrice = parsedPrice
+                                    )
+                                )
+                            } else {
+                                // mode tambah
+                                addOnList.add(
+                                    AddOn(
+                                        AddOnId = (addOnList.maxOfOrNull { it.AddOnId } ?: 0) + 1,
+                                        AddOnName = newNamaAddOn,
+                                        AddOnPrice = parsedPrice,
+                                        AddOnAvailable = true
+                                    )
+                                )
+                            }
+
+                            newNamaAddOn = ""
+                            newHargaAddOn = ""
+                            selectedAddOnToEdit = null
+                            isDialogVisible = false
+                        }
                     }
                 },
                 onDismiss = {
                     isDialogVisible = false
                     newNamaAddOn = ""
-                    newHargaAddOn = 0.0
+                    newHargaAddOn = ""
+                    selectedAddOnToEdit = null
                 }
             )
 

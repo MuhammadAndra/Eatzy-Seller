@@ -1,18 +1,21 @@
 package com.example.eatzy_seller.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,9 +44,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.eatzy_seller.data.model.AddOn
+import com.example.eatzy_seller.data.model.AddOnCategory
+import com.example.eatzy_seller.data.model.dummyAddOnCategories
+import com.example.eatzy_seller.data.model.dummyAddOns1
 import com.example.eatzy_seller.navigation.navGraph.Home
+import com.example.eatzy_seller.ui.theme.DeleteColor
 import com.example.eatzy_seller.ui.theme.PrimaryColor
 import com.example.eatzy_seller.ui.theme.SecondColor
+import org.intellij.lang.annotations.JdkConstants
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -239,8 +248,8 @@ fun AddKategoriAddOnDialog(
 
 @Composable
 fun PilihKategoriAddOnDialog(
-    kategoriAddOnList: List<Pair<String, Boolean>>,
-    selectedAddOns: SnapshotStateList<String>,
+    kategoriAddOnList: List<AddOnCategory>,
+    selectedAddOns: SnapshotStateList<AddOnCategory>,
     onDismiss: () -> Unit,
     onTambahKategoriClick: () -> Unit
 ) {
@@ -248,12 +257,12 @@ fun PilihKategoriAddOnDialog(
         onDismissRequest = onDismiss,
         title = { Text("Pilih Kategori Add-On") },
         text = {
-            Column {
-                kategoriAddOnList.forEach { (nama, _) ->
+            Column (modifier = Modifier){
+                kategoriAddOnList.forEach { addonCategory ->
                     OutlinedButton(
                         onClick = {
-                            if (nama !in selectedAddOns) {
-                                selectedAddOns.add(nama)
+                            if (addonCategory !in selectedAddOns) {
+                                selectedAddOns.add(addonCategory)
                             }
                             onDismiss()
                         },
@@ -263,7 +272,7 @@ fun PilihKategoriAddOnDialog(
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
                     ) {
-                        Text(nama)
+                        Text(addonCategory.addOnCategoryName)
                     }
                 }
 
@@ -275,9 +284,12 @@ fun PilihKategoriAddOnDialog(
                         onDismiss()
                         onTambahKategoriClick()
                     },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    Modifier.align(Alignment.CenterHorizontally)
+                        .fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = SecondColor)
+
                 ) {
-                    Text("+ Tambah Kategori")
+                    Text("Tambah Kategori")
                 }
             }
         },
@@ -304,6 +316,7 @@ fun Add_AddOnDialog(
                     value = newAddOn,
                     onValueChange = AddOnNamaChange,
                     label = { Text("Nama Add-On") },
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -402,15 +415,10 @@ fun AddKategoriAddOnDialogPreview() {
 @Preview(showBackground = true)
 @Composable
 fun PilihKategoriAddOnDialogPreview() {
-    val dummyKategori = listOf(
-        "Makanan" to true,
-        "Minuman" to false,
-        "Cemilan" to true
-    )
-    val selectedAddOns = remember { mutableStateListOf<String>() }
+    val selectedAddOns = remember { mutableStateListOf<AddOnCategory>() }
 
     PilihKategoriAddOnDialog(
-        kategoriAddOnList = dummyKategori,
+        kategoriAddOnList = dummyAddOnCategories,
         selectedAddOns = selectedAddOns,
         onDismiss = {},
         onTambahKategoriClick = {}

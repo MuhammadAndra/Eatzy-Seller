@@ -1,6 +1,7 @@
 package com.example.eatzy_seller.ui.screen.menu
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -61,6 +62,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
@@ -73,6 +77,10 @@ import com.example.eatzy_seller.ui.components.BottomNavBar
 import com.example.eatzy_seller.ui.components.TopBarMenu
 import com.example.eatzy_seller.ui.theme.SecondColor
 import coil.compose.rememberImagePainter
+import com.example.eatzy_seller.data.model.AddOn
+import com.example.eatzy_seller.data.model.AddOnCategory
+import com.example.eatzy_seller.data.model.MenuCategory
+import com.example.eatzy_seller.data.model.RequestAddOnCategory
 import com.example.eatzy_seller.navigation.navGraph.EditCategory
 import com.example.eatzy_seller.ui.components.AddKategoriAddOnDialog
 import com.example.eatzy_seller.ui.components.PilihKategoriAddOnDialog
@@ -92,9 +100,17 @@ fun AddMenuScreen(
     var estimasi by remember { mutableStateOf("") }
 
 
+    LaunchedEffect(Unit) {
+        viewModel.fetchMenus()
+        viewModel.fetchAddons()
+
+    }
     // List kategori yang sudah ada
-    val kategoriList = remember { mutableStateListOf("Makanan", "Minuman", "Dessert") }
-    var selectedKategori by remember { mutableStateOf(kategoriList.firstOrNull() ?: "") }
+//    val kategoriList = remember { mutableStateListOf("") }
+    val kategoriList by viewModel.menuCategories.collectAsState()
+    Log.d("KategoriList", kategoriList.toString())
+
+    var selectedKategori by remember { mutableStateOf<MenuCategory?>(null) }
     //var newKategori by remember { mutableStateOf("") }
 
     // State untuk dialogkategori
@@ -104,9 +120,8 @@ fun AddMenuScreen(
     val isAddOnDialogVisible = remember { mutableStateOf(false) }
     val showFormDialog = remember { mutableStateOf(false) }
 
-    val kategoriAddOnList =
-        remember { mutableStateListOf<Pair<String, Boolean>>() } // Pair(nama, isSingleChoice)
-    val selectedAddOns = remember { mutableStateListOf<String>() }
+    val kategoriAddOnList by viewModel.addonCategories.collectAsState()
+    val selectedAddOns = remember { mutableStateListOf<AddOnCategory>() }
 
     var newKategoriAddOn by remember { mutableStateOf("") }
     var isSingleChoice by remember { mutableStateOf(false) }
@@ -166,7 +181,6 @@ fun AddMenuScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Kategori Dropdown
-//
             // Button untuk menambah kategori baru yang akan memunculkan dialog
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ExposedDropdownMenuBox(
@@ -175,7 +189,7 @@ fun AddMenuScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     OutlinedTextField(
-                        value = selectedKategori,
+                        value = selectedKategori?.categoryName?:"",
                         onValueChange = {},
                         label = { Text("Pilih Kategori") },
                         readOnly = true,
@@ -208,7 +222,7 @@ fun AddMenuScreen(
                     ) {
                         kategoriList.forEach { kategori ->
                             androidx.compose.material3.DropdownMenuItem(
-                                text = { Text(kategori) },
+                                text = { Text(kategori.categoryName) },
                                 onClick = {
                                     selectedKategori = kategori
                                     isDropdownExpanded = false
@@ -261,7 +275,7 @@ fun AddMenuScreen(
             }
 
 
-            if (kategoriAddOnList.isEmpty()) {
+            if (selectedAddOns.isEmpty()) {
                 Text(
                     text = "Belum ada Add-On",
                     modifier = Modifier
@@ -272,7 +286,7 @@ fun AddMenuScreen(
                 )
             } else {
                 // Tampilkan daftar kategori add-on yang sudah ditambahkan dalam bentuk Row mirip TextField
-                kategoriAddOnList.forEachIndexed { index, (nama, isSingle) ->
+                selectedAddOns.forEach { addonKategori ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -287,7 +301,7 @@ fun AddMenuScreen(
                                 .padding(horizontal = 16.dp, vertical = 14.dp)
                         ) {
                             Text(
-                                text = "$nama (${if (isSingle) "Pilih satu" else "Bebas pilih"})",
+                                text = "${addonKategori.addOnCategoryName} (${if (addonKategori.addOnCategoryMultiple) "Pilih satu" else "Bebas pilih"})",
                                 fontSize = 16.sp,
                                 color = Color.Black
                             )
@@ -298,7 +312,8 @@ fun AddMenuScreen(
                         // Tombol edit dengan ikon dalam kotak oranye
                         IconButton(
                             onClick = {
-                                selectedAddOns.remove(nama)
+                                selectedAddOns.remove(addonKategori)
+
                             }
                         ) {
                             Icon(
@@ -338,7 +353,7 @@ fun AddMenuScreen(
     if (isAddOnDialogVisible.value) {
         PilihKategoriAddOnDialog(
             kategoriAddOnList = kategoriAddOnList,
-            selectedAddOns = selectedAddOns,
+            selectedAddOns = selectedAddOns ,
             onDismiss = { isAddOnDialogVisible.value = false },
             onTambahKategoriClick = {
                 showFormDialog.value = true
@@ -353,15 +368,21 @@ fun AddMenuScreen(
             isSingleChoice = isSingleChoice,
             onSingleChoiceChange = { isSingleChoice = it },
             onSave = {
-                if (newKategoriAddOn.isNotBlank() &&
-                    !kategoriAddOnList.any { it.first == newKategoriAddOn }
-                ) {
-                    kategoriAddOnList.add(Pair(newKategoriAddOn, isSingleChoice))
-                    newKategoriAddOn = ""
-                    isSingleChoice = false
-                }
+                if (newKategoriAddOn.isNotBlank()) {
+                val request = RequestAddOnCategory(
+                    addOnCategoryName = newKategoriAddOn,
+                    addOnCategoryMultiple = isSingleChoice, // diasumsikan toggle "Single = false → Multiple = true"
+                    addOns = emptyList() // kosong dulu, nanti user isi AddOn-nya
+                )
+
+                viewModel.createAddonCategory(request)
+
+                // Reset UI state
+                newKategoriAddOn = ""
+                isSingleChoice = false
                 showFormDialog.value = false
-                isAddOnDialogVisible.value = true // kembali ke dialog pilih kategori
+                isAddOnDialogVisible.value = true
+                }
             },
             onDismiss = {
                 showFormDialog.value = false

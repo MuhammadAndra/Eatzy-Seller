@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +38,7 @@ import com.example.eatzy_seller.data.model.AddOn
 import com.example.eatzy_seller.data.model.AddOnCategory
 import com.example.eatzy_seller.data.model.Menu
 import com.example.eatzy_seller.data.model.MenuCategory
+import com.example.eatzy_seller.data.model.UpdateAddonRequest
 import com.example.eatzy_seller.navigation.navGraph.AddAddOnCategory
 import com.example.eatzy_seller.navigation.navGraph.AddMenu
 import com.example.eatzy_seller.ui.components.*
@@ -56,6 +58,7 @@ fun MenuManagementScreen(navController: NavController) {
     //default menu screen ke Menu
     var currentMenuType by remember { mutableStateOf(MenuType.REGULAR_MENU) }
 
+    val context = LocalContext.current
     val viewModel: MenuViewModel = viewModel()
 
     //===========Pindah Menu dan Add On===========//
@@ -84,13 +87,13 @@ fun ButtonStatus(
             .fillMaxWidth()
             .background(Color.White) // Ganti dengan warna latar yang diinginkan
             .padding(vertical = 8.dp), // Opsional: Tambahkan padding agar tombol tidak terlalu mepet
-        horizontalArrangement = Arrangement.SpaceAround
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        listOf("Menu", "Add-On").forEach { status ->
+        listOf(" Menu ", "Add-On").forEach { status ->
             Button(
                 onClick = {
                     when (status) {
-                        "Menu" -> onMenuClick()
+                        " Menu " -> onMenuClick()
                         "Add-On" -> onAddOnClick()
                     }
                 },
@@ -132,7 +135,6 @@ fun MenuListScreen(
 
     LaunchedEffect(Unit) {
         viewModel.fetchMenus()
-
     }
 
     Scaffold(
@@ -145,7 +147,7 @@ fun MenuListScreen(
                     showBackButton = false
                 )
                 ButtonStatus(
-                    currentScreen = "Menu",
+                    currentScreen = " Menu ",
                     onMenuClick = { /* already on menu */ },
                     onAddOnClick = onSwitchToAddOn
                 )
@@ -204,15 +206,16 @@ fun MenuListScreen(
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
 
-                        if (category.menus.isNullOrEmpty()) {
+                        val menus = category.menus ?: emptyList()
+                        if (menus.isEmpty()) {
                             Text(
                                 text = "Menu kosong",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                modifier = Modifier.padding(8.dp)
                             )
                         } else {
-                            category.menus.forEachIndexed { index, menu ->
+                            menus.forEachIndexed { index, menu ->
                                 //===========Masuk ke Item Menu===========//
                                 MenuItem(
                                     menu = menu,
@@ -388,7 +391,8 @@ fun MenuItem(
                     onCheckedChange = { isChecked ->
                         menuViewModel.toggleMenuAvailability(menu.menuId, isChecked)
                         onShowSnackbar("${menu.menuName} ${if (isChecked) "tersedia" else "tidak tersedia"}")
-                    }
+                    },
+                    colors = CheckboxDefaults.colors(SecondColor)
                 )
                 Text(
                     text = "Tampilkan Menu",
@@ -511,12 +515,14 @@ fun AddOnListScreen(
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                 modifier = Modifier
                                     .weight(1f)
-                                    .padding(start = 8.dp)
+                                    .padding(start = 8.dp, top = 4.dp, bottom = 8.dp)
                             )
                             Text(
                                 text = if (category.addOnCategoryMultiple) "Multiple" else "Single",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray
+                                color = Color.Gray,
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
                             )
                         }
 
@@ -527,16 +533,17 @@ fun AddOnListScreen(
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
 
-                        if (category.addOns.isEmpty()) {
+                        val addOns = category.addOns ?: emptyList()
+                        if (addOns.isEmpty()) {
                             Text(
                                 text = "Add-on kosong",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                modifier = Modifier.padding(8.dp)
                             )
                         } else {
                             //===========Loop Kategori Add On===========//
-                            category.addOns.forEachIndexed { index, addOn ->
+                            addOns.forEachIndexed { index, addOn ->
                                 //masuk fun item add on
                                 AddOnItem(
                                     addOn = addOn,
@@ -667,7 +674,11 @@ fun AddOnItem(
             AddOnHargaChange = { newHargaAddOn = it.toDouble() },
             onConfirm = {
                 //kurang logika update edit
+                addonViewModel.updateAddon(addOn.AddOnId,
+                    UpdateAddonRequest(AddOnName = newNamaAddOn, AddOnPrice = newHargaAddOn)
+                )
                 onShowSnackbar("Add-On \"${addOn.AddOnName}\" berhasil diubah")
+                showEditDialog = false
             },
             onDismiss = { showEditDialog = false }
         )
@@ -699,7 +710,8 @@ fun AddOnItem(
                     onCheckedChange = { isChecked ->
                         addonViewModel.toggleAddonAvailability(addOn.AddOnId, isChecked)
                         onShowSnackbar("${addOn.AddOnName} ${if (isChecked) "tersedia" else "tidak tersedia"}")
-                    }
+                    },
+                    colors = CheckboxDefaults.colors(SecondColor)
                 )
                 Text(
                     text = "Tampilkan Add-On",
@@ -752,7 +764,7 @@ fun PreviewMenuManagementScreen() {
 fun PreviewButtonStatus() {
     Column {
         ButtonStatus(
-            currentScreen = "Menu",
+            currentScreen = " Menu ",
             onMenuClick = {},
             onAddOnClick = {}
         )

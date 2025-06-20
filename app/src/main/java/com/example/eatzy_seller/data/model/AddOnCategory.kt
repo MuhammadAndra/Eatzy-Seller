@@ -6,8 +6,6 @@ data class AddOnCategory(
     @SerializedName("addon_category_id")
     val addOnCategoryId : Int,
 
-    //val kantinId: Int,
-
     @SerializedName("addon_category_name")
     val addOnCategoryName: String,
 
@@ -15,5 +13,16 @@ data class AddOnCategory(
     val addOnCategoryMultiple : Boolean,
 
     @SerializedName("addons")
-    val addOns: List<AddOn>
+    val addOns: List<AddOn>?
+)
+
+data class RequestAddOnCategory(
+    @SerializedName("addon_category_name")
+    val addOnCategoryName: String,
+
+    @SerializedName("is_multiple_choice")
+    val addOnCategoryMultiple : Boolean,
+
+    @SerializedName("addons")
+    val addOns: List<AddOn>?
 )

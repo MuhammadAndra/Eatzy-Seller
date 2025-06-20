@@ -8,7 +8,7 @@ data class User(
     val userId: Int,
     val name:String="",
     val email:String="",
-    val canteenId:Int= 1,
+    val canteenId:Int= 4,
     val menuCategories: List<MenuCategory>,
     val addOnCategories: List<AddOnCategory>,
     val password: String,

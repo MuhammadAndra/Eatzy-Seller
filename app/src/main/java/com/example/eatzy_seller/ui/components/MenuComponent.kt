@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,6 +49,7 @@ import com.example.eatzy_seller.data.model.AddOnCategory
 import com.example.eatzy_seller.data.model.dummyAddOnCategories
 import com.example.eatzy_seller.data.model.dummyAddOns1
 import com.example.eatzy_seller.navigation.navGraph.Home
+import com.example.eatzy_seller.ui.theme.DeleteColor
 import com.example.eatzy_seller.ui.theme.PrimaryColor
 import com.example.eatzy_seller.ui.theme.SecondColor
 import org.intellij.lang.annotations.JdkConstants
@@ -283,7 +285,8 @@ fun PilihKategoriAddOnDialog(
                         onTambahKategoriClick()
                     },
                     Modifier.align(Alignment.CenterHorizontally)
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = SecondColor)
 
                 ) {
                     Text("Tambah Kategori")

@@ -1,5 +1,6 @@
 package com.example.eatzy_seller.ui.screen.menu
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -38,6 +39,10 @@ import com.example.eatzy_seller.navigation.navGraph.AddMenu
 import com.example.eatzy_seller.navigation.navGraph.EditCategory
 import com.example.eatzy_seller.ui.components.*
 import com.example.eatzy_seller.ui.theme.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -416,6 +421,18 @@ fun EditImageComponent(
         }
     }
 }
+
+//untuk upload image
+fun prepareFilePart(context: Context, uri: Uri): MultipartBody.Part {
+    val contentResolver = context.contentResolver
+    val inputStream = contentResolver.openInputStream(uri)!!
+    val file = File(context.cacheDir, "upload.jpg")
+    file.outputStream().use { inputStream.copyTo(it) }
+
+    val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+    return MultipartBody.Part.createFormData("image", file.name, requestFile)
+}
+
 
 
 @Preview(showBackground = true)

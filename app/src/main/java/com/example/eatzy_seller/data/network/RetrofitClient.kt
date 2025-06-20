@@ -30,4 +30,5 @@ object RetrofitClient {
     val menuApi: MenuApiService by lazy { retrofit.create(MenuApiService::class.java) }
 
 
+
 }

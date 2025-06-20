@@ -1,9 +1,14 @@
 package com.example.eatzy_seller.ui.screen.menu
 
+import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.Room
+import com.example.eatzy_seller.data.local.LocalDatabase
 import com.example.eatzy_seller.data.model.AddOnCategory
 import com.example.eatzy_seller.data.model.Menu
 import com.example.eatzy_seller.data.model.MenuCategory
@@ -20,11 +25,20 @@ import kotlinx.coroutines.launch
 
 // token
 
-class MenuViewModel : ViewModel() {
+class MenuViewModel(application: Application) : AndroidViewModel(application) {
 
+    private val context = application.applicationContext
+
+    val dbl = Room.databaseBuilder(
+        context,
+        LocalDatabase::class.java,
+        "eatzy.db"
+    ).build()
 
     //nyambung ke repository
-    private val repository = MenuRepository(RetrofitClient.menuApi)
+    private val repository = MenuRepository(
+        RetrofitClient.menuApi,
+        db = dbl)
 
     //buat ambil semua kategori menu, addon
     private val _menuCategories = MutableStateFlow<List<MenuCategory>>(emptyList())
@@ -36,6 +50,8 @@ class MenuViewModel : ViewModel() {
 
     val tokenUser = "Bearer "+ token
 
+
+
     //buat erro tapi belum dipake
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
@@ -45,14 +61,7 @@ class MenuViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = repository.getMenus(tokenUser)
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    println("Response body: $body") // Log raw data
-                    _menuCategories.value = body ?: emptyList()
-                    println(_menuCategories)
-                } else {
-                    _error.value = "Gagal mengambil data: ${response.code()}"
-                }
+                _menuCategories.value = response
             } catch (e: Exception) {
                 _error.value = "Terjadi kesalahan: ${e.message}"
             }
